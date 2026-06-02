@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(timeout 5 python -c \":*)",
+      "Bash(npm install:*)",
+      "Bash(find /d/self_learning/Agent/AgentProject -type f \\\\\\(-name *.py -o -name *.txt -o -name *.json -o -name *.md -o -name *.yaml -o -name *.yml -o -name *.toml -o -name .env* -o -name *.js -o -name *.vue \\\\\\))",
+      "Bash(find /d/self_learning/Agent/itheima -type f \\\\\\(-name *.py -o -name *.txt -o -name *.json -o -name *.md -o -name *.yaml -o -name *.yml \\\\\\))",
+      "Bash(find /d/self_learning/Agent/LangGraph -type f \\\\\\(-name *.py -o -name *.txt -o -name *.json -o -name *.md \\\\\\))",
+      "Bash(find /d/self_learning/Agent/RagProject -type f \\\\\\(-name *.py -o -name *.txt -o -name *.json -o -name *.md -o -name .env* \\\\\\))",
+      "Bash(python -c \"from fastapi import FastAPI; from sse_starlette.sse import EventSourceResponse; print\\(''✅ 依赖检查通过''\\)\")",
+      "Bash(python:*)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s -N \"http://localhost:8000/api/chat?student_id=test001&message=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E4%BD%A0%E6%98%AF%E8%B0%81%EF%BC%9F\")",
+      "WebSearch"
+    ]
+  }
+}

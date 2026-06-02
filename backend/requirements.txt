@@ -1,0 +1,30 @@
+# Web 框架
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+python-multipart>=0.0.19
+
+# 多智能体框架
+langgraph>=0.2.64
+langchain-community>=0.3.14
+langchain-openai>=0.3.1
+
+# 向量数据库（群体记忆）
+chromadb>=0.6.3
+langchain-chroma>=0.2.2
+
+# Python 3.13 需要 numpy>=2.0（否则无预编译包需编译源码）
+numpy>=2.0.0
+
+# 数据验证
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+
+# 数据库 ORM
+sqlalchemy>=2.0.0
+
+# 工具
+httpx>=0.28.0
+python-dotenv>=1.0.0
+
+# SSE 流式输出
+sse-starlette>=2.2.0
