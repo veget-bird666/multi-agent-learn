@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 环境变量
+.env
+
+# 数据库
+*.db
+*.sqlite
+chroma_data/
+
+# IDE
+.vscode/
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
