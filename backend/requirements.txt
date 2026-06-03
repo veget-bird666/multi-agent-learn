@@ -24,6 +24,8 @@ sqlalchemy>=2.0.0
 
 # 工具
 httpx>=0.28.0
+requests>=2.31.0
+requests-toolbelt>=1.0.0
 python-dotenv>=1.0.0
 
 # SSE 流式输出

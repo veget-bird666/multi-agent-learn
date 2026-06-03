@@ -58,6 +58,8 @@ async def chat(request: ChatRequest):
         return {
             "response": reply or "抱歉，我没有生成有效回复。",
             "profile": final_state.get("profile"),
+            "resources": final_state.get("generated_resources", []),
+            "learning_path": final_state.get("learning_path"),
         }
 
     except Exception as e:

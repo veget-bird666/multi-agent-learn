@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     # 向量数据库
     CHROMA_PERSIST_DIR: str = "chroma_data"
 
+    # 讯飞开放平台 - PPT 能力
+    XF_ZWAPI_APPID: str = ""
+    XF_ZWAPI_APISECRET: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
