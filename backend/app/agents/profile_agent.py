@@ -52,11 +52,11 @@ def profile_agent(state: LearningState):
     print(f"[ProfileAgent] ✅ 画像已保存: 认知风格={res_profile.cognitive_style}, 知识基础={res_profile.knowledge_base}, 兴趣={res_profile.interest_areas}")
 
     detail = f"系统：已更新学生画像（认知风格={res_profile.cognitive_style}，知识基础={res_profile.knowledge_base}）"
-    system_message = SystemMessage(content=detail)
+    agent_message = AIMessage(content=f"[profile_agent] {detail}")
 
     return {
       "profile": res_profile,
-      "history": history + [system_message],
+      "history": history + [agent_message],
       "profile_update_hint": None,  # 更新后清空提示，等待 Supervisor 下一轮判断是否需要新的提示
     }
 

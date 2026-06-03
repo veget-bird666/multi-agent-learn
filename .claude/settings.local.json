@@ -12,7 +12,10 @@
       "Bash(python:*)",
       "Bash(curl -s http://localhost:8000/)",
       "Bash(curl -s -N \"http://localhost:8000/api/chat?student_id=test001&message=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E4%BD%A0%E6%98%AF%E8%B0%81%EF%BC%9F\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \":*)",
+      "Bash(PYTHONIOENCODING=utf-8 python)",
+      "Bash(npx vite:*)"
     ]
   }
 }

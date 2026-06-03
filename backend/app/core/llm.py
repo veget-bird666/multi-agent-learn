@@ -44,12 +44,20 @@ deepseek_v3 = ChatOpenAI(
     temperature=0.7,
 )
 
+# 最优模型
+deepseek_v4_pro = ChatOpenAI(
+    model="xopdeepseekv4pro",
+    openai_api_key=settings.SPARK_MAAS_API_KEY,
+    openai_api_base=settings.SPARK_MAAS_BASE_URL,
+    temperature=0.7,
+)
 
 chat_llm = deepseek_v3
 vision_llm = hunyuan_model
-supervisor_llm = deepseek_v3
+supervisor_llm = deepseek_v4_pro
 path_llm = deepseek_v3
 tool_llm = deepseek_v3
+recourse_llm = deepseek_v3
 
 
 # chat_llm = ChatTongyi(model="qwen3-max", temperature=0.7)

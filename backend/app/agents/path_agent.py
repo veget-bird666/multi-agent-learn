@@ -6,7 +6,7 @@ from app.graph.state import LearningState
 from app.core.llm import path_llm
 from app.models.resources import LearningPathPlan, LearningPathStep
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import AIMessage
 
 SYSTEM_PROMPT = """你是一个专业的学习路径规划师，负责为学生制定个性化学习路径。
 
@@ -100,9 +100,9 @@ def path_agent(state: LearningState) -> dict:
         f" - {s.description}。知识点：{', '.join(s.knowledge_points)}"
         for s in result.steps
     )
-    path_system_msg = SystemMessage(
+    path_system_msg = AIMessage(
         content=(
-            f"系统：已生成个性化学习路径，共 {len(result.steps)} 个阶段：\n"
+            f"[path_agent] 系统：已生成个性化学习路径，共 {len(result.steps)} 个阶段：\n"
             f"{path_summary_lines}"
         )
     )

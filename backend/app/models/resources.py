@@ -10,6 +10,9 @@ class ResourceType(str, Enum):
     VIDEO = "video"                # 视频/动画
     CODE_EXAMPLE = "code_example"  # 代码实操案例
     EXTRA_READING = "extra_reading"  # 拓展阅读
+    PPT = "ppt"                    # PPT 课件
+    EXAM = "exam"                  # 试卷
+    IMAGE = "image"                # 图片
 
 
 class Resource(BaseModel):
