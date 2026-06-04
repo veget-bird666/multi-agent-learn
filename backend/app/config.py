@@ -22,9 +22,13 @@ class Settings(BaseSettings):
     # 向量数据库
     CHROMA_PERSIST_DIR: str = "chroma_data"
 
-    # 讯飞开放平台 - PPT 能力
+    # 讯飞开放平台 - PPT 能力（已废弃，改用文多多 AiPPT）
     XF_ZWAPI_APPID: str = ""
     XF_ZWAPI_APISECRET: str = ""
+
+    # 文多多 AiPPT 开放平台
+    DOCMEE_API_KEY: str = ""
+    DOCMEE_TEMPLATE_ID: str = "2031929779984429056"  # 教育培训类默认模板
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

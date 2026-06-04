@@ -33,6 +33,11 @@
         <!-- AI 消息：渲染 Markdown -->
         <div v-else class="chat-markdown text-sm" v-html="renderedContent"></div>
       </div>
+
+      <!-- 资源卡片 -->
+      <div v-if="!isUser && resources.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+        <ResourceCard v-for="res in resources" :key="res.id" :resource="res" />
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +45,7 @@
 <script setup>
 import { computed } from 'vue'
 import MarkdownIt from 'markdown-it'
+import ResourceCard from './ResourceCard.vue'
 
 const md = new MarkdownIt({
   html: false,
@@ -50,6 +56,7 @@ const md = new MarkdownIt({
 const props = defineProps({
   content: { type: String, required: true },
   isUser: { type: Boolean, default: false },
+  resources: { type: Array, default: () => [] },
 })
 
 const agentRegex = /^\[(\w+_agent)\]\s*/

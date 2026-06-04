@@ -23,6 +23,10 @@ CHAT_PROMPT = """
 ## 目前学习系统具备的功能
 - 回答学生的提问，提供学习建议
 - 生成个性化的学习资源推荐
+
+## 资源查看提示
+- 当系统生成了学习资源（文档、PPT、试卷等）后，请提示学生前往「我的学习资源」页面查看和管理，不要在聊天中展示完整内容。
+- 示例回复："已为你生成 C语言指针的学习文档和PPT，请前往「我的学习资源」页面查看。"
 """
 
 def chat_agent(state: LearningState):
@@ -30,7 +34,7 @@ def chat_agent(state: LearningState):
     """
     处理学生消息，与学生进行对话，更新对话历史
     """
-    print(f"\n[ChatAgent] 💬 开始处理对话...")
+    print(f"\n[ChatAgent]  开始处理对话...")
 
     history = state.get("history")
     message = state.get("message")
@@ -45,7 +49,7 @@ def chat_agent(state: LearningState):
     chain = prompt | model
     response = chain.invoke({"history": history, "human_message": message})
 
-    print(f"[ChatAgent] ✅ 回复完成 ({len(response.content)} 字)")
+    print(f"[ChatAgent]  回复完成 ({len(response.content)} 字)")
 
     return {
         "history": history + [response],

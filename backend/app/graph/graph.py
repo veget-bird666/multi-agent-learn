@@ -33,19 +33,19 @@ def route_from_supervisor(state: LearningState) -> str:
     """读取 state 中的 next_agent，路由到对应节点"""
     operation = state.get("operation", 0)
     if operation >= MAX_ITERATIONS:
-        print(f"[Graph] 🛑 达到最大迭代次数 {MAX_ITERATIONS}，强制结束")
+        print(f"[Graph]  达到最大迭代次数 {MAX_ITERATIONS}，强制结束")
         return "FINISH"
 
     # === 代码层硬规则：message 已被 chat_agent 处理完毕，本轮结束 ===
     if not state.get("message"):
-        print(f"[Graph] 🏁 message 为空，本轮对话结束")
+        print(f"[Graph]  message 为空，本轮对话结束")
         return "FINISH"
 
     next_agent = state.get("next_agent", "FINISH")
     if next_agent not in ROUTE_MAP:
-        print(f"[Graph] ⚠️ 未知的 next_agent: {next_agent}，兜底到 chat_agent")
+        print(f"[Graph]  未知的 next_agent: {next_agent}，兜底到 chat_agent")
         return "chat_agent"
-    print(f"[Graph] ➡️  路由: supervisor → {next_agent}")
+    print(f"[Graph]   路由: supervisor → {next_agent}")
     return next_agent
 
 

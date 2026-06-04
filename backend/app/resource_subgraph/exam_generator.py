@@ -66,13 +66,14 @@ def exam_generator(state: ResourceSubState) -> dict:
     knowledge_point = state.get("knowledge_point", "")
     profile = state.get("profile")
     rewritten = state.get("rewritten_query", "")
+    cleaned_topic = state.get("cleaned_topic", "")
 
-    topic = rewritten or knowledge_point
+    topic = cleaned_topic or rewritten or knowledge_point
     if not topic:
-        print(f"[ExamGenerator] ⚠️ 无知识点，跳过")
+        print(f"[ExamGenerator]  无知识点，跳过")
         return {"generated_resources": []}
 
-    print(f"\n[ExamGenerator] 📝 开始生成试卷: {topic}")
+    print(f"\n[ExamGenerator]  开始生成试卷: {topic}")
 
     # ── RAG 检索题库（骨架）──
     rag_context = _retrieve_exam_context(topic)
@@ -114,11 +115,11 @@ def exam_generator(state: ResourceSubState) -> dict:
             difficulty=difficulty,
         )
         question_count = content.count('"question"')
-        print(f"[ExamGenerator] ✅ 试卷生成完成 ({question_count} 道题)")
+        print(f"[ExamGenerator]  试卷生成完成 ({question_count} 道题)")
         return {"generated_resources": [resource]}
 
     except json.JSONDecodeError as e:
-        print(f"[ExamGenerator] ❌ JSON 解析失败: {e}")
+        print(f"[ExamGenerator]  JSON 解析失败: {e}")
         # 兜底：把结果当作内容，标记为 document 类型
         resource = Resource(
             id=f"exam_fallback_{int(time.time())}",
@@ -130,7 +131,7 @@ def exam_generator(state: ResourceSubState) -> dict:
         )
         return {"generated_resources": [resource]}
     except Exception as e:
-        print(f"[ExamGenerator] ❌ 生成失败: {e}")
+        print(f"[ExamGenerator]  生成失败: {e}")
         return {"generated_resources": []}
 
 

@@ -3,6 +3,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.models.user import ChatRequest
 from app.graph.graph import learning_graph
 from app.services.profile_service import profile_service
+from app.services.resource_service import resource_service
 from langchain_community.chat_models import ChatTongyi
 from langchain_core.messages import HumanMessage
 import json
@@ -48,6 +49,16 @@ async def chat(request: ChatRequest):
 
         # 跑完整多智能体图
         final_state = await learning_graph.ainvoke(initial_state)
+
+        # 调试信息
+        resp_field = final_state.get("response", "")
+        hist_len = len(final_state.get("history", []))
+        print(f"[Routes] response字段: {'空' if not resp_field else f'长度{len(resp_field)}'}")
+        print(f"[Routes] history长度: {hist_len}")
+        if hist_len > 0:
+            last_role = type(final_state["history"][-1]).__name__
+            last_content = final_state["history"][-1].content[:80]
+            print(f"[Routes] 最后一条history: {last_role} -> {last_content}")
 
         # 提取回复：优先 response 字段，其次 history 最后一条
         reply = final_state.get("response")
@@ -106,3 +117,19 @@ async def get_learning_path(student_id: str):
     """获取学习路径"""
     # TODO: 从 PathAgent 获取
     return {"student_id": student_id, "path": None}
+
+
+@router.get("/resources/{student_id}")
+async def list_resources(student_id: str):
+    """获取某学生的全部已生成资源"""
+    items = resource_service.list_with_orm_ids(student_id)
+    return {"resources": items}
+
+
+@router.delete("/resources/{orm_id}")
+async def delete_resource(orm_id: int):
+    """删除一条资源记录"""
+    ok = resource_service.delete(orm_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="资源不存在")
+    return {"message": "删除成功"}

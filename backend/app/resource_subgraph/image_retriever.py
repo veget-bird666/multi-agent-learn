@@ -15,13 +15,14 @@ def image_retriever(state: ResourceSubState) -> dict:
     """
     knowledge_point = state.get("knowledge_point", "")
     rewritten = state.get("rewritten_query", "")
+    cleaned_topic = state.get("cleaned_topic", "")
 
-    topic = rewritten or knowledge_point
+    topic = cleaned_topic or rewritten or knowledge_point
     if not topic:
-        print(f"[ImageRetriever] ⚠️ 无知识点，跳过")
+        print(f"[ImageRetriever]  无知识点，跳过")
         return {"generated_resources": []}
 
-    print(f"\n[ImageRetriever] 🖼️  检索图片: {topic}")
+    print(f"\n[ImageRetriever]   检索图片: {topic}")
 
     # ── RAG 检索（骨架，后续接入 ChromaDB）──
     image_urls = _retrieve_images(topic)
@@ -37,7 +38,7 @@ def image_retriever(state: ResourceSubState) -> dict:
             difficulty="medium",
         ))
 
-    print(f"[ImageRetriever] ✅ 检索到 {len(resources)} 张图片")
+    print(f"[ImageRetriever]  检索到 {len(resources)} 张图片")
     return {"generated_resources": resources}
 
 

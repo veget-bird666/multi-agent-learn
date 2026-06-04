@@ -34,4 +34,18 @@ export function getLearningPath(studentId) {
   return api.get(`/learning-path/${studentId}`)
 }
 
+/** 获取学生全部资源 */
+export async function fetchResources(studentId) {
+  const res = await fetch(`/api/resources/${studentId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 删除一条资源 */
+export async function deleteResource(ormId) {
+  const res = await fetch(`/api/resources/${ormId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export default api

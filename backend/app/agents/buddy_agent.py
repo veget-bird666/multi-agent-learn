@@ -11,5 +11,5 @@ def buddy_agent(state: LearningState) -> dict:
     # TODO: 根据当前知识点生成"笨同学"的提问
     # TODO: 分析学生"教"的过程，判断是否真正掌握
     return {
-        "response": f"关于「{knowledge_point}」，我这里不太懂，你能教我吗？🤔",
+        "response": f"关于「{knowledge_point}」，我这里不太懂，你能教我吗？",
     }

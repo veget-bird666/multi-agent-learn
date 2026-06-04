@@ -17,6 +17,14 @@ AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video"]
 class ResourcePlan(BaseModel):
     """资源生成计划"""
     reasoning: str = Field(default="", description="决策理由")
+    cleaned_topic: str = Field(
+        default="",
+        description=(
+            "从用户消息中提取的纯净知识点/主题名称（去掉'生成/PPT/文档'等指令词）。"
+            "如用户说'我想学C语言指针，帮我生成PPT'，则提取为'C语言指针'。"
+            "控制在 20 字以内。"
+        ),
+    )
     resource_types: list[str] = Field(
         default=["document"],
         description=f"要生成的资源类型列表，可选：{', '.join(AVAILABLE_RESOURCES)}",
@@ -43,7 +51,9 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 6. **不要贪多** — 每次只生成 1-3 种最合适的资源，质量优先
 
 ## 输出
-返回 resource_types 列表，列出要生成的资源类型。"""
+1. **cleaned_topic**：从用户消息中提取的纯净知识点名称。去掉"生成/制作/PPT/文档/教案/帮我"等指令词。
+   例如"我想学C语言指针，帮我生成PPT" → "C语言指针"；"能帮我生成一份数据结构PPT吗" → "数据结构"
+2. **resource_types**：列出要生成的资源类型列表。注意不要贪多，1-3 种最合适。"""
 
 
 # ── 节点函数 ─────────────────────────────────────────────
@@ -57,7 +67,7 @@ def resource_planner(state: ResourceSubState) -> dict:
     message = state.get("message", "")
     rewritten = state.get("rewritten_query", "")
 
-    print(f"\n[ResourcePlanner] 📋 开始规划...")
+    print(f"\n[ResourcePlanner]  开始规划...")
     print(f"[ResourcePlanner]   知识点: {knowledge_point}")
     print(f"[ResourcePlanner]   消息: {message[:60]}...")
 
@@ -103,12 +113,19 @@ def resource_planner(state: ResourceSubState) -> dict:
         if not plan:
             plan = ["document"]
 
-        print(f"[ResourcePlanner] ✅ 规划完成: {plan}")
+        # 提取纯净 topic
+        cleaned_topic = (result.cleaned_topic or knowledge_point or "").strip()
+        if not cleaned_topic or len(cleaned_topic) < 2:
+            cleaned_topic = knowledge_point
+
+        print(f"[ResourcePlanner]  规划完成: {plan}")
+        print(f"[ResourcePlanner]   cleaned_topic: {cleaned_topic}")
         if result.reasoning:
             print(f"[ResourcePlanner]   reasoning: {result.reasoning}")
 
     except Exception as e:
-        print(f"[ResourcePlanner] ❌ LLM 调用失败: {e}，兜底为 document")
+        print(f"[ResourcePlanner]  LLM 调用失败: {e}，兜底为 document")
         plan = ["document"]
+        cleaned_topic = knowledge_point
 
-    return {"resource_plan": plan}
+    return {"resource_plan": plan, "cleaned_topic": cleaned_topic}

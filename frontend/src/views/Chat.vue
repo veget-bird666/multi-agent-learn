@@ -51,6 +51,7 @@
         :key="i"
         :content="msg.content"
         :is-user="msg.role === 'user'"
+        :resources="msg.resources || []"
       />
 
       <!-- 加载指示 -->

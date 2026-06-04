@@ -57,5 +57,49 @@ class StudentProfileORM(Base):
         )
 
 
+class ResourceORM(Base):
+    """学习资源 ORM 模型 — 对应 resources 表"""
+
+    __tablename__ = "resources"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    resource_id = Column(String(128), index=True, nullable=False)   # 生成时的唯一 ID
+    student_id = Column(String(64), index=True, nullable=False)     # 所属学生
+    type = Column(String(32), nullable=False)                       # document / exam / ppt / image / video
+    title = Column(String(256), default="")
+    content = Column(Text, default="")                               # Markdown / JSON / URL
+    knowledge_point = Column(String(256), default="")
+    difficulty = Column(String(16), default="medium")
+    created_at = Column(String(32), default="")                      # ISO 时间戳
+
+    def to_pydantic(self):
+        from app.models.resources import Resource, ResourceType
+        try:
+            res_type = ResourceType(self.type)
+        except ValueError:
+            res_type = ResourceType.DOCUMENT
+        return Resource(
+            id=self.resource_id,
+            type=res_type,
+            title=self.title or "",
+            content=self.content or "",
+            knowledge_point=self.knowledge_point or "",
+            difficulty=self.difficulty or "medium",
+        )
+
+    @classmethod
+    def from_resource(cls, resource: "Resource", student_id: str, created_at: str = "") -> "ResourceORM":
+        return cls(
+            resource_id=resource.id,
+            student_id=student_id,
+            type=resource.type.value if hasattr(resource.type, "value") else str(resource.type),
+            title=resource.title,
+            content=resource.content,
+            knowledge_point=resource.knowledge_point,
+            difficulty=resource.difficulty,
+            created_at=created_at,
+        )
+
+
 # 导入模块时自动建表（无论从 main.py 启动还是测试都会执行）
 Base.metadata.create_all(engine)
