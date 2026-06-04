@@ -14,7 +14,7 @@ def rewrite_node(state: LearningState) -> dict:
     message = state.get("message", "")
     profile = state.get("profile")
 
-    print(f"\n[RewriteNode] ✏️  开始重写查询...")
+    print(f"\n[RewriteNode]   开始重写查询...")
     print(f"[RewriteNode]   message: {message[:50]}...")
 
     # 构建上下文摘要（给 rewrite 模型参考）
@@ -29,7 +29,7 @@ def rewrite_node(state: LearningState) -> dict:
 
     rewritten = rewrite_query(message, context=context)
 
-    print(f"[RewriteNode] ✅ 重写结果: {rewritten[:60] if rewritten else '(空，无需搜索)'}")
+    print(f"[RewriteNode]  重写结果: {rewritten[:60] if rewritten else '(空，无需搜索)'}")
 
     return {
         "rewritten_query": rewritten,

@@ -15,7 +15,7 @@ def profile_agent(state: LearningState):
     处理学生消息，抽取画像维度：
     - 知识基础、认知风格、学习节奏、兴趣领域、易错点偏好、学习目标
     """
-    print(f"\n[ProfileAgent] 🔍 开始构建/更新画像...")
+    print(f"\n[ProfileAgent]  开始构建/更新画像...")
     if state.get("profile_update_hint"):
         print(f"[ProfileAgent]   update_hint: {state['profile_update_hint']}")
     history = list(state.get("history") or [])
@@ -49,7 +49,7 @@ def profile_agent(state: LearningState):
 
     profile_service.save_or_update(res_profile)
 
-    print(f"[ProfileAgent] ✅ 画像已保存: 认知风格={res_profile.cognitive_style}, 知识基础={res_profile.knowledge_base}, 兴趣={res_profile.interest_areas}")
+    print(f"[ProfileAgent]  画像已保存: 认知风格={res_profile.cognitive_style}, 知识基础={res_profile.knowledge_base}, 兴趣={res_profile.interest_areas}")
 
     detail = f"系统：已更新学生画像（认知风格={res_profile.cognitive_style}，知识基础={res_profile.knowledge_base}）"
     agent_message = AIMessage(content=f"[profile_agent] {detail}")

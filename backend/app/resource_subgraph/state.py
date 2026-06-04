@@ -17,6 +17,9 @@ class ResourceSubState(TypedDict):
     message: str
     rewritten_query: Optional[str]
 
+    # 纯净主题（planner 从消息中提取，去掉指令词）
+    cleaned_topic: str
+
     # 规划结果（planner 写入）
     resource_plan: List[str]         # 如 ["document", "exam", "ppt"]
 

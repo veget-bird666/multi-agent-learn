@@ -18,11 +18,18 @@ class StudentProfile(BaseModel):
     @field_validator("interest_areas", "common_mistakes", mode="before")
     @classmethod
     def parse_json_list(cls, v):
-        """兼容 LLM 返回 JSON 字符串的情况"""
+        """兼容 LLM 返回 JSON 字符串或纯字符串的情况"""
         if isinstance(v, str):
             if not v.strip():
                 return None
-            return json.loads(v)
+            # 尝试解析 JSON 数组
+            if v.strip().startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            # 纯字符串 → 包装为单元素列表
+            return [v.strip().strip('"').strip("'")]
         return v
 
 

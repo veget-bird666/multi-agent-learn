@@ -104,10 +104,10 @@ def supervisor_agent(state: LearningState):
     # 构建画像摘要（给 LLM 看）
     if profile:
         profile_summary = profile.model_dump_json(indent=2, exclude_none=True)
-        profile_status = "✅ 已构建"
+        profile_status = " 已构建"
     else:
         profile_summary = "暂无"
-        profile_status = "❌ 未构建"
+        profile_status = " 未构建"
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
@@ -143,7 +143,7 @@ def supervisor_agent(state: LearningState):
     })
 
     # === 调试日志：展示决策结果 ===
-    print(f"[Supervisor] ➡️  决策: next_agent={result.next_agent}")
+    print(f"[Supervisor]   决策: next_agent={result.next_agent}")
     if result.reasoning:
         print(f"[Supervisor]   reasoning: {result.reasoning}")
     if result.profile_update_hint:

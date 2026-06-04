@@ -19,7 +19,7 @@ SYSTEM_PROMPT = """你是一个专业的教育内容创作者，擅长将复杂�
    - 公式型：展示完整推理过程
    - 实践型：多给代码/操作示例
 4. 通俗易懂：适当使用类比和 Mermaid 图表
-5. 篇幅适中：覆盖核心内容，不注水
+5. **篇幅控制：回复控制在 1500 字以内**，只覆盖最核心内容，不要展开太多
 
 ## 参考资料
 {rag_context}
@@ -35,13 +35,14 @@ def doc_generator(state: ResourceSubState) -> dict:
     knowledge_point = state.get("knowledge_point", "")
     profile = state.get("profile")
     rewritten = state.get("rewritten_query", "")
+    cleaned_topic = state.get("cleaned_topic", "")
 
-    topic = rewritten or knowledge_point
+    topic = cleaned_topic or rewritten or knowledge_point
     if not topic:
-        print(f"[DocGenerator] ⚠️ 无知识点，跳过")
+        print(f"[DocGenerator]  无知识点，跳过")
         return {"generated_resources": []}
 
-    print(f"\n[DocGenerator] 📝 开始生成文档: {topic}")
+    print(f"\n[DocGenerator]  开始生成文档: {topic}")
 
     # ── RAG 检索（骨架，后续接入 ChromaDB）──
     rag_context = _retrieve_doc_context(topic)
@@ -70,11 +71,11 @@ def doc_generator(state: ResourceSubState) -> dict:
             knowledge_point=knowledge_point or topic,
             difficulty=_estimate_difficulty(profile),
         )
-        print(f"[DocGenerator] ✅ 文档生成完成 ({len(result.content)} 字)")
+        print(f"[DocGenerator]  文档生成完成 ({len(result.content)} 字)")
         return {"generated_resources": [resource]}
 
     except Exception as e:
-        print(f"[DocGenerator] ❌ 生成失败: {e}")
+        print(f"[DocGenerator]  生成失败: {e}")
         return {"generated_resources": []}
 
 

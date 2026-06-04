@@ -6,8 +6,8 @@ export const useChatStore = defineStore('chat', () => {
   const isStreaming = ref(false)
   const studentId = ref('student_001')
 
-  function addMessage(role, content) {
-    messages.value.push({ role, content })
+  function addMessage(role, content, resources = []) {
+    messages.value.push({ role, content, resources })
   }
 
   function appendToLastMessage(token) {

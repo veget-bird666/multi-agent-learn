@@ -44,6 +44,7 @@ const route = useRoute()
 const navItems = [
   { path: '/', label: '首页' },
   { path: '/chat', label: '开始学习' },
+  { path: '/resources', label: '我的资源' },
   { path: '/learning-path', label: '学习路径' },
 ]
 

@@ -37,7 +37,7 @@ def path_agent(state: LearningState) -> dict:
     knowledge_point = state.get("knowledge_point")
     rewritten_query = state.get("rewritten_query", "")
 
-    print(f"\n[PathAgent] 🗺️  开始规划学习路径...")
+    print(f"\n[PathAgent]   开始规划学习路径...")
     print(f"[PathAgent]   knowledge_point: {knowledge_point}")
     print(f"[PathAgent]   原始消息: {message[:40]}...")
     if rewritten_query:
@@ -51,10 +51,19 @@ def path_agent(state: LearningState) -> dict:
     # 学习需求：优先使用重写后的查询，其次用原始消息
     search_query = rewritten_query or knowledge_point or message
 
-    # === 后续将在此处插入 RAG 检索 ===
-    # 从 ChromaDB 检索相关课程切片
-    # 将检索到的切片加入 prompt 的 rag_context
-    rag_context = ""
+    # === RAG 检索：从知识库获取相关上下文 ===
+    try:
+        from app.rag.retriever import search_knowledge, format_rag_results
+        rag_results = search_knowledge(search_query, k=5)
+        rag_context = format_rag_results(rag_results)
+    except Exception as e:
+        print(f"[PathAgent]  RAG 检索异常（跳过）: {e}")
+        rag_context = ""
+
+    # 当有检索结果时，添加标题引导 LLM 参考
+    rag_context_header = ""
+    if rag_context:
+        rag_context_header = "=== 知识库参考内容（请据此制定路径）==="
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
@@ -64,6 +73,7 @@ def path_agent(state: LearningState) -> dict:
             "=== 学习需求 ===\n"
             "用户消息：{message}\n"
             "提取的知识点：{knowledge_point}\n"
+            "{rag_context_header}\n"
             "{rag_context}"
         )),
         ("user", "请根据以上信息，为学生制定一份个性化的学习路径规划。"),
@@ -75,9 +85,10 @@ def path_agent(state: LearningState) -> dict:
         "message": message,
         "knowledge_point": search_query,
         "rag_context": rag_context,
+        "rag_context_header": rag_context_header,
     })
 
-    print(f"[PathAgent] ✅ 路径规划完成，共 {len(result.steps)} 个阶段")
+    print(f"[PathAgent]  路径规划完成，共 {len(result.steps)} 个阶段")
     for step in result.steps:
         print(f"[PathAgent]   阶段{step.order}: {step.stage_name} ({step.difficulty})")
 

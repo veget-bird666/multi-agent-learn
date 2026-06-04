@@ -44,7 +44,7 @@ def route_to_generators(state: ResourceSubState) -> list[Send] | str:
     plan = state.get("resource_plan", [])
 
     if not plan:
-        print(f"[Subgraph] ⚠️ resource_plan 为空，跳过生成")
+        print(f"[Subgraph]  resource_plan 为空，跳过生成")
         return "collector"
 
     sends = []
@@ -53,10 +53,10 @@ def route_to_generators(state: ResourceSubState) -> list[Send] | str:
         if node_name:
             sends.append(Send(node_name, state))
         else:
-            print(f"[Subgraph] ⚠️ 未知资源类型: {resource_type}，已跳过")
+            print(f"[Subgraph]  未知资源类型: {resource_type}，已跳过")
 
     if not sends:
-        print(f"[Subgraph] ⚠️ 无有效的资源类型，跳过生成")
+        print(f"[Subgraph]  无有效的资源类型，跳过生成")
         return "collector"
 
     print(f"[Subgraph] Send 并行派发: {', '.join(s.node for s in sends)}")
@@ -73,10 +73,10 @@ def resource_collector(state: ResourceSubState) -> dict:
     resources = state.get("generated_resources", [])
     plan = state.get("resource_plan", [])
 
-    print(f"\n[ResourceCollector] 📊 汇总资源生成结果...")
+    print(f"\n[ResourceCollector]  汇总资源生成结果...")
 
     if not resources:
-        print(f"[ResourceCollector] ⚠️ 无资源生成")
+        print(f"[ResourceCollector]  无资源生成")
         return {"response": "本次未生成学习资源。"}
 
     # 按类型统计
@@ -86,23 +86,23 @@ def resource_collector(state: ResourceSubState) -> dict:
 
     # 构建汇总信息
     type_labels = {
-        "document": "📄 学习文档",
-        "exam": "📝 试卷",
-        "ppt": "📊 PPT 课件",
-        "image": "🖼️ 图片",
-        "video": "🎬 视频",
+        "document": " 学习文档",
+        "exam": " 试卷",
+        "ppt": " PPT 课件",
+        "image": " 图片",
+        "video": " 视频",
     }
 
     lines = [f"已为当前知识点生成 {len(resources)} 项学习资源：\n"]
     for r in resources:
-        label = type_labels.get(r.type, "📁 " + r.type)
+        label = type_labels.get(r.type, " " + r.type)
         lines.append(f"- {label}：**{r.title}**")
 
     response = "\n".join(lines)
 
     # 记录详细日志
     for r in resources:
-        print(f"  ✅ {r.type}: {r.title}")
+        print(f"   {r.type}: {r.title}")
 
     return {"response": response}
 
