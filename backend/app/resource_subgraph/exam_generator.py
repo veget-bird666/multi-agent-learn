@@ -35,6 +35,7 @@ SYSTEM_PROMPT = """你是一个专业的出题老师，擅长针对知识点设�
       "difficulty": "easy",
       "question": "题目内容",
       "options": ["A. 选项1", "B. 选项2", "C. 选项3", "D. 选项4"],
+      "user_answer": "",
       "answer": "A",
       "explanation": "解析内容"
     }},
@@ -43,6 +44,7 @@ SYSTEM_PROMPT = """你是一个专业的出题老师，擅长针对知识点设�
       "type": "fill",
       "difficulty": "medium",
       "question": "填空题目（__为填空位置）",
+      "user_answer": "",
       "answer": "正确答案",
       "explanation": "解析内容"
     }},
@@ -51,12 +53,16 @@ SYSTEM_PROMPT = """你是一个专业的出题老师，擅长针对知识点设�
       "type": "short_answer",
       "difficulty": "hard",
       "question": "简答题内容",
+      "user_answer": "",
       "answer": "参考答案要点",
       "explanation": "评分要点"
     }}
   ]
 }}
-```"""
+```
+
+注意：每道题都包含 `user_answer` 字段（初始为空字符串），供学生填写答案后使用。`answer` 和 `explanation` 在初始展示时对学生隐藏，待学生作答后再展示对照。
+"""
 
 
 def exam_generator(state: ResourceSubState) -> dict:
@@ -91,7 +97,7 @@ def exam_generator(state: ResourceSubState) -> dict:
     chain = prompt | chat_llm
 
     try:
-        result = chain.invoke({})
+        result = chain.invoke({"rag_context": rag_context})
         content = result.content.strip()
 
         # 尝试清理：去掉可能的 markdown 代码块标记
