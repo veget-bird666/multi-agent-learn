@@ -53,24 +53,81 @@
           <div class="flex-1 overflow-y-auto p-6">
             <!-- 文档类型：渲染 Markdown -->
             <div v-if="modalType === 'document'" class="chat-markdown text-sm" v-html="renderedContent"></div>
-            <!-- 试卷类型：格式化显示 -->
+            <!-- 试卷类型：交互式作答 -->
             <div v-else-if="modalType === 'exam'" class="text-sm">
               <div v-if="examData">
                 <div class="mb-4 text-gray-500 text-xs">总分：{{ examData.total_score || '未标注' }} | 共 {{ examData.questions?.length || 0 }} 题</div>
-                <div v-for="(q, i) in examData.questions" :key="i" class="mb-5 pb-4 border-b border-gray-100 last:border-0">
+                <div v-for="(q, i) in examData.questions" :key="i" class="mb-6 pb-5 border-b border-gray-100 last:border-0">
                   <div class="flex items-start gap-2">
                     <span class="text-gray-400 font-mono text-xs mt-0.5">{{ i + 1 }}.</span>
                     <div class="flex-1">
-                      <p class="text-gray-900 mb-2">{{ q.question }}</p>
-                      <div v-if="q.options" class="space-y-1 mb-2">
-                        <p v-for="(opt, oi) in q.options" :key="oi" class="text-gray-600 text-xs">{{ opt }}</p>
+                      <!-- 题目 -->
+                      <p class="text-gray-900 mb-3 font-medium">{{ q.question }}</p>
+
+                      <!-- 选择题选项 -->
+                      <div v-if="q.type === 'choice' && q.options" class="space-y-2 mb-3">
+                        <div
+                          v-for="(opt, oi) in q.options"
+                          :key="oi"
+                          class="flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all text-xs"
+                          :class="optionClass(q, i, oi)"
+                          @click="selectOption(i, oi)"
+                        >
+                          <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                            :class="radioClass(q, i, oi)">
+                            <span v-if="isSelected(i, oi)" class="w-2 h-2 rounded-full bg-current"></span>
+                          </span>
+                          <span>{{ opt }}</span>
+                        </div>
                       </div>
+
+                      <!-- 填空题输入 -->
+                      <div v-if="q.type === 'fill'" class="mb-3">
+                        <input
+                          v-model="userAnswers[i]"
+                          type="text"
+                          :disabled="revealed[i]"
+                          placeholder="请输入答案..."
+                          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 disabled:bg-gray-50"
+                        />
+                      </div>
+
+                      <!-- 简答题输入 -->
+                      <div v-if="q.type === 'short_answer'" class="mb-3">
+                        <textarea
+                          v-model="userAnswers[i]"
+                          :disabled="revealed[i]"
+                          placeholder="请输入你的回答..."
+                          rows="3"
+                          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 resize-none disabled:bg-gray-50"
+                        ></textarea>
+                      </div>
+
+                      <!-- 操作区：难度 + 按钮 -->
                       <div class="flex items-center gap-2 text-xs">
                         <span :class="difficultyBadge(q.difficulty)">{{ difficultyLabelFor(q.difficulty) }}</span>
-                        <span class="text-gray-300">|</span>
-                        <span class="text-green-600">答案：{{ q.answer }}</span>
+                        <template v-if="!revealed[i]">
+                          <button
+                            v-if="userAnswers[i]"
+                            @click="revealAnswer(i)"
+                            class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors"
+                          >提交答案</button>
+                          <span v-else class="text-gray-300">请作答后提交</span>
+                        </template>
+                        <template v-else>
+                          <span class="text-gray-300">|</span>
+                          <span :class="isCorrect(i) ? 'text-green-600 font-medium' : 'text-red-500 font-medium'">
+                            {{ isCorrect(i) ? '✓ 正确' : '✗ 回答有误' }}
+                          </span>
+                          <span class="text-gray-300">|</span>
+                          <span class="text-green-700 font-medium">参考答案：{{ q.answer }}</span>
+                          <button
+                            @click="resetQuestion(i)"
+                            class="text-gray-400 hover:text-gray-600 ml-1 underline"
+                          >重做</button>
+                        </template>
                       </div>
-                      <p v-if="q.explanation" class="text-gray-500 text-xs mt-1">解析：{{ q.explanation }}</p>
+                      <p v-if="revealed[i] && q.explanation" class="text-gray-500 text-xs mt-2 bg-gray-50 rounded-lg p-2">解析：{{ q.explanation }}</p>
                     </div>
                   </div>
                 </div>
@@ -85,7 +142,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, reactive, watch } from 'vue'
 import MarkdownIt from 'markdown-it'
 
 const md = new MarkdownIt({
@@ -100,6 +157,63 @@ const props = defineProps({
 
 const showModal = ref(false)
 const modalType = ref('')
+
+// ── 试卷交互状态 ──
+const userAnswers = reactive({})     // { 题目索引: 用户答案 }
+const revealed = reactive({})        // { 题目索引: true/false } 是否已提交检查
+const selectedOptions = reactive({}) // { 题目索引: 选项索引 } 仅选择题用
+
+// 关闭弹窗时重置试卷状态
+watch(showModal, (val) => {
+  if (!val) {
+    Object.keys(userAnswers).forEach(k => { delete userAnswers[k] })
+    Object.keys(revealed).forEach(k => { delete revealed[k] })
+    Object.keys(selectedOptions).forEach(k => { delete selectedOptions[k] })
+  }
+})
+
+function selectOption(qIdx, optIdx) {
+  if (revealed[qIdx]) return
+  selectedOptions[qIdx] = optIdx
+  userAnswers[qIdx] = String.fromCharCode(65 + optIdx) // A, B, C, D...
+}
+
+function isSelected(qIdx, optIdx) {
+  return selectedOptions[qIdx] === optIdx
+}
+
+function radioClass(q, qIdx, optIdx) {
+  if (!isSelected(qIdx, optIdx)) return 'border-gray-300'
+  return 'border-blue-500 text-blue-500'
+}
+
+function optionClass(q, qIdx, optIdx) {
+  const base = 'border-gray-200 hover:border-blue-200 hover:bg-blue-50'
+  if (!isSelected(qIdx, optIdx)) return base
+  if (!revealed[qIdx]) return 'border-blue-400 bg-blue-50'
+  // 已提交：判断对错
+  const isCorrectOpt = isSelected(qIdx, optIdx) && isCorrect(qIdx)
+  return isCorrectOpt ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'
+}
+
+function revealAnswer(qIdx) {
+  revealed[qIdx] = true
+}
+
+function resetQuestion(qIdx) {
+  delete revealed[qIdx]
+  delete userAnswers[qIdx]
+  delete selectedOptions[qIdx]
+}
+
+function isCorrect(qIdx) {
+  const exam = examData.value
+  if (!exam || !exam.questions[qIdx]) return false
+  const q = exam.questions[qIdx]
+  const userAns = (userAnswers[qIdx] || '').trim().toLowerCase()
+  const correctAns = (q.answer || '').trim().toLowerCase()
+  return userAns === correctAns
+}
 
 const typeMap = {
   document: { icon: '📄', label: '文档', bg: 'bg-blue-50', badge: 'bg-blue-50 text-blue-600' },

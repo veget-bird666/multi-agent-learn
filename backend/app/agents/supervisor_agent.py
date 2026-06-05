@@ -99,6 +99,13 @@ def supervisor_agent(state: LearningState):
     print(f"[Supervisor]   history 条数: {len(history)}")
     if state.get("profile_update_hint"):
         print(f"[Supervisor]   残留的 update_hint: {state['profile_update_hint']}")
+
+    # === 消息为空 = 本轮已处理完毕，无需再调 LLM ===
+    if not latest_message:
+        print(f"[Supervisor]   message 为空，直接 FINISH")
+        print(f"{'='*60}")
+        return {"next_agent": "FINISH", "operation": turn_count + 1}
+    # ==============================================
     # ==============
 
     # 构建画像摘要（给 LLM 看）
