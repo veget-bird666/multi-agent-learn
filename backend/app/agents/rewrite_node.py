@@ -1,7 +1,8 @@
 """
 Graph 节点：查询重写节点
 职责：将用户原始消息重写为适合 RAG 检索的搜索查询
-位置：path_agent 之前，为路径规划提供精准搜索需求
+位置：由 Supervisor 按需调度，资源生成和路径规划前都会先经此节点清洗查询
+      path_agent 和 resource_agent 都可使用 rewritten_query 作为检索输入
 """
 from app.graph.state import LearningState
 from app.core.query_rewrite import rewrite_query

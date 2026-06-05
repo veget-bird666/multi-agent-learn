@@ -26,6 +26,10 @@ class LearningState(TypedDict):
     profile_update_hint: Optional[str]  # Supervisor 传给 profile_agent 的更新提示
     rewritten_query: Optional[str]  # rewrite_node 重写后的搜索查询
 
+    # Plan-and-Execute：Supervisor 规划后按计划推进
+    execution_plan: List[str]  # ["rewrite_node", "path_agent"] 等，空列表表示无计划
+    current_plan_step: int     # -1 表示无计划，0+ 表示当前执行到的步骤索引
+
     # 工具调用
     tool_result: Optional[str]       # 工具执行结果
     image_base64: Optional[str]      # 前端上传的图片（base64，不含前缀）
