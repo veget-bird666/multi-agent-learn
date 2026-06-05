@@ -25,8 +25,8 @@ ALL_AGENTS = [
     "tool_node",
 ]
 
-# Supervisor 条件路由范围（path_agent 不在此列——它由 rewrite_node 的硬边触发）
-ROUTE_MAP = {name: name for name in ALL_AGENTS if name != "path_agent"} | {"rewrite_node": "rewrite_node", "FINISH": END}
+# Supervisor 条件路由范围：所有 Agent 都由 Supervisor 统一调度
+ROUTE_MAP = {name: name for name in ALL_AGENTS} | {"rewrite_node": "rewrite_node", "FINISH": END}
 
 
 def route_from_supervisor(state: LearningState) -> str:
@@ -72,8 +72,8 @@ def build_graph() -> StateGraph:
     for name in ALL_AGENTS:
         workflow.add_edge(name, "supervisor")
 
-    # === rewrite_node 走硬边到 path_agent，不经过 Supervisor ===
-    workflow.add_edge("rewrite_node", "path_agent")
+    # rewrite_node 执行完后回到 Supervisor，由它按意图分流到 path_agent 或 resource_agent
+    workflow.add_edge("rewrite_node", "supervisor")
 
     return workflow.compile()
 
