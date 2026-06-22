@@ -194,6 +194,23 @@
               <p v-if="step.duration_estimate" class="text-xs text-gray-400 mt-1">
                 ⏱ {{ step.duration_estimate }}
               </p>
+
+              <!-- 关联资源列表 -->
+              <div v-if="getStepResources(step.order).length" class="mt-3 pt-3 border-t border-gray-100">
+                <p class="text-xs text-gray-400 mb-2">📎 关联资源（{{ getStepResources(step.order).length }}）</p>
+                <div class="space-y-1">
+                  <div
+                    v-for="res in getStepResources(step.order)"
+                    :key="res.orm_id || res.id"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
+                    @click.stop="openResource(res)"
+                  >
+                    <span>{{ typeIconMap[res.type] || '📄' }}</span>
+                    <span class="text-xs text-gray-700 truncate flex-1">{{ res.title }}</span>
+                    <span class="text-xs text-gray-400 flex-shrink-0">{{ typeLabelMap[res.type] || res.type }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- 展开/收起 -->
@@ -206,6 +223,13 @@
         </div>
       </template>
     </template>
+
+    <!-- 试卷作答弹窗 -->
+    <ExamModal
+      v-if="examTaking"
+      :resource="examTaking"
+      @close="examTaking = null"
+    />
 
     <!-- 删除确认弹窗 -->
     <Teleport to="body">
@@ -239,7 +263,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { listLearningPaths, fetchLearningPath, setActivePath, deleteLearningPath } from '../api'
+import { listLearningPaths, fetchLearningPath, setActivePath, deleteLearningPath, fetchResources } from '../api'
+import ExamModal from '../components/ExamModal.vue'
 
 const chatStore = useChatStore()
 const loading = ref(true)
@@ -248,6 +273,39 @@ const selectedPathId = ref(null)   // 当前选中的路径 ID
 const currentPath = ref(null)      // 当前选中路径的完整数据
 const expandedSteps = ref({})
 const deleteTarget = ref(null)
+const allResources = ref([])
+const examTaking = ref(null)
+
+/** 资源类型图标 */
+const typeIconMap = {
+  document: '📄', exam: '📝', ppt: '📊', image: '🖼️',
+  video: '🎬', exercise: '✏️', mindmap: '🧠', code_example: '💻', extra_reading: '📚',
+}
+
+/** 资源类型中文名 */
+const typeLabelMap = {
+  document: '文档', exam: '试卷', ppt: 'PPT', image: '图片',
+  video: '视频', exercise: '练习', mindmap: '思维导图', code_example: '代码', extra_reading: '拓展',
+}
+
+/** 获取某个阶段关联的资源 */
+function getStepResources(stepOrder) {
+  if (!currentPath.value) return []
+  return allResources.value.filter(r => {
+    const so = r.step_order
+    return so !== null && so !== undefined && Number(so) === Number(stepOrder)
+  })
+}
+
+/** 点击资源后的行为 */
+function openResource(res) {
+  if (res.type === 'exam') {
+    examTaking.value = res
+  } else {
+    // 非试卷资源跳转到资源页面
+    window.location.hash = '#/resources'
+  }
+}
 
 /** 已完成阶段数（mastery >= 80） */
 const completedCount = computed(() =>
@@ -359,9 +417,15 @@ async function switchPath(pathId) {
 /** 加载路径详情 */
 async function loadPathDetail(pathId) {
   try {
-    const detail = await fetchLearningPath(pathId)
+    const [detail, resData] = await Promise.all([
+      fetchLearningPath(pathId),
+      fetchResources(chatStore.studentId),
+    ])
     currentPath.value = detail
     expandedSteps.value = {}
+    allResources.value = (resData.resources || []).filter(r =>
+      r.path_id && Number(r.path_id) === Number(pathId)
+    )
   } catch (e) {
     console.error('加载路径详情失败:', e)
   }
