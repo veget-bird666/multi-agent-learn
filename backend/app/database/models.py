@@ -112,6 +112,7 @@ class LearningPathORM(Base):
     path_data = Column(Text, default="[]")                        # JSON: 完整步骤列表（含 mastery）
     current_step = Column(Integer, default=0)                     # 当前进度
     overall_mastery = Column(Integer, default=0)                  # 总体掌握度 0~100
+    is_active = Column(Integer, default=0)                        # 0=非活跃, 1=当前选中的路径
     created_at = Column(String(32), default="")
     updated_at = Column(String(32), default="")
 
@@ -125,5 +126,27 @@ class LearningPathORM(Base):
         self.path_data = json.dumps(steps, ensure_ascii=False)
 
 
+def _migrate_schema(engine) -> None:
+    """
+    轻量级 schema 迁移：给已有表补充新字段。
+    只处理新增列，不处理改名/删列等复杂操作。
+    """
+    import sqlalchemy as sa
+    inspector = sa.inspect(engine)
+    columns = {c["name"] for c in inspector.get_columns("learning_paths")}
+
+    with engine.connect() as conn:
+        if "is_active" not in columns:
+            conn.execute(sa.text(
+                "ALTER TABLE learning_paths ADD COLUMN is_active INTEGER DEFAULT 0"
+            ))
+            conn.commit()
+            print("[Migration]  learning_paths 表已添加 is_active 字段")
+
+
 # 导入模块时自动建表（无论从 main.py 启动还是测试都会执行）
 Base.metadata.create_all(engine)
+
+# ── 轻量迁移：新增字段到已有表 ───────────────────
+# SQLAlchemy create_all 不会改已有表，需要手动 ALTER
+_migrate_schema(engine)

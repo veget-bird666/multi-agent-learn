@@ -121,13 +121,16 @@ def path_agent(state: LearningState) -> dict:
 
     updated_history = list(state.get("history") or []) + [path_system_msg]
 
-    # ── 持久化到数据库 ──────────────────────────────────
+    # ── 持久化到数据库（追加新路径，不影响已有路径）──
     try:
         student_id = state.get("student_id", "")
         if student_id and result.steps:
             path_title = f"{search_query[:30]}学习路径"
-            learning_path_service.save(student_id, path_title, result.steps)
-            print(f"[PathAgent]  路径已持久化到数据库（学生: {student_id}）")
+            new_path = learning_path_service.create(student_id, path_title, result.steps)
+            # 新路径自动设为当前选中
+            if new_path.get("id"):
+                learning_path_service.set_active(new_path["id"], student_id)
+            print(f"[PathAgent]  新路径已持久化 [id={new_path.get('id')}]（学生: {student_id}）")
     except Exception as e:
         print(f"[PathAgent]  持久化异常（不影响主流程）: {e}")
 
