@@ -1,55 +1,14 @@
+抱歉，请求处理时出现错误：处理请求时出错: Error code: 500 - {'error': {'message': 'xunfei response error: sid: cht000d8e2b@dx19eef05b70fb91a122 msg: EngineInternalError:Bad Request, timeStamp:19:09:51.044 (request id: 2026062219094968981151106887229)', 'type': 'one_api_error', 'param': '', 'code': '10012'}}
+
 ============================================================
 [Supervisor] 第 0 轮决策
-[Supervisor]   message: 我想学习C语言，你能为我规划一下学习路线吗？
+[Supervisor]   message: 你好
 [Supervisor]   重写请求: (无)
 [Supervisor]   画像: 未构建
 [Supervisor]   路径: 未规划
 [Supervisor]   资源数: 0
-[Supervisor]   rewrite_done: False
+[Supervisor]   计划: []
+[Supervisor]   计划步骤: -1
 [Supervisor]   history 条数: 1
-[Supervisor]   决策: next_agent=rewrite_node
-[Supervisor]   reasoning: 学生请求学习C语言并规划学习路线。根据核心流程，需要先经过 rewrite_node 清洗查询，以便更准确地理解学生的学习需求，然后再由 supervisor 决定分流到 path_agent 进行路径规划。当前 rewrite_done 为 false，符合常规规则5（学习知识点且路径未规划），因此调用 rewrite_node。
-============================================================
-[Graph]   路由: supervisor → rewrite_node
-
-[RewriteNode]   开始重写查询...
-[RewriteNode]   message: 我想学习C语言，你能为我规划一下学习路线吗？...
-[QueryRewrite] 原始: 我想学习C语言，你能为我规划一下学习路线吗？... → 重写: C语言 学习路线 零基础入门 系统规划...
-[RewriteNode]  重写结果: C语言 学习路线 零基础入门 系统规划
-
-============================================================
-[Supervisor] 第 1 轮决策
-[Supervisor]   message: 我想学习C语言，你能为我规划一下学习路线吗？
-[Supervisor]   重写请求: C语言 学习路线 零基础入门 系统规划...
-[Supervisor]   画像: 未构建
-[Supervisor]   路径: 未规划
-[Supervisor]   资源数: 0
-[Supervisor]   rewrite_done: True
-[Supervisor]   history 条数: 1
-[Supervisor]   决策: next_agent=rewrite_node
-[Supervisor]   reasoning: 用户想学习C语言并规划路线，需要先经过rewrite_node清洗查询意图，然后再决定是path_agent还是resource_agent。当前rewrite_done为false，学习路径未规划，符合规则5。
-============================================================
-[Supervisor] 安全阀: rewritten_query 已存在，拦截 rewrite_node → chat_agent
-[Graph]   路由: supervisor → chat_agent
-
-[ChatAgent]  开始处理对话...
-[ChatAgent]  回复完成 (239 字)
-
-============================================================
-[Supervisor] 第 2 轮决策
-[Supervisor]   message: 
-[Supervisor]   重写请求: C语言 学习路线 零基础入门 系统规划...
-[Supervisor]   画像: 未构建
-[Supervisor]   路径: 未规划
-[Supervisor]   资源数: 0
-[Supervisor]   rewrite_done: True
-[Supervisor]   history 条数: 2
-[Supervisor]   message 为空，直接 FINISH
-============================================================
-[Graph]  message 为空，本轮对话结束
-[Routes] response字段: 长度239
-[Routes] history长度: 2
-[Routes] 最后一条history: AIMessage -> 很高兴你对C语言感兴趣！我可以为你规划一个系统化的学习路线。请先告诉我一些信息，以便为你制定更个性化的计划：
-
-1. **编程基础**：你是否有其他编程语言的基
-INFO:     127.0.0.1:65167 - "POST /api/chat HTTP/1.1" 200 OK
+[Supervisor]   LLM 模式: 规划
+INFO:     127.0.0.1:60655 - "POST /api/chat HTTP/1.1" 500 Internal Server Error

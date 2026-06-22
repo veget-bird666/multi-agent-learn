@@ -101,5 +101,29 @@ class ResourceORM(Base):
         )
 
 
+class LearningPathORM(Base):
+    """学习路径 ORM 模型 — 对应 learning_paths 表"""
+
+    __tablename__ = "learning_paths"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    student_id = Column(String(64), index=True, nullable=False)
+    title = Column(String(256), default="")                       # 学习路径标题
+    path_data = Column(Text, default="[]")                        # JSON: 完整步骤列表（含 mastery）
+    current_step = Column(Integer, default=0)                     # 当前进度
+    overall_mastery = Column(Integer, default=0)                  # 总体掌握度 0~100
+    created_at = Column(String(32), default="")
+    updated_at = Column(String(32), default="")
+
+    def get_steps(self) -> list[dict]:
+        """解析 steps JSON→list[dict]"""
+        import json
+        return json.loads(self.path_data) if self.path_data else []
+
+    def set_steps(self, steps: list[dict]) -> None:
+        import json
+        self.path_data = json.dumps(steps, ensure_ascii=False)
+
+
 # 导入模块时自动建表（无论从 main.py 启动还是测试都会执行）
 Base.metadata.create_all(engine)

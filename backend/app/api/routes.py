@@ -4,6 +4,7 @@ from app.models.user import ChatRequest
 from app.graph.graph import learning_graph
 from app.services.profile_service import profile_service
 from app.services.resource_service import resource_service
+from app.services.learning_path_service import learning_path_service
 from langchain_community.chat_models import ChatTongyi
 from langchain_core.messages import HumanMessage
 import json
@@ -117,9 +118,32 @@ async def get_profile(student_id: str):
 
 @router.get("/learning-path/{student_id}")
 async def get_learning_path(student_id: str):
-    """获取学习路径"""
-    # TODO: 从 PathAgent 获取
-    return {"student_id": student_id, "path": None}
+    """获取学生的学习路径（含各阶段掌握度）"""
+    path = learning_path_service.get(student_id)
+    if path is None:
+        return {"student_id": student_id, "path": None, "message": "暂无学习路径"}
+    return {"student_id": student_id, "path": path}
+
+
+@router.put("/learning-path/{student_id}/mastery")
+async def update_mastery(student_id: str, step_order: int, mastery: float):
+    """更新某个学习阶段的掌握度"""
+    if mastery < 0 or mastery > 100:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="掌握度必须在 0~100 之间")
+    result = learning_path_service.update_step_mastery(student_id, step_order, mastery)
+    if result is None:
+        raise HTTPException(status_code=404, detail="未找到学习路径")
+    return {"student_id": student_id, "path": result}
+
+
+@router.put("/learning-path/{student_id}/mastery/batch")
+async def batch_update_mastery(student_id: str, updates: list[dict]):
+    """批量更新多个阶段的掌握度"""
+    result = learning_path_service.batch_update_mastery(student_id, updates)
+    if result is None:
+        raise HTTPException(status_code=404, detail="未找到学习路径")
+    return {"student_id": student_id, "path": result}
 
 
 @router.get("/resources/{student_id}")

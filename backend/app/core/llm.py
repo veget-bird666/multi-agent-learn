@@ -54,7 +54,7 @@ deepseek_v4_pro = ChatOpenAI(
 
 chat_llm = deepseek_v3
 vision_llm = hunyuan_model
-supervisor_llm = deepseek_v4_pro
+supervisor_llm = deepseek_v3
 path_llm = deepseek_v3
 tool_llm = deepseek_v3
 recourse_llm = deepseek_v3

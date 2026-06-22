@@ -40,7 +40,7 @@ REWRITE_PROMPT = """你是一个查询重写助手。你的任务是将用户的
 输出：Python字典 学习 详解"""
 
 
-def rewrite_query(message: str, context: str = "") -> str:
+async def rewrite_query(message: str, context: str = "") -> str:
     """
     将用户消息重写为搜索查询。
 
@@ -60,7 +60,7 @@ def rewrite_query(message: str, context: str = "") -> str:
     ])
 
     chain = prompt | supervisor_llm
-    result = chain.invoke({
+    result = await chain.ainvoke({
         "message": message,
         "context": context or "无额外上下文",
     })

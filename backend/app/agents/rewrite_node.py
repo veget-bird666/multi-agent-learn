@@ -8,7 +8,7 @@ from app.graph.state import LearningState
 from app.core.query_rewrite import rewrite_query
 
 
-def rewrite_node(state: LearningState) -> dict:
+async def rewrite_node(state: LearningState) -> dict:
     """
     读取用户消息，重写为搜索查询，存入 state.rewritten_query。
     """
@@ -28,7 +28,7 @@ def rewrite_node(state: LearningState) -> dict:
         )
     context = " | ".join(context_parts) if context_parts else ""
 
-    rewritten = rewrite_query(message, context=context)
+    rewritten = await rewrite_query(message, context=context)
 
     print(f"[RewriteNode]  重写结果: {rewritten[:60] if rewritten else '(空，无需搜索)'}")
 

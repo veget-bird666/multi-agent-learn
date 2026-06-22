@@ -89,7 +89,7 @@ SYSTEM_PROMPT = """你是一个学习系统的调度员（Supervisor），负责
 """
 
 
-def supervisor_agent(state: LearningState):
+async def supervisor_agent(state: LearningState):
     """监督智能体：Plan-and-Execute 模式"""
     plan = state.get("execution_plan", [])
     plan_step = state.get("current_plan_step", -1)
@@ -175,7 +175,7 @@ def supervisor_agent(state: LearningState):
     path_status = f"已规划（{len(learning_path)} 个阶段）" if learning_path else "未规划"
 
     chain = prompt | supervisor_llm.with_structured_output(SupervisorOutput)
-    result = chain.invoke({
+    result = await chain.ainvoke({
         "history": history,
         "profile_status": profile_status,
         "profile_summary": profile_summary,

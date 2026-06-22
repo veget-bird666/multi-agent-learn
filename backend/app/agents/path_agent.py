@@ -5,6 +5,7 @@
 from app.graph.state import LearningState
 from app.core.llm import path_llm
 from app.models.resources import LearningPathPlan, LearningPathStep
+from app.services.learning_path_service import learning_path_service
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage
 
@@ -119,6 +120,16 @@ def path_agent(state: LearningState) -> dict:
     )
 
     updated_history = list(state.get("history") or []) + [path_system_msg]
+
+    # ── 持久化到数据库 ──────────────────────────────────
+    try:
+        student_id = state.get("student_id", "")
+        if student_id and result.steps:
+            path_title = f"{search_query[:30]}学习路径"
+            learning_path_service.save(student_id, path_title, result.steps)
+            print(f"[PathAgent]  路径已持久化到数据库（学生: {student_id}）")
+    except Exception as e:
+        print(f"[PathAgent]  持久化异常（不影响主流程）: {e}")
 
     return {
         "learning_path": [s.model_dump() for s in result.steps],

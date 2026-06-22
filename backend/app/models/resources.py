@@ -34,6 +34,7 @@ class LearningPathStep(BaseModel):
     duration_estimate: str = ""                        # 预估学习时长
     difficulty: str = "medium"                         # easy / medium / hard
     status: str = "pending"                            # pending / in_progress / completed
+    mastery: float = 0.0                               # 掌握度 0~100，用于看板展示
 
 
 class LearningPathPlan(BaseModel):

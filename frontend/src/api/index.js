@@ -48,4 +48,33 @@ export async function deleteResource(ormId) {
   return res.json()
 }
 
+/** ── 学习路径 ── */
+
+/** 获取学习路径（含掌握度） */
+export async function fetchLearningPath(studentId) {
+  const res = await fetch(`/api/learning-path/${studentId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 更新某个阶段的掌握度 */
+export async function updateMastery(studentId, stepOrder, mastery) {
+  const res = await fetch(`/api/learning-path/${studentId}/mastery?step_order=${stepOrder}&mastery=${mastery}`, {
+    method: 'PUT',
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 批量更新掌握度 */
+export async function batchUpdateMastery(studentId, updates) {
+  const res = await fetch(`/api/learning-path/${studentId}/mastery/batch`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export default api
