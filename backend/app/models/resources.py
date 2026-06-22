@@ -23,6 +23,8 @@ class Resource(BaseModel):
     content: str  # Markdown / JSON / 其他格式
     knowledge_point: str
     difficulty: str  # "easy" | "medium" | "hard"
+    path_id: Optional[int] = None      # 关联的学习路径 ID
+    step_order: Optional[int] = None   # 关联的学习阶段序号
 
 
 class LearningPathStep(BaseModel):
@@ -34,7 +36,8 @@ class LearningPathStep(BaseModel):
     duration_estimate: str = ""                        # 预估学习时长
     difficulty: str = "medium"                         # easy / medium / hard
     status: str = "pending"                            # pending / in_progress / completed
-    mastery: float = 0.0                               # 掌握度 0~100，用于看板展示
+    mastery: float = 0.0                               # 掌握度 0~100（由 knowledge_point_mastery 计算得出，也兼容旧数据）
+    knowledge_point_mastery: dict[str, float] = {}     # {"知识点名称": 0~120} 各知识点独立熟练度
 
 
 class LearningPathPlan(BaseModel):

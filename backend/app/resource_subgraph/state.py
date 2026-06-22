@@ -17,6 +17,11 @@ class ResourceSubState(TypedDict):
     message: str
     rewritten_query: Optional[str]
 
+    # 学习路径上下文（可选，用于绑定资源到具体阶段）
+    path_id: Optional[int]            # 当前选中的学习路径 ID
+    step_order: Optional[int]         # 当前聚焦的学习阶段序号
+    step_knowledge_points: List[str]  # 当前阶段的所有知识点列表
+
     # 纯净主题（planner 从消息中提取，去掉指令词）
     cleaned_topic: str
 

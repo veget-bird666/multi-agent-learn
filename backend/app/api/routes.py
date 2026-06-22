@@ -25,6 +25,11 @@ async def chat(request: ChatRequest):
     非流式运行整个 LangGraph 图，返回最终回复
     """
     try:
+        # ── 加载已有的学习路径上下文 ──
+        active_path = learning_path_service.get_active(request.student_id)
+        current_path_id = active_path["id"] if active_path else None
+        learning_path_data = active_path["steps"] if active_path else None
+
         # 构建完整的初始 state
         initial_state = {
             "history": [HumanMessage(content=request.message)],
@@ -43,8 +48,10 @@ async def chat(request: ChatRequest):
             "current_plan_step": -1,
             "image_base64": None,
             "knowledge_point": None,
-            "learning_path": None,
+            "learning_path": learning_path_data,
+            "current_path_id": current_path_id,
             "current_step": 0,
+            "focused_step_order": request.focused_step_order,
             "generated_resources": [],
             "teaching_decisions": [],
             "interaction_pattern": None,
@@ -75,6 +82,7 @@ async def chat(request: ChatRequest):
             "profile": final_state.get("profile"),
             "resources": final_state.get("generated_resources", []),
             "learning_path": final_state.get("learning_path"),
+            "current_path_id": final_state.get("current_path_id"),
         }
 
     except Exception as e:
@@ -177,6 +185,66 @@ async def update_mastery(path_id: int, step_order: int, mastery: float):
     if result is None:
         raise HTTPException(status_code=404, detail="未找到该学习路径")
     return result
+
+
+@router.put("/learning-path/{path_id}/kp-mastery")
+async def update_kp_mastery(path_id: int, body: dict):
+    """
+    更新某个知识点的熟练度（增量累加）。
+    body: {"step_order": 1, "knowledge_point": "指针概念", "increment": 8}
+    mastery_increment 建议值：easy=5, medium=8, hard=12
+    """
+    step_order = body.get("step_order")
+    kp_name = body.get("knowledge_point")
+    increment = body.get("increment", 5)
+
+    if step_order is None or not kp_name:
+        raise HTTPException(status_code=400, detail="需要提供 step_order 和 knowledge_point")
+    if increment < 0 or increment > 100:
+        raise HTTPException(status_code=400, detail="increment 必须在 0~100 之间")
+
+    result = learning_path_service.update_kp_mastery(path_id, step_order, kp_name, increment)
+    if result is None:
+        raise HTTPException(status_code=404, detail="未找到该学习路径")
+    return result
+
+
+@router.post("/learning-path/{path_id}/exam-submit")
+async def submit_exam(path_id: int, body: dict):
+    """
+    提交试卷作答结果，批量更新知识点熟练度。
+    body: {
+        "step_order": 1,
+        "results": [
+            {"knowledge_point": "变量", "is_correct": true, "difficulty": "easy"},
+            {"knowledge_point": "数据类型", "is_correct": false, "difficulty": "medium"}
+        ]
+    }
+    熟练度增量规则：easy=5, medium=8, hard=12（答对加分，答错不加）
+    """
+    DIFFICULTY_MAP = {"easy": 5, "medium": 8, "hard": 12}
+    step_order = body.get("step_order")
+    results = body.get("results", [])
+
+    if step_order is None:
+        raise HTTPException(status_code=400, detail="需要提供 step_order")
+    if not results:
+        raise HTTPException(status_code=400, detail="results 不能为空")
+
+    updated_count = 0
+    for r in results:
+        kp = r.get("knowledge_point")
+        is_correct = r.get("is_correct", False)
+        difficulty = r.get("difficulty", "medium")
+        if kp and is_correct:
+            increment = DIFFICULTY_MAP.get(difficulty, 5)
+            learning_path_service.update_kp_mastery(path_id, step_order, kp, increment)
+            updated_count += 1
+
+    # 返回更新后的路径
+    path = learning_path_service.get_by_id(path_id)
+    print(f"[ExamSubmit]  试卷提交完成 - 路径#{path_id} 阶段{step_order}: {updated_count}/{len(results)} 题正确")
+    return path or {"message": "提交完成但路径已不存在"}
 
 
 @router.put("/learning-path/{path_id}/mastery/batch")

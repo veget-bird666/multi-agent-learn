@@ -42,3 +42,4 @@ class ChatRequest(BaseModel):
     student_id: str
     message: str
     session_id: Optional[str] = None
+    focused_step_order: Optional[int] = None  # 用户聚焦的学习阶段

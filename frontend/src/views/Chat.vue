@@ -1,102 +1,139 @@
 <template>
-  <div class="max-w-5xl mx-auto px-4 py-6 h-[calc(100vh-3.5rem-4rem)] flex flex-col gap-4">
-    <!-- 顶部信息栏 -->
-    <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold text-gray-900">对话式学习</h2>
-      <div class="flex items-center gap-3">
-        <router-link
-          to="/learning-path"
-          class="text-xs text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
-        >
-          查看学习路径 →
-        </router-link>
-        <button
-          v-if="chatStore.messages.length > 0"
-          @click="clearConversation"
-          class="text-xs text-gray-400 hover:text-red-500 transition-colors"
-        >
-          清空对话
-        </button>
-      </div>
-    </div>
+  <div class="h-[calc(100vh-3.5rem)] flex">
+    <!-- 侧边栏：学习路径 -->
+    <PathSidebar />
 
-    <!-- 消息列表 -->
-    <div
-      ref="messageListRef"
-      class="flex-1 bg-white/70 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-4 md:p-6 overflow-y-auto scrollbar-thin space-y-5"
-    >
-      <!-- 空状态 -->
-      <div v-if="chatStore.messages.length === 0" class="flex flex-col items-center justify-center h-full text-center">
-        <div class="text-6xl mb-6">💡</div>
-        <h3 class="text-lg font-semibold text-gray-700 mb-2">开始你的学习之旅</h3>
-        <p class="text-sm text-gray-400 max-w-md leading-relaxed">
-          告诉我你想学习什么内容，系统将为你构建个性化学习方案，<br>生成专属的学习资源
-        </p>
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
-          <button
-            v-for="suggestion in suggestions"
-            :key="suggestion.text"
-            @click="useSuggestion(suggestion.text)"
-            class="text-left bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:shadow-sm transition-all text-sm text-gray-600 hover:text-gray-900"
+    <!-- 主对话区 -->
+    <div class="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-slate-50/80 via-white to-blue-50/30">
+      <!-- 顶部栏 -->
+      <div class="flex-shrink-0 flex items-center justify-between px-6 py-3 border-b border-gray-100/80 bg-white/40 backdrop-blur-sm">
+        <div class="flex items-center gap-3">
+          <h2 class="text-sm font-semibold text-gray-700">对话式学习</h2>
+          <!-- 聚焦状态指示 -->
+          <div
+            v-if="chatStore.focusedStepOrder !== null && activePathName"
+            class="flex items-center gap-1.5 text-[11px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full"
           >
-            <span class="mr-2">{{ suggestion.icon }}</span>
-            {{ suggestion.text }}
+            <span>🎯</span>
+            <span>聚焦：{{ activePathName }} 第{{ chatStore.focusedStepOrder }}阶段</span>
+            <button
+              @click="chatStore.clearFocus()"
+              class="ml-1 text-blue-400 hover:text-blue-600 transition-colors"
+              title="取消聚焦"
+            >✕</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <router-link
+            to="/learning-path"
+            class="text-[11px] text-blue-500 hover:text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg transition-colors"
+          >
+            路径看板 →
+          </router-link>
+          <button
+            v-if="chatStore.messages.length > 0"
+            @click="clearConversation"
+            class="text-[11px] text-gray-400 hover:text-red-500 transition-colors"
+          >
+            清空对话
           </button>
         </div>
       </div>
 
-      <!-- 消息 -->
-      <ChatMessage
-        v-for="(msg, i) in chatStore.messages"
-        :key="i"
-        :content="msg.content"
-        :is-user="msg.role === 'user'"
-        :resources="msg.resources || []"
-      />
-
-      <!-- 加载指示 -->
-      <div v-if="chatStore.isStreaming" class="flex items-start gap-3">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
-          AI
+      <!-- 消息列表 -->
+      <div
+        ref="messageListRef"
+        class="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-5 scrollbar-thin"
+      >
+        <!-- 空状态 -->
+        <div v-if="chatStore.messages.length === 0" class="flex flex-col items-center justify-center h-full text-center">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-blue-200">
+            💡
+          </div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">开始你的学习之旅</h3>
+          <p class="text-sm text-gray-400 max-w-md leading-relaxed mb-8">
+            在左侧侧边栏选择一个学习阶段聚焦，<br>
+            或直接输入你想学的内容
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
+            <button
+              v-for="suggestion in suggestions"
+              :key="suggestion.text"
+              @click="useSuggestion(suggestion.text)"
+              class="text-left bg-white border border-gray-200 rounded-xl px-4 py-3.5 hover:border-blue-300 hover:shadow-sm hover:shadow-blue-100 transition-all text-sm text-gray-600 hover:text-gray-900"
+            >
+              <span class="text-base mr-2">{{ suggestion.icon }}</span>
+              {{ suggestion.text }}
+            </button>
+          </div>
         </div>
-        <div class="bg-white border border-gray-100 rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
-          <div class="flex gap-1.5">
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
+
+        <!-- 消息 -->
+        <template v-for="(msg, i) in chatStore.messages" :key="i">
+          <ChatMessage
+            :content="msg.content"
+            :is-user="msg.role === 'user'"
+            :resources="msg.resources || []"
+          />
+        </template>
+
+        <!-- 加载指示 -->
+        <div v-if="chatStore.isStreaming" class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+            AI
+          </div>
+          <div class="bg-white border border-gray-100 rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
+            <div class="flex gap-1.5">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 输入区 -->
-    <div class="bg-white rounded-2xl border border-gray-200/60 p-2 flex items-end gap-2 shadow-sm">
-      <textarea
-        ref="inputRef"
-        v-model="inputMessage"
-        class="flex-1 border-0 bg-transparent px-3 py-2 text-sm resize-none focus:outline-none focus:ring-0 placeholder:text-gray-400 max-h-32"
-        placeholder="输入你想学的内容，按 Enter 发送..."
-        rows="1"
-        @keydown.enter.exact="sendMessage"
-        @input="autoResize"
-      />
-      <button
-        @click="sendMessage"
-        :disabled="chatStore.isStreaming || !inputMessage.trim()"
-        class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-blue-200 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 flex-shrink-0"
-      >
-        <span class="hidden sm:inline">发送</span>
-        <span class="sm:hidden">→</span>
-      </button>
+      <!-- 输入区 -->
+      <div class="flex-shrink-0 px-4 md:px-8 pb-4 pt-2 bg-white/40 backdrop-blur-sm border-t border-gray-100/60">
+        <!-- 聚焦上下文提示 -->
+        <div
+          v-if="chatStore.focusedStepOrder !== null && currentFocusedStep"
+          class="flex items-center gap-2 mb-2 px-4 py-2 bg-blue-50/80 border border-blue-100 rounded-xl text-xs text-blue-600"
+        >
+          <span>🎯</span>
+          <span class="font-medium">聚焦阶段：{{ currentFocusedStep.stage_name }}</span>
+          <span class="text-blue-300">|</span>
+          <span class="text-blue-400">知识点：{{ kpPreview }}</span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-200/80 p-2 flex items-end gap-2 shadow-sm focus-within:border-blue-300 focus-within:shadow-blue-100/50 focus-within:shadow-sm transition-all">
+          <textarea
+            ref="inputRef"
+            v-model="inputMessage"
+            class="flex-1 border-0 bg-transparent px-3 py-2 text-sm resize-none focus:outline-none focus:ring-0 placeholder:text-gray-400 max-h-32"
+            placeholder="输入你想学的内容，按 Enter 发送..."
+            rows="1"
+            @keydown.enter.exact="sendMessage"
+            @input="autoResize"
+          />
+          <button
+            @click="sendMessage"
+            :disabled="chatStore.isStreaming || !inputMessage.trim()"
+            class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-blue-200 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 flex-shrink-0"
+          >
+            <span class="hidden sm:inline">发送</span>
+            <span class="sm:hidden">→</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { sendChatMessage } from '../api'
 import ChatMessage from '../components/ChatMessage.vue'
+import PathSidebar from '../components/PathSidebar.vue'
 
 const chatStore = useChatStore()
 const inputMessage = ref('')
@@ -109,6 +146,27 @@ const suggestions = [
   { icon: '📊', text: '能帮我生成一份数据结构PPT吗？' },
   { icon: '🧮', text: '我想练习高等数学的微积分题目' },
 ]
+
+/** 当前聚焦阶段的名称 */
+const activePathName = computed(() => {
+  const path = chatStore.pathList.find(p => p.id === chatStore.currentPathId)
+  return path?.title || ''
+})
+
+/** 当前聚焦阶段的详细信息 */
+const currentFocusedStep = computed(() => {
+  if (chatStore.focusedStepOrder === null) return null
+  const path = chatStore.pathList.find(p => p.id === chatStore.currentPathId)
+  if (!path) return null
+  return path.steps?.find(s => s.order === chatStore.focusedStepOrder) || null
+})
+
+/** 知识点预览 */
+const kpPreview = computed(() => {
+  if (!currentFocusedStep.value) return ''
+  const kps = currentFocusedStep.value.knowledge_points || []
+  return kps.join('、')
+})
 
 function autoResize() {
   const el = inputRef.value
@@ -135,32 +193,48 @@ async function sendMessage() {
   const text = inputMessage.value.trim()
   if (!text || chatStore.isStreaming) return
 
-  chatStore.addMessage('user', text)
-  chatStore.isStreaming = true
   inputMessage.value = ''
   autoResize()
-  scrollToBottom()
 
-  try {
-    const data = await sendChatMessage(chatStore.studentId, text)
-    chatStore.addMessage('assistant', data.response)
-  } catch (e) {
-    chatStore.addMessage('assistant', '抱歉，请求处理时出现错误：' + e.message)
-  } finally {
-    chatStore.isStreaming = false
-    scrollToBottom()
-  }
+  await chatStore.sendMessage(text)
+  scrollToBottom()
 }
 
 function clearConversation() {
   chatStore.clearMessages()
 }
 
-// 消息变化时自动滚动到底部
 watch(() => chatStore.messages.length, scrollToBottom)
 
-// 加载时聚焦输入框
 onMounted(() => {
   inputRef.value?.focus()
 })
 </script>
+
+<style scoped>
+/* 滚动条 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: typing-bounce 1.4s infinite both;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+</style>

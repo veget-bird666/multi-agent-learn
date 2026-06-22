@@ -1,6 +1,7 @@
 """
 试卷生成器（exam_generator）
 职责：RAG 检索题库 + LLM 生成 JSON 格式的试卷（含选择题、填空题、简答题等）。
+      支持绑定到学习路径的特定阶段和知识点。
 """
 import json
 import time
@@ -37,42 +38,34 @@ SYSTEM_PROMPT = """你是一个专业的出题老师，擅长针对知识点设�
       "options": ["A. 选项1", "B. 选项2", "C. 选项3", "D. 选项4"],
       "user_answer": "",
       "answer": "A",
-      "explanation": "解析内容"
-    }},
-    {{
-      "id": 2,
-      "type": "fill",
-      "difficulty": "medium",
-      "question": "填空题目（__为填空位置）",
-      "user_answer": "",
-      "answer": "正确答案",
-      "explanation": "解析内容"
-    }},
-    {{
-      "id": 3,
-      "type": "short_answer",
-      "difficulty": "hard",
-      "question": "简答题内容",
-      "user_answer": "",
-      "answer": "参考答案要点",
-      "explanation": "评分要点"
+      "explanation": "解析内容",
+      "step_order": 2,
+      "knowledge_point": "指针概念"
     }}
   ]
 }}
 ```
 
-注意：每道题都包含 `user_answer` 字段（初始为空字符串），供学生填写答案后使用。`answer` 和 `explanation` 在初始展示时对学生隐藏，待学生作答后再展示对照。
+注意：
+- 每道题都包含 `user_answer` 字段（初始为空字符串），供学生填写答案后使用。
+- `answer` 和 `explanation` 在初始展示时对学生隐藏，待学生作答后再展示对照。
+- 如果提供了"学习阶段上下文"，每道题必须填写 `step_order` 和 `knowledge_point` 字段。
 """
 
 
 def exam_generator(state: ResourceSubState) -> dict:
     """
-    生成 JSON 格式试卷。
+    生成 JSON 格式试卷，可绑定到学习路径的特定阶段和知识点。
     """
     knowledge_point = state.get("knowledge_point", "")
     profile = state.get("profile")
     rewritten = state.get("rewritten_query", "")
     cleaned_topic = state.get("cleaned_topic", "")
+
+    # ── 学习路径上下文 ────────────────────────────────
+    path_id = state.get("path_id")
+    step_order = state.get("step_order")
+    step_kps = state.get("step_knowledge_points", [])
 
     topic = cleaned_topic or rewritten or knowledge_point
     if not topic:
@@ -80,18 +73,35 @@ def exam_generator(state: ResourceSubState) -> dict:
         return {"generated_resources": []}
 
     print(f"\n[ExamGenerator]  开始生成试卷: {topic}")
+    if step_order is not None:
+        print(f"[ExamGenerator]   绑定路径阶段: step={step_order}, KPs={step_kps}")
 
-    # ── RAG 检索题库（骨架）──
+    # ── RAG 检索题库 ──
     rag_context = _retrieve_exam_context(topic)
     difficulty = _estimate_difficulty(profile)
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", SYSTEM_PROMPT),
-        ("user", (
+    # ★ 有聚焦阶段时，以阶段知识点为出题核心（直接取代 topic 参数）
+    if step_order is not None and step_kps:
+        kp_list = "、".join(step_kps)
+        user_prompt = (
+            f"请严格围绕以下学习阶段的内容出题：\n"
+            f"阶段：第{step_order}阶段 — {topic}\n"
+            f"知识点范围：{kp_list}\n"
+            f"难度级别：{difficulty}\n"
+            f"包含选择题、填空题和简答题。\n"
+            f"每道题必须从「{kp_list}」中选择一个作为其 `knowledge_point` 字段，"
+            f"且 `step_order` 字段固定为 {step_order}。"
+        )
+    else:
+        user_prompt = (
             f"请为知识点「{topic}」生成一份试卷。\n"
             f"难度级别：{difficulty}\n"
             f"包含选择题、填空题和简答题。"
-        )),
+        )
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", SYSTEM_PROMPT),
+        ("user", user_prompt),
     ])
 
     chain = prompt | chat_llm
@@ -100,17 +110,19 @@ def exam_generator(state: ResourceSubState) -> dict:
         result = chain.invoke({"rag_context": rag_context})
         content = result.content.strip()
 
-        # 尝试清理：去掉可能的 markdown 代码块标记
+        # 清理可能的 markdown 代码块标记
         if content.startswith("```"):
-            # 找到第一个换行后的内容和最后一个 ```
             content = content.split("\n", 1)[1] if "\n" in content else content
             content = content.rsplit("```", 1)[0].strip()
-            # 去掉开头的 json 标记
             if content.startswith("json"):
                 content = content[4:].strip()
 
-        # 验证是合法 JSON
+        # 验证合法 JSON
         json.loads(content)
+
+        # 如果绑定了路径阶段，确保每道题都有 step_order 和 knowledge_point
+        if step_order is not None:
+            content = _patch_exam_json(content, step_order, step_kps)
 
         resource = Resource(
             id=f"exam_{int(time.time())}",
@@ -119,6 +131,8 @@ def exam_generator(state: ResourceSubState) -> dict:
             content=content,
             knowledge_point=knowledge_point or topic,
             difficulty=difficulty,
+            path_id=path_id,
+            step_order=step_order,
         )
         question_count = content.count('"question"')
         print(f"[ExamGenerator]  试卷生成完成 ({question_count} 道题)")
@@ -126,7 +140,6 @@ def exam_generator(state: ResourceSubState) -> dict:
 
     except json.JSONDecodeError as e:
         print(f"[ExamGenerator]  JSON 解析失败: {e}")
-        # 兜底：把结果当作内容，标记为 document 类型
         resource = Resource(
             id=f"exam_fallback_{int(time.time())}",
             type="exam",
@@ -134,6 +147,8 @@ def exam_generator(state: ResourceSubState) -> dict:
             content=result.content if 'result' in dir() else "生成失败",
             knowledge_point=knowledge_point or topic,
             difficulty=difficulty,
+            path_id=path_id,
+            step_order=step_order,
         )
         return {"generated_resources": [resource]}
     except Exception as e:
@@ -142,6 +157,37 @@ def exam_generator(state: ResourceSubState) -> dict:
 
 
 # ── 内部辅助 ────────────────────────────────────────────
+
+def _patch_exam_json(content: str, step_order: int, step_kps: list[str]) -> str:
+    """
+    确保试卷 JSON 中每道题都包含 step_order 和 knowledge_point 字段。
+    """
+    try:
+        data = json.loads(content)
+        questions = data.get("questions", [])
+        if not questions:
+            return content
+
+        import random
+        # 如果没有 step_kps，用 knowledge_point 字段作为备选
+        kp_pool = step_kps if step_kps else [data.get("knowledge_point", "未分类")]
+
+        modified = False
+        for q in questions:
+            if "step_order" not in q:
+                q["step_order"] = step_order
+                modified = True
+            if not q.get("knowledge_point"):
+                q["knowledge_point"] = random.choice(kp_pool)
+                modified = True
+
+        if modified:
+            return json.dumps(data, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[ExamGenerator]  补全题目字段失败: {e}")
+
+    return content
+
 
 def _retrieve_exam_context(topic: str) -> str:
     """RAG 检索题库。"""

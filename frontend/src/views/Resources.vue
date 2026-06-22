@@ -51,6 +51,14 @@
             class="relative group/card"
           >
             <ResourceCard :resource="item" />
+            <!-- 作答按钮（仅试卷） -->
+            <button
+              v-if="item.type === 'exam'"
+              @click.stop="examTaking = item"
+              class="absolute bottom-2 right-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-all opacity-0 group-hover/card:opacity-100"
+            >
+              开始作答
+            </button>
             <!-- 删除按钮（hover 显示） -->
             <button
               @click="confirmDelete(item)"
@@ -92,6 +100,13 @@
       </div>
     </Teleport>
 
+    <!-- 试卷作答弹窗 -->
+    <ExamModal
+      v-if="examTaking"
+      :resource="examTaking"
+      @close="examTaking = null; refresh()"
+    />
+
     <!-- 删除成功提示 -->
     <div
       v-if="toast"
@@ -107,10 +122,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { fetchResources, deleteResource } from '../api'
 import ResourceCard from '../components/ResourceCard.vue'
+import ExamModal from '../components/ExamModal.vue'
 
 const chatStore = useChatStore()
 const loading = ref(true)
 const resources = ref([])
+const examTaking = ref(null)
 const deleteTarget = ref(null)
 const deleting = ref(false)
 const toast = ref('')

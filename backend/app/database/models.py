@@ -70,6 +70,8 @@ class ResourceORM(Base):
     content = Column(Text, default="")                               # Markdown / JSON / URL
     knowledge_point = Column(String(256), default="")
     difficulty = Column(String(16), default="medium")
+    path_id = Column(Integer, nullable=True)                         # 关联的学习路径 ID
+    step_order = Column(Integer, nullable=True)                      # 关联的学习阶段序号
     created_at = Column(String(32), default="")                      # ISO 时间戳
 
     def to_pydantic(self):
@@ -85,6 +87,8 @@ class ResourceORM(Base):
             content=self.content or "",
             knowledge_point=self.knowledge_point or "",
             difficulty=self.difficulty or "medium",
+            path_id=self.path_id,
+            step_order=self.step_order,
         )
 
     @classmethod
@@ -97,6 +101,8 @@ class ResourceORM(Base):
             content=resource.content,
             knowledge_point=resource.knowledge_point,
             difficulty=resource.difficulty,
+            path_id=resource.path_id,
+            step_order=resource.step_order,
             created_at=created_at,
         )
 
@@ -133,15 +139,34 @@ def _migrate_schema(engine) -> None:
     """
     import sqlalchemy as sa
     inspector = sa.inspect(engine)
-    columns = {c["name"] for c in inspector.get_columns("learning_paths")}
 
-    with engine.connect() as conn:
-        if "is_active" not in columns:
-            conn.execute(sa.text(
-                "ALTER TABLE learning_paths ADD COLUMN is_active INTEGER DEFAULT 0"
-            ))
-            conn.commit()
-            print("[Migration]  learning_paths 表已添加 is_active 字段")
+    # ── learning_paths 表 ──
+    if "learning_paths" in inspector.get_table_names():
+        lp_cols = {c["name"] for c in inspector.get_columns("learning_paths")}
+        with engine.connect() as conn:
+            if "is_active" not in lp_cols:
+                conn.execute(sa.text(
+                    "ALTER TABLE learning_paths ADD COLUMN is_active INTEGER DEFAULT 0"
+                ))
+                conn.commit()
+                print("[Migration]  learning_paths 表已添加 is_active 字段")
+
+    # ── resources 表 ──
+    if "resources" in inspector.get_table_names():
+        res_cols = {c["name"] for c in inspector.get_columns("resources")}
+        with engine.connect() as conn:
+            if "path_id" not in res_cols:
+                conn.execute(sa.text(
+                    "ALTER TABLE resources ADD COLUMN path_id INTEGER"
+                ))
+                conn.commit()
+                print("[Migration]  resources 表已添加 path_id 字段")
+            if "step_order" not in res_cols:
+                conn.execute(sa.text(
+                    "ALTER TABLE resources ADD COLUMN step_order INTEGER"
+                ))
+                conn.commit()
+                print("[Migration]  resources 表已添加 step_order 字段")
 
 
 # 导入模块时自动建表（无论从 main.py 启动还是测试都会执行）

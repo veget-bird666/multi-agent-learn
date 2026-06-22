@@ -142,6 +142,83 @@ class LearningPathService:
             self.update_step_mastery(path_id, u["step_order"], u["mastery"])
         return self.get_by_id(path_id)
 
+    def update_kp_mastery(
+        self, path_id: int, step_order: int, kp_name: str, increment: float
+    ) -> Optional[dict]:
+        """
+        更新某个知识点的熟练度（增量累加）。
+        - 知识点熟练度上限 120%
+        - 阶段掌握度 = 该阶段下所有知识点熟练度的均值
+        - 路径总体掌握度 = 所有阶段掌握度的均值
+
+        Args:
+            path_id: 学习路径 ID
+            step_order: 阶段序号
+            kp_name: 知识点名称
+            increment: 本次增加的熟练度（答对加分，答错不加）
+
+        Returns:
+            更新后的路径 dict，或 None（路径不存在时）
+        """
+        now = datetime.now().isoformat(timespec="seconds")
+
+        with get_session() as session:
+            orm = session.query(LearningPathORM).get(path_id)
+            if not orm:
+                return None
+
+            steps = orm.get_steps()
+            step_found = False
+            for step in steps:
+                if step.get("order") == step_order:
+                    step_found = True
+                    # 初始化/获取知识点熟练度字典
+                    kp_mastery: dict = step.get("knowledge_point_mastery") or {}
+
+                    # 如果该知识点在 step.knowledge_points 中，才允许更新
+                    allowed_kps = step.get("knowledge_points", [])
+                    if allowed_kps and kp_name not in allowed_kps:
+                        print(f"[KPMastery]  {kp_name} 不在 {allowed_kps} 中，跳过")
+                        break
+
+                    current = kp_mastery.get(kp_name, 0.0)
+                    new_val = current + increment
+                    new_val = min(new_val, 120.0)  # 上限 120%
+
+                    if new_val > current:
+                        kp_mastery[kp_name] = round(new_val, 1)
+                        step["knowledge_point_mastery"] = kp_mastery
+
+                        # 重新计算阶段掌握度 = 各知识点熟练度均值
+                        if kp_mastery:
+                            step["mastery"] = round(
+                                sum(kp_mastery.values()) / len(kp_mastery), 1
+                            )
+
+                    print(
+                        f"[KPMastery]  step{step_order}/{kp_name}: "
+                        f"{current} → {kp_mastery.get(kp_name, current)} "
+                        f"(上限120%，增{increment})"
+                    )
+                    break
+
+            if not step_found:
+                print(f"[KPMastery]  未找到 step_order={step_order}，跳过")
+                return self.get_by_id(path_id)
+
+            # 重新计算总体掌握度 = 有 KP 数据的阶段掌握度均值
+            steps_with_kp = [s for s in steps if s.get("knowledge_point_mastery")]
+            if steps_with_kp:
+                avg = sum(s.get("mastery", 0.0) for s in steps_with_kp) / len(steps_with_kp)
+                orm.overall_mastery = round(avg)
+
+            orm.set_steps(steps)
+            orm.updated_at = now
+            session.merge(orm)
+            session.commit()
+
+            return self.get_by_id(path_id)
+
     def delete(self, path_id: int) -> bool:
         """删除一条学习路径"""
         with get_session() as session:

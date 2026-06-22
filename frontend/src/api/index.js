@@ -9,13 +9,18 @@ const api = axios.create({
  * 发送聊天消息（走多智能体图，非流式）
  * @param {string} studentId
  * @param {string} message
- * @returns {Promise<{response: string, profile: object|null}>}
+ * @param {number|null} focusedStepOrder 当前聚焦的学习阶段（可选）
+ * @returns {Promise<object>}
  */
-export async function sendChatMessage(studentId, message) {
+export async function sendChatMessage(studentId, message, focusedStepOrder = null) {
+  const body = { student_id: studentId, message }
+  if (focusedStepOrder !== null) {
+    body.focused_step_order = focusedStepOrder
+  }
   const res = await fetch(`${api.defaults.baseURL}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ student_id: studentId, message }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
@@ -86,12 +91,43 @@ export async function updateMastery(pathId, stepOrder, mastery) {
   return res.json()
 }
 
+/**
+ * 更新知识点熟练度（增量累加）
+ * increment 建议值：easy=5, medium=8, hard=12
+ */
+export async function updateKpMastery(pathId, stepOrder, kpName, increment = 5) {
+  const res = await fetch(`/api/learning-path/${pathId}/kp-mastery`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ step_order: stepOrder, knowledge_point: kpName, increment }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 /** 批量更新掌握度 */
 export async function batchUpdateMastery(pathId, updates) {
   const res = await fetch(`/api/learning-path/${pathId}/mastery/batch`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/**
+ * 提交试卷作答结果，批量更新知识点熟练度
+ * @param {number} pathId
+ * @param {number} stepOrder
+ * @param {Array<{knowledge_point: string, is_correct: boolean, difficulty: string}>} results
+ * @returns {Promise<object>} 更新后的路径
+ */
+export async function submitExam(pathId, stepOrder, results) {
+  const res = await fetch(`/api/learning-path/${pathId}/exam-submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ step_order: stepOrder, results }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()

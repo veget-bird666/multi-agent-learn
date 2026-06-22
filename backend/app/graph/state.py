@@ -37,7 +37,9 @@ class LearningState(TypedDict):
     # 学习过程
     knowledge_point: Optional[str]
     learning_path: Optional[List[dict]]
+    current_path_id: Optional[int]     # 当前选中的学习路径 ID（存数据库的 id）
     current_step: int
+    focused_step_order: Optional[int]  # 用户聚焦的学习阶段（可空）
 
     # 生成资源
     generated_resources: Annotated[List[Resource], lambda a, b: a + b]
