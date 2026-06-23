@@ -68,9 +68,8 @@
           >
             {{ p.steps.length }}阶
           </span>
-          <!-- 删除按钮（hover 显示，选中时不显示） -->
+          <!-- 删除按钮（hover 显示） -->
           <button
-            v-if="selectedPathId !== p.id"
             @click.stop="confirmDeletePath(p)"
             class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:border-red-200 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs shadow-sm"
             title="删除此路径"
@@ -180,17 +179,76 @@
             <div
               v-if="expandedSteps[step.order]"
               class="mt-3 pt-3 border-t border-gray-100 space-y-2"
+              @click.stop
             >
               <p class="text-sm text-gray-600 leading-relaxed">{{ step.description }}</p>
-              <div v-if="step.knowledge_points && step.knowledge_points.length" class="flex flex-wrap gap-1.5">
-                <span
-                  v-for="(kp, ki) in step.knowledge_points"
-                  :key="ki"
-                  class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md"
+
+              <!-- 知识点区域 -->
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-gray-400 font-medium">知识点</span>
+                <button
+                  v-if="!isLocked && editingStepOrder !== step.order"
+                  @click.stop="startEdit(step)"
+                  class="text-[11px] text-blue-500 hover:text-blue-700 transition-colors"
                 >
-                  {{ kp }}
-                </span>
+                  ✎ 编辑
+                </button>
               </div>
+
+              <!-- 编辑模式 -->
+              <template v-if="editingStepOrder === step.order">
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="(kp, ki) in editingKps"
+                    :key="ki"
+                    class="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md"
+                  >
+                    {{ kp }}
+                    <button
+                      @click.stop="removeKp(ki)"
+                      class="text-blue-400 hover:text-red-500 transition-colors leading-none"
+                    >✕</button>
+                  </span>
+                </div>
+                <div v-if="editingKps.length === 0" class="text-xs text-gray-400">
+                  暂无知识点，请在下方添加
+                </div>
+                <div class="flex gap-2 mt-2">
+                  <input
+                    v-model="editingInput"
+                    @keydown.enter.prevent="addKp"
+                    placeholder="输入知识点，按 Enter 添加"
+                    class="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200"
+                  />
+                  <div class="flex gap-1.5">
+                    <button
+                      @click.stop="saveEdit"
+                      :disabled="saving"
+                      class="text-xs bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 disabled:opacity-40 transition-colors"
+                    >
+                      {{ saving ? '保存中...' : '保存' }}
+                    </button>
+                    <button
+                      @click.stop="cancelEdit"
+                      class="text-xs text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                    >取消</button>
+                  </div>
+                </div>
+              </template>
+
+              <!-- 只读模式 -->
+              <template v-else>
+                <div v-if="step.knowledge_points && step.knowledge_points.length" class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="(kp, ki) in step.knowledge_points"
+                    :key="ki"
+                    class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md"
+                  >
+                    {{ kp }}
+                  </span>
+                </div>
+                <p v-else class="text-xs text-gray-400">暂无知识点</p>
+              </template>
               <p v-if="step.duration_estimate" class="text-xs text-gray-400 mt-1">
                 ⏱ {{ step.duration_estimate }}
               </p>
@@ -263,7 +321,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { listLearningPaths, fetchLearningPath, setActivePath, deleteLearningPath, fetchResources } from '../api'
+import { listLearningPaths, fetchLearningPath, setActivePath, deleteLearningPath, fetchResources, updateStepKnowledgePoints } from '../api'
 import ExamModal from '../components/ExamModal.vue'
 
 const chatStore = useChatStore()
@@ -275,6 +333,12 @@ const expandedSteps = ref({})
 const deleteTarget = ref(null)
 const allResources = ref([])
 const examTaking = ref(null)
+
+// ── 知识点编辑状态 ──
+const editingStepOrder = ref(null)   // 正在编辑的阶段序号，null 表示未编辑
+const editingKps = ref([])           // 编辑中的知识点列表（工作副本）
+const editingInput = ref('')         // 新增知识点的输入框
+const saving = ref(false)
 
 /** 资源类型图标 */
 const typeIconMap = {
@@ -397,6 +461,86 @@ function difficultyLabel(d) {
 /** 展开/收起某阶段详情 */
 function toggleExpand(order) {
   expandedSteps.value[order] = !expandedSteps.value[order]
+}
+
+// ═══════════════════════════════════════════════════════════
+//  知识点编辑
+// ═══════════════════════════════════════════════════════════
+
+/** 路径是否已锁定（任一阶段掌握度 > 0 则不可编辑） */
+const isLocked = computed(() => {
+  if (!currentPath.value?.steps) return false
+  return currentPath.value.steps.some(s => (s.mastery || 0) > 0)
+})
+
+/** 进入编辑模式 */
+function startEdit(step) {
+  editingStepOrder.value = step.order
+  editingKps.value = [...(step.knowledge_points || [])]
+  editingInput.value = ''
+}
+
+/** 取消编辑 */
+function cancelEdit() {
+  editingStepOrder.value = null
+  editingKps.value = []
+  editingInput.value = ''
+}
+
+/** 添加知识点标签 */
+function addKp() {
+  const text = editingInput.value.trim()
+  if (!text) return
+  // 去重检查
+  if (editingKps.value.includes(text)) {
+    editingInput.value = ''
+    return
+  }
+  editingKps.value.push(text)
+  editingInput.value = ''
+}
+
+/** 删除知识点标签 */
+function removeKp(index) {
+  editingKps.value.splice(index, 1)
+}
+
+/** 保存知识点编辑 */
+async function saveEdit() {
+  if (saving.value) return
+  if (editingKps.value.length === 0) {
+    alert('至少需要保留一个知识点')
+    return
+  }
+
+  saving.value = true
+  try {
+    const updated = await updateStepKnowledgePoints(
+      selectedPathId.value,
+      editingStepOrder.value,
+      editingKps.value,
+    )
+    // 更新当前路径数据
+    currentPath.value = updated
+    // 同步更新 pathList 中的对应项
+    const idx = pathList.value.findIndex(p => p.id === selectedPathId.value)
+    if (idx !== -1) {
+      pathList.value[idx] = {
+        ...pathList.value[idx],
+        steps: updated.steps,
+        overall_mastery: updated.overall_mastery,
+      }
+    }
+    cancelEdit()
+  } catch (e) {
+    if (e.message.includes('已开始学习') || e.message.includes('403')) {
+      alert('该路径已开始学习，知识点已被锁定，无法修改')
+    } else {
+      alert('保存失败：' + e.message)
+    }
+  } finally {
+    saving.value = false
+  }
 }
 
 /** 切换查看的路径 */

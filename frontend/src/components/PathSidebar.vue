@@ -13,6 +13,24 @@
         </button>
       </div>
       <p class="text-[11px] text-gray-400 mt-0.5">选择一个阶段聚焦，Agent 将重点围绕它生成内容</p>
+
+      <!-- 路径上下文开关 -->
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100/60">
+        <span class="text-[11px] text-gray-500">关联学习路径</span>
+        <button
+          @click="chatStore.togglePathContext()"
+          class="relative w-9 h-5 rounded-full transition-colors duration-200"
+          :class="chatStore.includePathContext ? 'bg-blue-500' : 'bg-gray-300'"
+        >
+          <span
+            class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200"
+            :class="chatStore.includePathContext ? 'translate-x-4' : 'translate-x-0'"
+          ></span>
+        </button>
+      </div>
+      <p class="text-[10px] text-gray-300 mt-1">
+        {{ chatStore.includePathContext ? '开启后模型可查看路径上下文' : '关闭后模型不可见学习路径' }}
+      </p>
     </div>
 
     <!-- 路径列表（无路径时） -->
@@ -115,7 +133,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { listLearningPaths, fetchActiveLearningPath } from '../api'
+import { listLearningPaths, fetchActiveLearningPath, setActivePath } from '../api'
 
 const chatStore = useChatStore()
 const loading = ref(true)
@@ -169,6 +187,12 @@ async function onPathChange() {
     chatStore.currentPathId = path.id
     // 切换路径时取消聚焦
     chatStore.clearFocus()
+    // 同步到后端 DB，确保 `/chat` 接口能查到正确路径
+    try {
+      await setActivePath(chatStore.studentId, path.id)
+    } catch (e) {
+      console.error('激活路径失败:', e)
+    }
   }
 }
 

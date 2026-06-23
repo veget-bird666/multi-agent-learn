@@ -25,10 +25,28 @@ async def chat(request: ChatRequest):
     非流式运行整个 LangGraph 图，返回最终回复
     """
     try:
-        # ── 加载已有的学习路径上下文 ──
-        active_path = learning_path_service.get_active(request.student_id)
-        current_path_id = active_path["id"] if active_path else None
-        learning_path_data = active_path["steps"] if active_path else None
+        # ── 加载学习路径上下文（开关关闭时跳过） ──
+        current_path_id = request.current_path_id
+        learning_path_data = None
+
+        if request.include_path_context:
+            if current_path_id is not None:
+                path = learning_path_service.get_by_id(current_path_id)
+                if path:
+                    learning_path_data = path.get("steps")
+                else:
+                    current_path_id = None  # 路径不存在则回退
+
+            # 兜底：查 DB active 路径
+            if current_path_id is None:
+                active_path = learning_path_service.get_active(request.student_id)
+                current_path_id = active_path["id"] if active_path else None
+                learning_path_data = active_path["steps"] if active_path else None
+        else:
+            # 开关关闭 → 不传任何路径上下文
+            current_path_id = None
+            learning_path_data = None
+            request.focused_step_order = None
 
         # 构建完整的初始 state
         initial_state = {
@@ -256,9 +274,43 @@ async def batch_update_mastery(path_id: int, updates: list[dict]):
     return result
 
 
+@router.put("/learning-path/{path_id}/knowledge-points")
+async def update_knowledge_points(path_id: int, body: dict):
+    """
+    更新某个阶段的知识点列表。
+
+    锁定规则：路径中任一阶段掌握度 > 0 时禁止编辑。
+    只能修改知识点标签，不能修改阶段主结构。
+    body: {"step_order": 1, "knowledge_points": ["指针概念", "指针运算"]}
+    """
+    step_order = body.get("step_order")
+    knowledge_points = body.get("knowledge_points", [])
+
+    if step_order is None:
+        raise HTTPException(status_code=400, detail="需要提供 step_order")
+    if not knowledge_points:
+        raise HTTPException(status_code=400, detail="知识列表不能为空")
+    if len(knowledge_points) > 20:
+        raise HTTPException(status_code=400, detail="单阶段知识点不能超过 20 个")
+
+    result = learning_path_service.update_step_knowledge_points(
+        path_id, step_order, knowledge_points
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="未找到该学习路径")
+
+    if result.get("_locked"):
+        raise HTTPException(
+            status_code=403,
+            detail="该学习路径已开始学习（掌握度已上升），无法修改知识点",
+        )
+
+    return result
+
+
 @router.delete("/learning-path/{path_id}")
 async def delete_learning_path(path_id: int):
-    """删除一条学习路径"""
+    """删除一条学习路径（同时删除关联的所有资源）"""
     ok = learning_path_service.delete(path_id)
     if not ok:
         raise HTTPException(status_code=404, detail="未找到该学习路径")

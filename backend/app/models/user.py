@@ -42,4 +42,6 @@ class ChatRequest(BaseModel):
     student_id: str
     message: str
     session_id: Optional[str] = None
-    focused_step_order: Optional[int] = None  # 用户聚焦的学习阶段
+    focused_step_order: Optional[int] = None   # 用户聚焦的学习阶段
+    current_path_id: Optional[int] = None      # 前端当前选中的路径 ID
+    include_path_context: bool = True           # 是否将学习路径上下文发给模型

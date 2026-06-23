@@ -11,6 +11,7 @@ export const useChatStore = defineStore('chat', () => {
   const currentPathId = ref(null)      // 当前选中的路径 ID
   const focusedStepOrder = ref(null)   // 聚焦的学习阶段序号
   const pathList = ref([])             // 所有路径的摘要列表
+  const includePathContext = ref(true) // 是否将路径上下文发给模型
 
   function addMessage(role, content, resources = []) {
     messages.value.push({ role, content, resources })
@@ -27,6 +28,15 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = []
   }
 
+  /** 切换路径上下文开关 */
+  function togglePathContext() {
+    includePathContext.value = !includePathContext.value
+    if (!includePathContext.value) {
+      // 关闭开关时自动取消聚焦
+      focusedStepOrder.value = null
+    }
+  }
+
   /** 发送消息，携带当前路径上下文 */
   async function sendMessage(text) {
     if (!text.trim() || isStreaming.value) return null
@@ -39,6 +49,8 @@ export const useChatStore = defineStore('chat', () => {
         studentId.value,
         text,
         focusedStepOrder.value,
+        currentPathId.value,
+        includePathContext.value,
       )
       addMessage('assistant', data.response)
 
@@ -73,10 +85,12 @@ export const useChatStore = defineStore('chat', () => {
     currentPathId,
     focusedStepOrder,
     pathList,
+    includePathContext,
     addMessage,
     appendToLastMessage,
     clearMessages,
     sendMessage,
+    togglePathContext,
     focusStep,
     clearFocus,
   }

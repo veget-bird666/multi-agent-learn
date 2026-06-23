@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional
 
 from app.database.base import get_session
-from app.database.models import LearningPathORM
+from app.database.models import LearningPathORM, ResourceORM
 from app.models.resources import LearningPathStep
 
 
@@ -206,10 +206,9 @@ class LearningPathService:
                 print(f"[KPMastery]  未找到 step_order={step_order}，跳过")
                 return self.get_by_id(path_id)
 
-            # 重新计算总体掌握度 = 有 KP 数据的阶段掌握度均值
-            steps_with_kp = [s for s in steps if s.get("knowledge_point_mastery")]
-            if steps_with_kp:
-                avg = sum(s.get("mastery", 0.0) for s in steps_with_kp) / len(steps_with_kp)
+            # 重新计算总体掌握度 = 所有阶段掌握度的均值（未学阶段 mastery=0 参与计算）
+            if steps:
+                avg = sum(s.get("mastery", 0.0) for s in steps) / len(steps)
                 orm.overall_mastery = round(avg)
 
             orm.set_steps(steps)
@@ -219,14 +218,113 @@ class LearningPathService:
 
             return self.get_by_id(path_id)
 
+    def update_step_knowledge_points(
+        self, path_id: int, step_order: int, knowledge_points: list[str]
+    ) -> Optional[dict]:
+        """
+        更新某个阶段的知识点列表。
+
+        锁定规则：路径中任一阶段 mastery > 0 时禁止编辑（已开始学习）。
+        只能修改知识点标签，不能修改阶段名称/顺序/描述等主结构。
+
+        Args:
+            path_id: 学习路径 ID
+            step_order: 阶段序号
+            knowledge_points: 新的知识点列表
+
+        Returns:
+            更新后的路径 dict，或 None（路径不存在时）
+            返回 dict 中带 _locked 字段表示路径已被锁定不可编辑
+        """
+        if not knowledge_points:
+            return None
+
+        with get_session() as session:
+            orm = session.query(LearningPathORM).get(path_id)
+            if not orm:
+                return None
+
+            steps = orm.get_steps()
+
+            # ── 锁定检查：任一阶段有掌握度即锁定 ──
+            is_locked = any(
+                s.get("mastery", 0) > 0 for s in steps
+            )
+            if is_locked:
+                result = self.get_by_id(path_id)
+                if result:
+                    result["_locked"] = True
+                return result
+
+            # ── 找到目标阶段并更新知识点 ──
+            step_found = False
+            for step in steps:
+                if step.get("order") == step_order:
+                    step_found = True
+                    # 保存旧知识点列表
+                    old_kps = set(step.get("knowledge_points", []))
+
+                    # 更新知识点列表
+                    step["knowledge_points"] = knowledge_points
+
+                    # ── 清理已删除知识点的熟练度数据 ──
+                    kp_mastery: dict = step.get("knowledge_point_mastery") or {}
+                    new_kp_set = set(knowledge_points)
+                    removed_kps = old_kps - new_kp_set
+                    for removed in removed_kps:
+                        kp_mastery.pop(removed, None)
+
+                    # 如果删除了知识点，重新计算阶段掌握度
+                    if kp_mastery and removed_kps:
+                        step["mastery"] = round(
+                            sum(kp_mastery.values()) / len(kp_mastery), 1
+                        )
+                    elif not kp_mastery:
+                        step["mastery"] = 0.0
+
+                    step["knowledge_point_mastery"] = kp_mastery
+                    print(
+                        f"[KPMastery]  step{step_order} 知识点已更新: "
+                        f"{len(old_kps)} → {len(new_kp_set)} 个"
+                    )
+                    if removed_kps:
+                        print(f"[KPMastery]  已清理熟练度数据: {removed_kps}")
+                    break
+
+            if not step_found:
+                print(f"[KPMastery]  未找到 step_order={step_order}，跳过")
+                return self.get_by_id(path_id)
+
+            # 重新计算总体掌握度 = 所有阶段掌握度的均值（未学阶段 mastery=0 参与计算）
+            if steps:
+                avg = sum(s.get("mastery", 0.0) for s in steps) / len(steps)
+                orm.overall_mastery = round(avg)
+
+            orm.set_steps(steps)
+            orm.updated_at = datetime.now().isoformat(timespec="seconds")
+            session.merge(orm)
+            session.commit()
+
+            return self.get_by_id(path_id)
+
     def delete(self, path_id: int) -> bool:
-        """删除一条学习路径"""
+        """删除一条学习路径（同时删除关联的所有资源）"""
         with get_session() as session:
             orm = session.query(LearningPathORM).get(path_id)
             if not orm:
                 return False
+
+            # 级联删除关联的学习资源
+            deleted_res = (
+                session.query(ResourceORM)
+                .filter_by(path_id=path_id)
+                .delete()
+            )
+            print(f"[Delete]  已删除路径#{path_id} 关联的 {deleted_res} 条资源")
+
             session.delete(orm)
             session.commit()
+            print(f"[Delete]  路径#{path_id} 已删除")
             return True
 
     # ── 内部方法 ──────────────────────────────────

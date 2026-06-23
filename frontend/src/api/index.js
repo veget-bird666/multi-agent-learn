@@ -10,12 +10,17 @@ const api = axios.create({
  * @param {string} studentId
  * @param {string} message
  * @param {number|null} focusedStepOrder 当前聚焦的学习阶段（可选）
+ * @param {number|null} currentPathId 当前选中的路径 ID（可选）
+ * @param {boolean} includePathContext 是否将路径上下文发给模型
  * @returns {Promise<object>}
  */
-export async function sendChatMessage(studentId, message, focusedStepOrder = null) {
-  const body = { student_id: studentId, message }
-  if (focusedStepOrder !== null) {
+export async function sendChatMessage(studentId, message, focusedStepOrder = null, currentPathId = null, includePathContext = true) {
+  const body = { student_id: studentId, message, include_path_context: includePathContext }
+  if (focusedStepOrder !== null && includePathContext) {
     body.focused_step_order = focusedStepOrder
+  }
+  if (currentPathId !== null && includePathContext) {
+    body.current_path_id = currentPathId
   }
   const res = await fetch(`${api.defaults.baseURL}/chat`, {
     method: 'POST',
@@ -139,6 +144,26 @@ export async function deleteLearningPath(pathId) {
     method: 'DELETE',
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/**
+ * 更新某个阶段的知识点列表
+ * @param {number} pathId
+ * @param {number} stepOrder
+ * @param {string[]} knowledgePoints 新的知识点列表
+ * @returns {Promise<object>}
+ */
+export async function updateStepKnowledgePoints(pathId, stepOrder, knowledgePoints) {
+  const res = await fetch(`/api/learning-path/${pathId}/knowledge-points`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ step_order: stepOrder, knowledge_points: knowledgePoints }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || `HTTP ${res.status}`)
+  }
   return res.json()
 }
 
