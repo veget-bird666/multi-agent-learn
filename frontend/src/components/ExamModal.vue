@@ -1,18 +1,18 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" @click.self="$emit('close')">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="bg-dark-surface rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden border border-dark-border">
         <!-- 头部 -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-dark-border flex-shrink-0">
           <div>
-            <h3 class="text-base font-semibold text-gray-900">{{ examTitle }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <h3 class="text-base font-semibold text-gray-200">{{ examTitle }}</h3>
+            <p class="text-xs text-gray-500 mt-0.5">
               {{ questions.length }} 道题
               <span v-if="!submitted"> · 点击提交后自动批改并更新熟练度</span>
               <span v-else> · 答对 {{ correctCount }}/{{ gradedCount }} 题</span>
             </p>
           </div>
-          <button @click="$emit('close')" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-sm">
+          <button @click="$emit('close')" class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-dark-surface-hover rounded-lg transition-colors text-sm">
             ✕
           </button>
         </div>
@@ -22,23 +22,23 @@
           <div
             v-for="(q, i) in questions"
             :key="q.id"
-            class="pb-5 border-b border-gray-50 last:border-b-0"
+            class="pb-5 border-b border-dark-border/50 last:border-b-0"
             :class="{ 'opacity-60': submitted && !isCorrect(q) }"
           >
             <!-- 题目标题 -->
             <div class="flex items-start gap-2 mb-3">
-              <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ i + 1 }}</span>
+              <span class="w-6 h-6 rounded-full bg-dark-surface-alt text-gray-500 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{{ i + 1 }}</span>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="text-xs px-1.5 py-0.5 rounded-full font-mono" :class="difficultyBadge(q.difficulty)">
                     {{ difficultyLabel(q.difficulty) }}
                   </span>
                   <span class="text-xs text-gray-400">{{ typeLabel(q.type) }}</span>
-                  <span v-if="q.knowledge_point" class="text-xs text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">
+                  <span v-if="q.knowledge_point" class="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
                     {{ q.knowledge_point }}
                   </span>
                 </div>
-                <p class="text-sm text-gray-800 leading-relaxed" v-html="q.question"></p>
+                <p class="text-sm text-gray-300 leading-relaxed" v-html="q.question"></p>
               </div>
             </div>
 
@@ -59,7 +59,7 @@
                   class="mt-0.5 accent-blue-600"
                   @change="onAnswerChange"
                 />
-                <span class="text-sm text-gray-700">{{ opt }}</span>
+                <span class="text-sm text-gray-400">{{ opt }}</span>
               </label>
               <!-- 提交后显示正确答案 -->
               <div v-if="submitted && q.answer" class="mt-2 text-xs" :class="isCorrect(q) ? 'text-green-600' : 'text-red-500'">
@@ -74,7 +74,7 @@
                 v-model="answers[q.id]"
                 :disabled="submitted"
                 placeholder="输入答案..."
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-300 disabled:bg-gray-50 disabled:text-gray-500"
+                class="w-full px-4 py-2.5 border-2 border-dark-border rounded-xl text-sm bg-dark-surface focus:outline-none focus:border-blue-500 disabled:bg-dark-surface-alt disabled:text-gray-500 text-gray-300 placeholder-gray-600"
               />
               <div v-if="submitted" class="mt-2 space-y-1">
                 <div class="text-xs" :class="isCorrect(q) ? 'text-green-600' : 'text-red-500'">
@@ -91,7 +91,7 @@
                 :disabled="submitted"
                 placeholder="输入你的回答..."
                 rows="3"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-300 disabled:bg-gray-50 disabled:text-gray-500 resize-none"
+                class="w-full px-4 py-2.5 border-2 border-dark-border rounded-xl text-sm bg-dark-surface focus:outline-none focus:border-blue-500 disabled:bg-dark-surface-alt disabled:text-gray-500 text-gray-300 placeholder-gray-600 resize-none"
               ></textarea>
               <div v-if="submitted" class="mt-2 space-y-1">
                 <div class="flex items-center gap-2">
@@ -116,10 +116,10 @@
         </div>
 
         <!-- 底部：提交/结果 -->
-        <div class="flex-shrink-0 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+        <div class="flex-shrink-0 px-6 py-4 border-t border-dark-border bg-dark-surface-alt/50">
           <!-- 未提交：提交按钮 -->
           <div v-if="!submitted" class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">{{ answeredCount }}/{{ questions.length }} 题已作答</span>
+            <span class="text-xs text-gray-500">{{ answeredCount }}/{{ questions.length }} 题已作答</span>
             <button
               @click="submit"
               :disabled="submitting"
@@ -134,13 +134,13 @@
               <span class="text-sm font-medium" :class="correctRate >= 70 ? 'text-green-600' : correctRate >= 30 ? 'text-yellow-600' : 'text-red-500'">
                 {{ correctCount }}/{{ gradedCount }} 正确 ({{ Math.round(correctRate) }}%)
               </span>
-              <span v-if="masteryUpdated" class="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+              <span v-if="masteryUpdated" class="text-xs text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-full">
                 🎯 熟练度已更新
               </span>
             </div>
             <button
               @click="$emit('close')"
-              class="bg-gray-200 text-gray-600 px-5 py-2 rounded-xl text-sm hover:bg-gray-300 transition-colors"
+              class="bg-dark-surface-hover text-gray-400 px-5 py-2 rounded-xl text-sm hover:bg-dark-border transition-colors"
             >
               关闭
             </button>
@@ -205,11 +205,11 @@ function difficultyLabel(d) {
 
 function difficultyBadge(d) {
   const map = {
-    easy: 'bg-green-50 text-green-600',
-    medium: 'bg-yellow-50 text-yellow-600',
-    hard: 'bg-red-50 text-red-600',
+    easy: 'bg-green-500/10 text-green-400',
+    medium: 'bg-yellow-500/10 text-yellow-400',
+    hard: 'bg-red-500/10 text-red-400',
   }
-  return map[d] || 'bg-gray-100 text-gray-500'
+  return map[d] || 'bg-dark-surface-alt text-gray-500'
 }
 
 /** 已回答计数 */
@@ -228,18 +228,18 @@ function optionClass(q, opt, oi) {
 
   if (!submitted.value) {
     return selected
-      ? 'border-blue-300 bg-blue-50/50'
-      : 'border-gray-100 hover:border-gray-200'
+      ? 'border-blue-500/40 bg-blue-500/10'
+      : 'border-dark-border hover:border-dark-border-light'
   }
 
   // 提交后：正确选项标绿，错误标红
   const isCorrectOpt = letter === q.answer
   const isWrongSelection = selected && !isCorrectOpt
 
-  if (isWrongSelection) return 'border-red-300 bg-red-50'
-  if (isCorrectOpt) return 'border-green-300 bg-green-50'
-  if (selected) return 'border-green-300 bg-green-50'
-  return 'border-gray-100 opacity-50'
+  if (isWrongSelection) return 'border-red-400/30 bg-red-500/10'
+  if (isCorrectOpt) return 'border-green-400/40 bg-green-500/10'
+  if (selected) return 'border-green-400/40 bg-green-500/10'
+  return 'border-dark-border opacity-50'
 }
 
 /** 能否自动批改 */
@@ -326,5 +326,5 @@ onMounted(parseExam)
 <style scoped>
 .scrollbar-thin::-webkit-scrollbar { width: 4px; }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #3E3E4E; border-radius: 4px; }
 </style>

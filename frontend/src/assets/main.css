@@ -4,13 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-dark-bg text-gray-300 antialiased;
     font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
   }
 }
 
 @layer components {
-  /* 自定义滚动条 */
+  /* 自定义滚动条 — 深色 */
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
@@ -18,27 +18,27 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    @apply bg-dark-border rounded-full;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    @apply bg-dark-border-light;
   }
 
   /* 打字动画点 */
   .typing-dot {
-    @apply w-2 h-2 bg-gray-400 rounded-full inline-block;
+    @apply w-2 h-2 bg-gray-500 rounded-full inline-block;
     animation: pulseDot 1.4s infinite ease-in-out;
   }
   .typing-dot:nth-child(1) { animation-delay: 0s; }
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
-  /* Markdown 内容样式覆盖 */
+  /* Markdown 内容样式覆盖 — 深色 */
   .chat-markdown h1,
   .chat-markdown h2,
   .chat-markdown h3,
   .chat-markdown h4 {
-    @apply font-semibold text-gray-900 mt-4 mb-2;
+    @apply font-semibold text-gray-100 mt-4 mb-2;
   }
   .chat-markdown h1 { @apply text-lg; }
   .chat-markdown h2 { @apply text-base; }
@@ -49,34 +49,34 @@
   .chat-markdown ol { @apply list-decimal; }
   .chat-markdown li { @apply mb-1; }
   .chat-markdown code {
-    @apply bg-gray-100 text-pink-600 px-1.5 py-0.5 rounded text-xs font-mono;
+    @apply bg-dark-surface text-pink-400 px-1.5 py-0.5 rounded text-xs font-mono;
   }
   .chat-markdown pre {
-    @apply bg-gray-900 text-gray-100 rounded-lg p-4 mb-3 overflow-x-auto text-xs;
+    @apply bg-black/40 text-gray-100 rounded-lg p-4 mb-3 overflow-x-auto text-xs border border-dark-border;
   }
   .chat-markdown pre code {
     @apply bg-transparent text-gray-100 p-0;
   }
   .chat-markdown blockquote {
-    @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-2;
+    @apply border-l-4 border-dark-border pl-4 italic text-gray-500 mb-2;
   }
   .chat-markdown table {
     @apply w-full border-collapse mb-3 text-xs;
   }
   .chat-markdown th, .chat-markdown td {
-    @apply border border-gray-200 px-3 py-2 text-left;
+    @apply border border-dark-border px-3 py-2 text-left;
   }
   .chat-markdown th {
-    @apply bg-gray-50 font-semibold;
+    @apply bg-dark-surface-alt font-semibold text-gray-200;
   }
   .chat-markdown hr {
-    @apply my-4 border-gray-200;
+    @apply my-4 border-dark-border;
   }
   .chat-markdown strong {
-    @apply font-semibold;
+    @apply font-semibold text-gray-100;
   }
   .chat-markdown a {
-    @apply text-blue-600 underline hover:text-blue-800;
+    @apply text-blue-400 underline hover:text-blue-300;
   }
 }
 

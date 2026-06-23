@@ -50,7 +50,8 @@
       "Bash(python -c \":*)",
       "Bash(rm:*)",
       "Bash(cd:*)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(npm run:*)"
     ]
   }
 }

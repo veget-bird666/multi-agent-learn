@@ -1,43 +1,43 @@
 <template>
-  <aside class="w-[280px] flex-shrink-0 h-full bg-white/60 backdrop-blur-sm border-r border-gray-200/60 flex flex-col overflow-hidden">
+  <aside class="w-[280px] flex-shrink-0 h-full bg-dark-surface/60 backdrop-blur-sm border-r border-dark-border/60 flex flex-col overflow-hidden">
     <!-- 标题 -->
-    <div class="px-5 pt-5 pb-3 border-b border-gray-100/80">
+    <div class="px-5 pt-5 pb-3 border-b border-dark-border/60">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-semibold text-gray-700">学习路径</h3>
+        <h3 class="text-sm font-semibold text-gray-300">学习路径</h3>
         <button
           @click="refresh"
           :disabled="loading"
-          class="text-xs text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-40"
+          class="text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-40"
         >
           {{ loading ? '...' : '↻' }}
         </button>
       </div>
-      <p class="text-[11px] text-gray-400 mt-0.5">选择一个阶段聚焦，Agent 将重点围绕它生成内容</p>
+      <p class="text-[11px] text-gray-500 mt-0.5">选择一个阶段聚焦，Agent 将重点围绕它生成内容</p>
 
       <!-- 路径上下文开关 -->
-      <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100/60">
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-dark-border/60">
         <span class="text-[11px] text-gray-500">关联学习路径</span>
         <button
           @click="chatStore.togglePathContext()"
           class="relative w-9 h-5 rounded-full transition-colors duration-200"
-          :class="chatStore.includePathContext ? 'bg-blue-500' : 'bg-gray-300'"
+          :class="chatStore.includePathContext ? 'bg-blue-500' : 'bg-dark-border-light'"
         >
           <span
-            class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200"
+            class="absolute top-0.5 left-0.5 w-4 h-4 bg-gray-200 rounded-full shadow-sm transition-transform duration-200"
             :class="chatStore.includePathContext ? 'translate-x-4' : 'translate-x-0'"
           ></span>
         </button>
       </div>
-      <p class="text-[10px] text-gray-300 mt-1">
+      <p class="text-[10px] text-gray-600 mt-1">
         {{ chatStore.includePathContext ? '开启后模型可查看路径上下文' : '关闭后模型不可见学习路径' }}
       </p>
     </div>
 
     <!-- 路径列表（无路径时） -->
     <div v-if="!loading && paths.length === 0" class="flex-1 flex flex-col items-center justify-center px-5 text-center">
-      <div class="text-2xl mb-2 opacity-30">🗺️</div>
-      <p class="text-xs text-gray-400">暂无学习路径</p>
-      <p class="text-[11px] text-gray-300 mt-1">开始对话后自动生成</p>
+      <div class="text-2xl mb-2 opacity-20">🗺️</div>
+      <p class="text-xs text-gray-500">暂无学习路径</p>
+      <p class="text-[11px] text-gray-600 mt-1">开始对话后自动生成</p>
     </div>
 
     <!-- 加载中 -->
@@ -52,7 +52,7 @@
         <select
           v-model="selectedPathId"
           @change="onPathChange"
-          class="path-select w-full text-xs bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200 appearance-none cursor-pointer"
+          class="path-select w-full text-xs bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 appearance-none cursor-pointer"
         >
           <option v-for="p in paths" :key="p.id" :value="p.id">{{ p.title }}</option>
         </select>
@@ -95,25 +95,25 @@
           </div>
 
           <!-- 阶段名称 -->
-          <h4 class="text-xs font-semibold text-gray-800 mb-1.5 leading-snug">{{ step.stage_name }}</h4>
+          <h4 class="text-xs font-semibold text-gray-300 mb-1.5 leading-snug">{{ step.stage_name }}</h4>
 
           <!-- 知识点标签 -->
           <div v-if="step.knowledge_points && step.knowledge_points.length" class="flex flex-wrap gap-1 mb-2">
             <span
               v-for="(kp, ki) in step.knowledge_points.slice(0, 3)"
               :key="ki"
-              class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded"
+              class="text-[10px] bg-dark-surface-alt text-gray-500 px-1.5 py-0.5 rounded"
             >
               {{ kp.length > 6 ? kp.slice(0, 6) + '…' : kp }}
             </span>
-            <span v-if="step.knowledge_points.length > 3" class="text-[10px] text-gray-400">
+            <span v-if="step.knowledge_points.length > 3" class="text-[10px] text-gray-500">
               +{{ step.knowledge_points.length - 3 }}
             </span>
           </div>
 
           <!-- 掌握度条 -->
           <div class="flex items-center gap-2">
-            <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+            <div class="flex-1 bg-dark-surface-alt rounded-full h-1.5">
               <div
                 class="h-1.5 rounded-full transition-all duration-500"
                 :class="masteryBarColor(step.mastery)"
@@ -218,8 +218,8 @@ function stepCardClass(step) {
   const isFocused = focusedStep.value === step.order
   const m = step.mastery || 0
   const base = isFocused
-    ? 'border-blue-400 bg-blue-50/60 shadow-sm'
-    : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+    ? 'border-blue-500/40 bg-blue-500/10 shadow-sm'
+    : 'border-dark-border bg-dark-surface hover:border-dark-border-light hover:shadow-sm'
   return base
 }
 
@@ -239,9 +239,9 @@ function masteryBarColor(mastery) {
 
 function masteryTextColor(mastery) {
   const m = mastery || 0
-  if (m >= 80) return 'text-green-600'
-  if (m >= 30) return 'text-yellow-600'
-  return 'text-red-500'
+  if (m >= 80) return 'text-green-400'
+  if (m >= 30) return 'text-yellow-400'
+  return 'text-red-400'
 }
 
 function stepStatusLabel(mastery) {
@@ -253,9 +253,9 @@ function stepStatusLabel(mastery) {
 
 function stepStatusText(mastery) {
   const m = mastery || 0
-  if (m >= 80) return 'text-green-600'
-  if (m > 0) return 'text-yellow-600'
-  return 'text-gray-400'
+  if (m >= 80) return 'text-green-400'
+  if (m > 0) return 'text-yellow-400'
+  return 'text-gray-500'
 }
 
 onMounted(refresh)

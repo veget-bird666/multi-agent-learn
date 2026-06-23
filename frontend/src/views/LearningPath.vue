@@ -3,8 +3,8 @@
     <!-- 顶部导航 -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-xl font-bold text-gray-900">学习路径</h2>
-        <p class="text-sm text-gray-400 mt-0.5">
+        <h2 class="text-xl font-bold text-gray-100">学习路径</h2>
+        <p class="text-sm text-gray-500 mt-0.5">
           你可以有多条学习路径，选择一条开始学习
         </p>
       </div>
@@ -12,13 +12,13 @@
         <button
           @click="loadAll"
           :disabled="loading"
-          class="text-xs text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+          class="text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
         >
           {{ loading ? '加载中...' : '刷新' }}
         </button>
         <router-link
           to="/chat"
-          class="text-xs text-gray-500 hover:text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg transition-colors"
+          class="text-xs text-gray-500 hover:text-gray-300 bg-dark-surface-hover px-3 py-1.5 rounded-lg transition-colors"
         >
           ← 返回对话
         </router-link>
@@ -34,10 +34,10 @@
     </div>
 
     <!-- 空态 -->
-    <div v-else-if="pathList.length === 0" class="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+    <div v-else-if="pathList.length === 0" class="bg-dark-surface rounded-2xl border border-dark-border p-16 text-center">
       <div class="text-5xl mb-4">🗺️</div>
-      <h3 class="text-lg font-semibold text-gray-700 mb-2">暂无学习路径</h3>
-      <p class="text-sm text-gray-400 mb-6">开始对话学习后，系统将自动为你规划多条个性化的学习路径</p>
+      <h3 class="text-lg font-semibold text-gray-300 mb-2">暂无学习路径</h3>
+      <p class="text-sm text-gray-500 mb-6">开始对话学习后，系统将自动为你规划多条个性化的学习路径</p>
       <router-link
         to="/chat"
         class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:shadow-lg transition-all"
@@ -51,7 +51,7 @@
     <template v-else>
       <!-- 路径选择器 -->
       <div class="flex flex-wrap items-center gap-2 mb-6">
-        <span class="text-xs text-gray-400 mr-1">我的路径：</span>
+        <span class="text-xs text-gray-500 mr-1">我的路径：</span>
         <button
           v-for="p in pathList"
           :key="p.id"
@@ -59,19 +59,19 @@
           class="group relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
           :class="selectedPathId === p.id
             ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-            : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600'"
+            : 'bg-dark-surface border border-dark-border text-gray-400 hover:border-blue-500/40 hover:text-blue-400'"
         >
           <span class="truncate max-w-[180px]">{{ p.title }}</span>
           <span
             class="text-xs px-1.5 py-0.5 rounded-full"
-            :class="selectedPathId === p.id ? 'bg-white/20' : 'bg-gray-100 text-gray-400'"
+            :class="selectedPathId === p.id ? 'bg-white/20' : 'bg-dark-surface-alt text-gray-500'"
           >
             {{ p.steps.length }}阶
           </span>
           <!-- 删除按钮（hover 显示） -->
           <button
             @click.stop="confirmDeletePath(p)"
-            class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:border-red-200 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs shadow-sm"
+            class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-dark-surface border border-dark-border rounded-full text-gray-500 hover:text-red-400 hover:border-red-500/30 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs shadow-sm"
             title="删除此路径"
           >
             ✕
@@ -83,31 +83,31 @@
       <template v-if="currentPath">
         <!-- 掌握度一览 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ currentPath.steps.length }}</div>
-            <div class="text-xs text-gray-400 mt-1">总阶段数</div>
+          <div class="bg-dark-surface rounded-xl border border-dark-border p-4 text-center">
+            <div class="text-2xl font-bold text-gray-100">{{ currentPath.steps.length }}</div>
+            <div class="text-xs text-gray-500 mt-1">总阶段数</div>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
+          <div class="bg-dark-surface rounded-xl border border-dark-border p-4 text-center">
             <div class="text-2xl font-bold" :class="overallColor">{{ currentPath.overall_mastery }}%</div>
-            <div class="text-xs text-gray-400 mt-1">总体掌握度</div>
+            <div class="text-xs text-gray-500 mt-1">总体掌握度</div>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div class="text-2xl font-bold text-green-600">{{ completedCount }}</div>
-            <div class="text-xs text-gray-400 mt-1">已完成</div>
+          <div class="bg-dark-surface rounded-xl border border-dark-border p-4 text-center">
+            <div class="text-2xl font-bold text-green-400">{{ completedCount }}</div>
+            <div class="text-xs text-gray-500 mt-1">已完成</div>
           </div>
-          <div class="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div class="text-2xl font-bold text-blue-600">{{ inProgressCount }}</div>
-            <div class="text-xs text-gray-400 mt-1">进行中</div>
+          <div class="bg-dark-surface rounded-xl border border-dark-border p-4 text-center">
+            <div class="text-2xl font-bold text-blue-400">{{ inProgressCount }}</div>
+            <div class="text-xs text-gray-500 mt-1">进行中</div>
           </div>
         </div>
 
         <!-- 进度条 -->
-        <div class="bg-white rounded-xl border border-gray-100 p-4 mb-6">
+        <div class="bg-dark-surface rounded-xl border border-dark-border p-4 mb-6">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">学习进度</span>
-            <span class="text-xs text-gray-400">{{ completedCount }} / {{ currentPath.steps.length }} 阶段</span>
+            <span class="text-sm font-medium text-gray-300">学习进度</span>
+            <span class="text-xs text-gray-500">{{ completedCount }} / {{ currentPath.steps.length }} 阶段</span>
           </div>
-          <div class="w-full bg-gray-100 rounded-full h-3">
+          <div class="w-full bg-dark-surface-alt rounded-full h-3">
             <div
               class="h-3 rounded-full transition-all duration-700"
               :class="progressBarColor"
@@ -153,17 +153,17 @@
                   </span>
                 </div>
               </div>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-mono">
+              <span class="text-xs px-2 py-0.5 rounded-full bg-dark-surface-alt text-gray-500 font-mono">
                 {{ difficultyLabel(step.difficulty) }}
               </span>
             </div>
 
             <!-- 阶段名称 -->
-            <h4 class="font-semibold text-gray-900 mb-2 leading-snug">{{ step.stage_name }}</h4>
+            <h4 class="font-semibold text-gray-200 mb-2 leading-snug">{{ step.stage_name }}</h4>
 
             <!-- 进度条（小） -->
             <div class="flex items-center gap-2 mb-2">
-              <div class="flex-1 bg-gray-100 rounded-full h-1.5">
+              <div class="flex-1 bg-dark-surface-alt rounded-full h-1.5">
                 <div
                   class="h-1.5 rounded-full transition-all duration-500"
                   :class="masteryBarColor(step.mastery)"
@@ -178,18 +178,18 @@
             <!-- 描述（展开时显示） -->
             <div
               v-if="expandedSteps[step.order]"
-              class="mt-3 pt-3 border-t border-gray-100 space-y-2"
+              class="mt-3 pt-3 border-t border-dark-border space-y-2"
               @click.stop
             >
-              <p class="text-sm text-gray-600 leading-relaxed">{{ step.description }}</p>
+              <p class="text-sm text-gray-400 leading-relaxed">{{ step.description }}</p>
 
               <!-- 知识点区域 -->
               <div class="flex items-center justify-between">
-                <span class="text-[11px] text-gray-400 font-medium">知识点</span>
+                <span class="text-[11px] text-gray-500 font-medium">知识点</span>
                 <button
                   v-if="!isLocked && editingStepOrder !== step.order"
                   @click.stop="startEdit(step)"
-                  class="text-[11px] text-blue-500 hover:text-blue-700 transition-colors"
+                  class="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   ✎ 编辑
                 </button>
@@ -201,16 +201,16 @@
                   <span
                     v-for="(kp, ki) in editingKps"
                     :key="ki"
-                    class="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md"
+                    class="inline-flex items-center gap-1 text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-md"
                   >
                     {{ kp }}
                     <button
                       @click.stop="removeKp(ki)"
-                      class="text-blue-400 hover:text-red-500 transition-colors leading-none"
+                      class="text-blue-400 hover:text-red-400 transition-colors leading-none"
                     >✕</button>
                   </span>
                 </div>
-                <div v-if="editingKps.length === 0" class="text-xs text-gray-400">
+                <div v-if="editingKps.length === 0" class="text-xs text-gray-500">
                   暂无知识点，请在下方添加
                 </div>
                 <div class="flex gap-2 mt-2">
@@ -218,19 +218,19 @@
                     v-model="editingInput"
                     @keydown.enter.prevent="addKp"
                     placeholder="输入知识点，按 Enter 添加"
-                    class="flex-1 text-xs border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-300 focus:ring-1 focus:ring-blue-200"
+                    class="flex-1 text-xs bg-dark-surface border border-dark-border rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 text-gray-300 placeholder-gray-600"
                   />
                   <div class="flex gap-1.5">
                     <button
                       @click.stop="saveEdit"
                       :disabled="saving"
-                      class="text-xs bg-blue-500 text-white px-3 py-1.5 rounded-lg hover:bg-blue-600 disabled:opacity-40 transition-colors"
+                      class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-500 disabled:opacity-40 transition-colors"
                     >
                       {{ saving ? '保存中...' : '保存' }}
                     </button>
                     <button
                       @click.stop="cancelEdit"
-                      class="text-xs text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                      class="text-xs text-gray-500 px-3 py-1.5 rounded-lg hover:bg-dark-surface-hover transition-colors"
                     >取消</button>
                   </div>
                 </div>
@@ -242,30 +242,30 @@
                   <span
                     v-for="(kp, ki) in step.knowledge_points"
                     :key="ki"
-                    class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md"
+                    class="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md"
                   >
                     {{ kp }}
                   </span>
                 </div>
-                <p v-else class="text-xs text-gray-400">暂无知识点</p>
+                <p v-else class="text-xs text-gray-500">暂无知识点</p>
               </template>
-              <p v-if="step.duration_estimate" class="text-xs text-gray-400 mt-1">
+              <p v-if="step.duration_estimate" class="text-xs text-gray-500 mt-1">
                 ⏱ {{ step.duration_estimate }}
               </p>
 
               <!-- 关联资源列表 -->
-              <div v-if="getStepResources(step.order).length" class="mt-3 pt-3 border-t border-gray-100">
-                <p class="text-xs text-gray-400 mb-2">📎 关联资源（{{ getStepResources(step.order).length }}）</p>
+              <div v-if="getStepResources(step.order).length" class="mt-3 pt-3 border-t border-dark-border">
+                <p class="text-xs text-gray-500 mb-2">📎 关联资源（{{ getStepResources(step.order).length }}）</p>
                 <div class="space-y-1">
                   <div
                     v-for="res in getStepResources(step.order)"
                     :key="res.orm_id || res.id"
-                    class="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg bg-dark-surface-alt hover:bg-dark-surface-hover cursor-pointer transition-colors"
                     @click.stop="openResource(res)"
                   >
                     <span>{{ typeIconMap[res.type] || '📄' }}</span>
-                    <span class="text-xs text-gray-700 truncate flex-1">{{ res.title }}</span>
-                    <span class="text-xs text-gray-400 flex-shrink-0">{{ typeLabelMap[res.type] || res.type }}</span>
+                    <span class="text-xs text-gray-400 truncate flex-1">{{ res.title }}</span>
+                    <span class="text-xs text-gray-500 flex-shrink-0">{{ typeLabelMap[res.type] || res.type }}</span>
                   </div>
                 </div>
               </div>
@@ -273,7 +273,7 @@
 
             <!-- 展开/收起 -->
             <div class="mt-2 text-center">
-              <span class="text-xs text-gray-400">
+              <span class="text-xs text-gray-500">
                 {{ expandedSteps[step.order] ? '收起详情 ▲' : '展开详情 ▼' }}
               </span>
             </div>
@@ -296,20 +296,20 @@
         class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
         @click.self="deleteTarget = null"
       >
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+        <div class="bg-dark-surface rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-dark-border">
           <div class="text-center mb-4">
             <div class="text-3xl mb-3">🗑️</div>
-            <h3 class="font-semibold text-gray-900 mb-1">确认删除</h3>
-            <p class="text-sm text-gray-500">删除「{{ deleteTarget.title }}」后将无法恢复，确认删除吗？</p>
+            <h3 class="font-semibold text-gray-200 mb-1">确认删除</h3>
+            <p class="text-sm text-gray-400">删除「{{ deleteTarget.title }}」后将无法恢复，确认删除吗？</p>
           </div>
           <div class="flex gap-3">
             <button
               @click="deleteTarget = null"
-              class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              class="flex-1 px-4 py-2.5 border border-dark-border rounded-xl text-sm text-gray-400 hover:bg-dark-surface-hover transition-colors"
             >取消</button>
             <button
               @click="doDeletePath"
-              class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-600 transition-colors"
+              class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm hover:bg-red-400 transition-colors"
             >确认删除</button>
           </div>
         </div>
@@ -390,9 +390,9 @@ const progressPercent = computed(() => {
 /** 总体掌握度颜色 */
 const overallColor = computed(() => {
   const m = currentPath.value?.overall_mastery || 0
-  if (m >= 70) return 'text-green-600'
-  if (m >= 30) return 'text-yellow-600'
-  return 'text-red-500'
+  if (m >= 70) return 'text-green-400'
+  if (m >= 30) return 'text-yellow-400'
+  return 'text-red-400'
 })
 
 /** 进度条颜色 */
@@ -406,9 +406,9 @@ const progressBarColor = computed(() => {
 /** 卡片边框颜色 */
 function cardBorder(mastery) {
   const m = mastery || 0
-  if (m >= 80) return 'border-green-300 bg-green-50/30 hover:border-green-400'
-  if (m >= 30) return 'border-yellow-300 bg-yellow-50/30 hover:border-yellow-400'
-  return 'border-red-200 bg-red-50/20 hover:border-red-300'
+  if (m >= 80) return 'border-green-500/30 bg-green-500/5 hover:border-green-400/50'
+  if (m >= 30) return 'border-yellow-500/30 bg-yellow-500/5 hover:border-yellow-400/50'
+  return 'border-red-500/30 bg-red-500/5 hover:border-red-400/50'
 }
 
 /** 阶段徽章颜色 */
@@ -430,9 +430,9 @@ function masteryBarColor(mastery) {
 /** 掌握度文字颜色 */
 function masteryTextColor(mastery) {
   const m = mastery || 0
-  if (m >= 80) return 'text-green-600'
-  if (m >= 30) return 'text-yellow-600'
-  return 'text-red-500'
+  if (m >= 80) return 'text-green-400'
+  if (m >= 30) return 'text-yellow-400'
+  return 'text-red-400'
 }
 
 /** 阶段状态文字 */
@@ -446,9 +446,9 @@ function stepStatusLabel(mastery) {
 /** 阶段状态文字颜色 */
 function stepStatusText(mastery) {
   const m = mastery || 0
-  if (m >= 80) return 'text-green-600'
-  if (m > 0) return 'text-yellow-600'
-  return 'text-gray-400'
+  if (m >= 80) return 'text-green-400'
+  if (m > 0) return 'text-yellow-400'
+  return 'text-gray-500'
 }
 
 /** 难度标签 */

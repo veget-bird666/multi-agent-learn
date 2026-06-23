@@ -1,20 +1,22 @@
 <template>
   <div :class="['flex items-start gap-3 animate-fade-in', isUser ? 'flex-row-reverse' : 'flex-row']">
     <!-- 头像 -->
-    <div
-      :class="[
-        'w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 shadow-sm',
-        isUser ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' : 'bg-gradient-to-br from-purple-500 to-pink-500 text-white',
-      ]"
+    <div v-if="isUser"
+      class="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white"
     >
-      {{ isUser ? '你' : 'AI' }}
+      你
     </div>
+    <img v-else
+      src="/ai_avatar.png"
+      alt="AI"
+      class="w-8 h-8 rounded-full flex-shrink-0 shadow-sm object-cover"
+    />
 
     <!-- 消息体 -->
     <div class="max-w-[75%] space-y-1">
       <!-- 如果是 agent 报告消息 -->
       <div v-if="isAgentMessage" class="flex items-center gap-2 mb-1">
-        <span class="text-xs font-medium text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{{ agentName }}</span>
+        <span class="text-xs font-medium text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">{{ agentName }}</span>
       </div>
 
       <!-- 气泡 -->
@@ -24,8 +26,8 @@
           isUser
             ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-md'
             : isAgentMessage
-              ? 'bg-purple-50/80 border border-purple-100 text-gray-700 rounded-tl-md'
-              : 'bg-white border border-gray-100 text-gray-800 shadow-sm rounded-tl-md',
+              ? 'bg-purple-500/10 border border-purple-500/20 text-gray-100 rounded-tl-md'
+              : 'bg-dark-surface border border-dark-border text-gray-100 shadow-sm rounded-tl-md',
         ]"
       >
         <!-- 用户消息：纯文本 -->

@@ -29,6 +29,14 @@ export default {
           600: '#9333ea',
           700: '#7e22ce',
         },
+        dark: {
+          bg: '#16161E',
+          surface: '#363640',
+          'surface-hover': '#3E3E4A',
+          'surface-alt': '#3A3A45',
+          border: '#3E3E4E',
+          'border-light': '#4A4A58',
+        },
       },
       fontFamily: {
         sans: ['"Inter"', '"Noto Sans SC"', 'system-ui', 'sans-serif'],

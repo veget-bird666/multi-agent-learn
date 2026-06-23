@@ -1,8 +1,8 @@
 <template>
-  <div v-if="profile" class="bg-white rounded-xl border border-gray-100 p-5 animate-fade-in">
+  <div v-if="profile" class="bg-dark-surface rounded-xl border border-dark-border p-5 animate-fade-in">
     <div class="flex items-center gap-2 mb-4">
       <span class="text-lg">🎯</span>
-      <h3 class="font-semibold text-gray-900">学习画像</h3>
+      <h3 class="font-semibold text-gray-200">学习画像</h3>
     </div>
     <div class="space-y-3">
       <div
@@ -12,17 +12,17 @@
       >
         <span class="text-base flex-shrink-0 mt-0.5">{{ item.icon }}</span>
         <div class="flex-1 min-w-0">
-          <div class="text-xs text-gray-400 mb-0.5">{{ item.label }}</div>
-          <div v-if="getValue(item.key)" class="text-sm text-gray-700">
+          <div class="text-xs text-gray-500 mb-0.5">{{ item.label }}</div>
+          <div v-if="getValue(item.key)" class="text-sm text-gray-300">
             <span
               v-for="(tag, ti) in formatValue(item.key)"
               :key="ti"
-              class="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-0.5 rounded-md mr-1 mb-1"
+              class="inline-block bg-dark-surface-alt text-gray-400 text-xs px-2 py-0.5 rounded-md mr-1 mb-1"
             >
               {{ tag }}
             </span>
           </div>
-          <div v-else class="text-sm text-gray-300 italic">待分析</div>
+          <div v-else class="text-sm text-gray-600 italic">待分析</div>
         </div>
       </div>
     </div>

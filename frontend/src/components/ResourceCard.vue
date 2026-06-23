@@ -2,7 +2,7 @@
   <div>
     <!-- 卡片 -->
     <div
-      class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-blue-100 transition-all duration-200 group cursor-pointer"
+      class="bg-dark-surface rounded-xl border border-dark-border p-4 hover:shadow-md hover:border-blue-500/30 transition-all duration-200 group cursor-pointer"
       @click="openResource"
     >
       <div class="flex items-start gap-3">
@@ -16,12 +16,12 @@
             <span :class="['text-xs font-medium px-2 py-0.5 rounded-full', typeStyle.badge]">{{ typeStyle.label }}</span>
             <span :class="['text-xs px-2 py-0.5 rounded-full', difficultyStyle]">{{ difficultyLabel }}</span>
           </div>
-          <h4 class="font-medium text-sm text-gray-900 mb-1 group-hover:text-blue-600 transition-colors truncate">{{ resource.title }}</h4>
-          <p class="text-xs text-gray-400 truncate">{{ resource.knowledge_point }}</p>
+          <h4 class="font-medium text-sm text-gray-200 mb-1 group-hover:text-blue-400 transition-colors truncate">{{ resource.title }}</h4>
+          <p class="text-xs text-gray-500 truncate">{{ resource.knowledge_point }}</p>
         </div>
 
         <!-- 箭头 -->
-        <div class="text-gray-200 group-hover:text-blue-400 transition-colors flex-shrink-0 mt-2">
+        <div class="text-dark-border group-hover:text-blue-400 transition-colors flex-shrink-0 mt-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
@@ -36,17 +36,17 @@
         class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 md:p-8"
         @click.self="showModal = false"
       >
-        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+        <div class="bg-dark-surface rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-dark-border">
           <!-- 弹窗头部 -->
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-dark-border shrink-0">
             <div class="flex items-center gap-2">
               <span class="text-lg">{{ typeStyle.icon }}</span>
-              <h3 class="font-semibold text-gray-900">{{ resource.title }}</h3>
+              <h3 class="font-semibold text-gray-200">{{ resource.title }}</h3>
               <span :class="['text-xs px-2 py-0.5 rounded-full', typeStyle.badge]">{{ typeStyle.label }}</span>
             </div>
             <button
               @click="showModal = false"
-              class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg w-8 h-8 flex items-center justify-center transition-colors text-lg"
+              class="text-gray-500 hover:text-gray-300 hover:bg-dark-surface-hover rounded-lg w-8 h-8 flex items-center justify-center transition-colors text-lg"
             >✕</button>
           </div>
           <!-- 弹窗内容 -->
@@ -57,12 +57,12 @@
             <div v-else-if="modalType === 'exam'" class="text-sm">
               <div v-if="examData">
                 <div class="mb-4 text-gray-500 text-xs">总分：{{ examData.total_score || '未标注' }} | 共 {{ examData.questions?.length || 0 }} 题</div>
-                <div v-for="(q, i) in examData.questions" :key="i" class="mb-6 pb-5 border-b border-gray-100 last:border-0">
+                <div v-for="(q, i) in examData.questions" :key="i" class="mb-6 pb-5 border-b border-dark-border last:border-0">
                   <div class="flex items-start gap-2">
                     <span class="text-gray-400 font-mono text-xs mt-0.5">{{ i + 1 }}.</span>
                     <div class="flex-1">
                       <!-- 题目 -->
-                      <p class="text-gray-900 mb-3 font-medium">{{ q.question }}</p>
+                      <p class="text-gray-200 mb-3 font-medium">{{ q.question }}</p>
 
                       <!-- 选择题选项 -->
                       <div v-if="q.type === 'choice' && q.options" class="space-y-2 mb-3">
@@ -88,7 +88,7 @@
                           type="text"
                           :disabled="revealed[i]"
                           placeholder="请输入答案..."
-                          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 disabled:bg-gray-50"
+                          class="w-full bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 disabled:bg-dark-surface-alt text-gray-300 placeholder-gray-600"
                         />
                       </div>
 
@@ -99,7 +99,7 @@
                           :disabled="revealed[i]"
                           placeholder="请输入你的回答..."
                           rows="3"
-                          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 resize-none disabled:bg-gray-50"
+                          class="w-full bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 resize-none disabled:bg-dark-surface-alt text-gray-300 placeholder-gray-600"
                         ></textarea>
                       </div>
 
@@ -120,19 +120,19 @@
                             {{ isCorrect(i) ? '✓ 正确' : '✗ 回答有误' }}
                           </span>
                           <span class="text-gray-300">|</span>
-                          <span class="text-green-700 font-medium">参考答案：{{ q.answer }}</span>
+                          <span class="text-green-400 font-medium">参考答案：{{ q.answer }}</span>
                           <button
                             @click="resetQuestion(i)"
                             class="text-gray-400 hover:text-gray-600 ml-1 underline"
                           >重做</button>
                         </template>
                       </div>
-                      <p v-if="revealed[i] && q.explanation" class="text-gray-500 text-xs mt-2 bg-gray-50 rounded-lg p-2">解析：{{ q.explanation }}</p>
+                      <p v-if="revealed[i] && q.explanation" class="text-gray-500 text-xs mt-2 bg-dark-surface-alt rounded-lg p-2">解析：{{ q.explanation }}</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <pre v-else class="bg-gray-50 rounded-lg p-4 text-xs overflow-x-auto">{{ resource.content }}</pre>
+              <pre v-else class="bg-dark-surface-alt rounded-lg p-4 text-xs overflow-x-auto text-gray-400 border border-dark-border">{{ resource.content }}</pre>
             </div>
           </div>
         </div>
@@ -188,12 +188,12 @@ function radioClass(q, qIdx, optIdx) {
 }
 
 function optionClass(q, qIdx, optIdx) {
-  const base = 'border-gray-200 hover:border-blue-200 hover:bg-blue-50'
+  const base = 'border-dark-border hover:border-blue-500/30 hover:bg-blue-500/10'
   if (!isSelected(qIdx, optIdx)) return base
-  if (!revealed[qIdx]) return 'border-blue-400 bg-blue-50'
+  if (!revealed[qIdx]) return 'border-blue-500/40 bg-blue-500/10'
   // 已提交：判断对错
   const isCorrectOpt = isSelected(qIdx, optIdx) && isCorrect(qIdx)
-  return isCorrectOpt ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'
+  return isCorrectOpt ? 'border-green-400/40 bg-green-500/10' : 'border-red-400/30 bg-red-500/10'
 }
 
 function revealAnswer(qIdx) {
@@ -216,15 +216,15 @@ function isCorrect(qIdx) {
 }
 
 const typeMap = {
-  document: { icon: '📄', label: '文档', bg: 'bg-blue-50', badge: 'bg-blue-50 text-blue-600' },
-  exam: { icon: '📝', label: '试卷', bg: 'bg-green-50', badge: 'bg-green-50 text-green-600' },
-  ppt: { icon: '📊', label: 'PPT', bg: 'bg-orange-50', badge: 'bg-orange-50 text-orange-600' },
-  image: { icon: '🖼️', label: '图片', bg: 'bg-pink-50', badge: 'bg-pink-50 text-pink-600' },
-  video: { icon: '🎬', label: '视频', bg: 'bg-purple-50', badge: 'bg-purple-50 text-purple-600' },
-  exercise: { icon: '✏️', label: '练习', bg: 'bg-teal-50', badge: 'bg-teal-50 text-teal-600' },
-  mindmap: { icon: '🧠', label: '思维导图', bg: 'bg-yellow-50', badge: 'bg-yellow-50 text-yellow-600' },
-  code_example: { icon: '💻', label: '代码', bg: 'bg-indigo-50', badge: 'bg-indigo-50 text-indigo-600' },
-  extra_reading: { icon: '📚', label: '拓展', bg: 'bg-rose-50', badge: 'bg-rose-50 text-rose-600' },
+  document: { icon: '📄', label: '文档', bg: 'bg-blue-500/10', badge: 'bg-blue-500/20 text-blue-400' },
+  exam: { icon: '📝', label: '试卷', bg: 'bg-green-500/10', badge: 'bg-green-500/20 text-green-400' },
+  ppt: { icon: '📊', label: 'PPT', bg: 'bg-orange-500/10', badge: 'bg-orange-500/20 text-orange-400' },
+  image: { icon: '🖼️', label: '图片', bg: 'bg-pink-500/10', badge: 'bg-pink-500/20 text-pink-400' },
+  video: { icon: '🎬', label: '视频', bg: 'bg-purple-500/10', badge: 'bg-purple-500/20 text-purple-400' },
+  exercise: { icon: '✏️', label: '练习', bg: 'bg-teal-500/10', badge: 'bg-teal-500/20 text-teal-400' },
+  mindmap: { icon: '🧠', label: '思维导图', bg: 'bg-yellow-500/10', badge: 'bg-yellow-500/20 text-yellow-400' },
+  code_example: { icon: '💻', label: '代码', bg: 'bg-indigo-500/10', badge: 'bg-indigo-500/20 text-indigo-400' },
+  extra_reading: { icon: '📚', label: '拓展', bg: 'bg-rose-500/10', badge: 'bg-rose-500/20 text-rose-400' },
 }
 
 const resolvedType = computed(() => {
@@ -238,9 +238,9 @@ const typeStyle = computed(() => {
 
 const difficultyStyle = computed(() => {
   const d = props.resource.difficulty
-  if (d === 'easy') return 'bg-green-50 text-green-600'
-  if (d === 'hard') return 'bg-red-50 text-red-600'
-  return 'bg-yellow-50 text-yellow-600'
+  if (d === 'easy') return 'bg-green-500/10 text-green-400'
+  if (d === 'hard') return 'bg-red-500/10 text-red-400'
+  return 'bg-yellow-500/10 text-yellow-400'
 })
 
 const difficultyLabel = computed(() => {
@@ -270,9 +270,9 @@ const renderedContent = computed(() => {
 })
 
 function difficultyBadge(d) {
-  if (d === 'easy') return 'bg-green-50 text-green-600 px-1.5 py-0.5 rounded'
-  if (d === 'hard') return 'bg-red-50 text-red-600 px-1.5 py-0.5 rounded'
-  return 'bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded'
+  if (d === 'easy') return 'bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded'
+  if (d === 'hard') return 'bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded'
+  return 'bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded'
 }
 
 function openResource() {

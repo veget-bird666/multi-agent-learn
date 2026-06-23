@@ -2,11 +2,10 @@
   <div class="max-w-5xl mx-auto px-6 py-12">
     <!-- Hero -->
     <div class="text-center mb-16 animate-fade-in">
-      <div class="text-6xl mb-6">🧠</div>
       <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
         AI 个性化学习系统
       </h1>
-      <p class="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+      <p class="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
         基于大模型与多智能体协同技术，为你量身定制学习路径、生成个性化资源，让学习更高效
       </p>
     </div>
@@ -16,19 +15,19 @@
       <div
         v-for="(feature, i) in features"
         :key="i"
-        class="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-blue-100 transition-all duration-300 hover:-translate-y-1"
+        class="group bg-dark-surface rounded-2xl p-6 shadow-sm border border-dark-border hover:shadow-lg hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1"
       >
         <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">
           {{ feature.icon }}
         </div>
-        <h3 class="font-semibold text-gray-900 mb-2">{{ feature.title }}</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">{{ feature.desc }}</p>
+        <h3 class="font-semibold text-gray-200 mb-2">{{ feature.title }}</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">{{ feature.desc }}</p>
       </div>
     </div>
 
     <!-- 工作流程 -->
-    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-12">
-      <h2 class="text-xl font-bold text-center mb-8">系统工作流程</h2>
+    <div class="bg-dark-surface rounded-2xl p-8 shadow-sm border border-dark-border mb-12">
+      <h2 class="text-xl font-bold text-center text-gray-100 mb-8">系统工作流程</h2>
       <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-2">
         <div
           v-for="(step, i) in steps"
@@ -41,7 +40,7 @@
             </div>
             <span class="text-xs text-gray-500 mt-1.5 text-center max-w-[80px]">{{ step.label }}</span>
           </div>
-          <div v-if="i < steps.length - 1" class="hidden md:block text-gray-300 text-xl mx-2">→</div>
+          <div v-if="i < steps.length - 1" class="hidden md:block text-gray-600 text-xl mx-2">→</div>
         </div>
       </div>
     </div>
@@ -50,7 +49,7 @@
     <div class="text-center">
       <router-link
         to="/chat"
-        class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-xl text-lg font-medium hover:shadow-lg hover:shadow-blue-200 transition-all duration-300 hover:-translate-y-0.5"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-xl text-lg font-medium hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-0.5"
       >
         <span>开始学习</span>
         <span>→</span>
