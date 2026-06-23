@@ -7,7 +7,7 @@
       <div class="flex items-center gap-2">
         <span class="text-xs text-gray-500 flex-shrink-0">学习路径</span>
         <select
-          v-model="buddyStore.currentPathId"
+          :value="buddyStore.currentPathId"
           @change="onPathChange"
           :disabled="buddyStore.loadingPaths || buddyStore.waitingForAnswer"
           class="text-xs bg-dark-surface border border-dark-border rounded-lg px-3 py-2 text-gray-300 focus:outline-none focus:border-blue-500 min-w-[180px] appearance-none cursor-pointer disabled:opacity-40"
@@ -415,8 +415,9 @@ async function handleSubmit() {
   scrollToBottom()
 }
 
-async function onPathChange() {
-  await buddyStore.selectPath(buddyStore.currentPathId)
+async function onPathChange(event) {
+  const pathId = Number(event.target.value)
+  await buddyStore.selectPath(pathId)
   buddyStore.resetSession()
   expandedNotes.value = {}
   scrollToBottom()
