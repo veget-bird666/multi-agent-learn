@@ -204,4 +204,22 @@ export async function buddyEvaluate(studentId, pathId, stepOrder, knowledgePoint
   return res.json()
 }
 
+/** 创建一条新资源（如导出学习笔记） */
+export async function createResource(studentId, title, content, knowledgePoint = '', pathId = null, stepOrder = null) {
+  const res = await fetch(`/api/resources`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      student_id: studentId,
+      title,
+      content,
+      knowledge_point: knowledgePoint,
+      path_id: pathId,
+      step_order: stepOrder,
+    }),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export default api

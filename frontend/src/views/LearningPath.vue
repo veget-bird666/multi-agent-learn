@@ -69,13 +69,13 @@
             {{ p.steps.length }}阶
           </span>
           <!-- 删除按钮（hover 显示） -->
-          <button
+          <span
             @click.stop="confirmDeletePath(p)"
-            class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-dark-surface border border-dark-border rounded-full text-gray-500 hover:text-red-400 hover:border-red-500/30 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs shadow-sm"
+            class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-dark-surface border border-dark-border rounded-full text-gray-500 hover:text-red-400 hover:border-red-500/30 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs shadow-sm cursor-pointer"
             title="删除此路径"
           >
             ✕
-          </button>
+          </span>
         </button>
       </div>
 

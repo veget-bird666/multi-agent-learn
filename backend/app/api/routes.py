@@ -333,6 +333,30 @@ async def delete_resource(orm_id: int):
     return {"message": "删除成功"}
 
 
+@router.post("/resources")
+async def create_resource(body: dict):
+    """创建一条新资源（如导出学习笔记）"""
+    from app.models.resources import Resource, ResourceType
+    import uuid
+
+    student_id = body.get("student_id")
+    if not student_id:
+        raise HTTPException(status_code=400, detail="缺少 student_id")
+
+    resource = Resource(
+        id=str(uuid.uuid4()),
+        type=ResourceType.DOCUMENT,
+        title=body.get("title", ""),
+        content=body.get("content", ""),
+        knowledge_point=body.get("knowledge_point", ""),
+        difficulty=body.get("difficulty", "medium"),
+        path_id=body.get("path_id"),
+        step_order=body.get("step_order"),
+    )
+    resource_service.save(resource, student_id)
+    return {"message": "保存成功", "resource_id": resource.id}
+
+
 # ═══════════════════════════════════════════════════════════
 #  虚拟学伴（独立于主图的双层输出聊天）
 # ═══════════════════════════════════════════════════════════

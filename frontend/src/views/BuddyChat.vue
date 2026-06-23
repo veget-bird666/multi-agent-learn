@@ -27,6 +27,18 @@
         <span>掌握度 {{ Math.round(buddyStore.overallMastery) }}%</span>
       </div>
 
+      <!-- 导出学习笔记 -->
+      <button
+        v-if="buddyStore.messages.some(m => m.type === 'note')"
+        @click="handleExportNotes"
+        :disabled="exportLoading"
+        class="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-dark-surface border border-dark-border text-gray-400 hover:text-gray-200 hover:border-gray-500"
+      >
+        <span v-if="exportLoading" class="w-3.5 h-3.5 border-2 border-gray-500 border-t-gray-300 rounded-full animate-spin"></span>
+        <span v-else>📥</span>
+        导出笔记
+      </button>
+
       <!-- 学伴提问 / 换个知识点 按钮（始终可点） -->
       <button
         @click="handleRequestQuestion"
@@ -52,6 +64,8 @@
         v-for="step in buddyStore.currentPath.steps"
         :key="step.order"
         @click="buddyStore.focusStep(step.order)"
+        @mouseenter="showTooltip(step, $event)"
+        @mouseleave="hideTooltip"
         class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border"
         :class="stagePillClass(step)"
       >
@@ -245,17 +259,54 @@
       </div>
     </div>
   </div>
+
+  <!-- ═══ 阶段悬浮卡片 ═══ -->
+  <div
+    v-if="hoveredStep"
+    class="fixed z-50 bg-dark-surface-alt border border-dark-border rounded-xl shadow-2xl px-4 py-3 text-xs w-72 pointer-events-none"
+    :style="tooltipStyle"
+  >
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <span class="font-medium text-gray-200 truncate">{{ hoveredStep.stage_name }}</span>
+      <span
+        class="text-[10px] px-2 py-0.5 rounded-full font-mono flex-shrink-0"
+        :class="masteryBadgeClass(hoveredStep.mastery)"
+      >
+        {{ Math.round(hoveredStep.mastery) }}%
+      </span>
+    </div>
+    <p v-if="hoveredStep.description" class="text-gray-500 leading-relaxed mb-2">
+      {{ hoveredStep.description }}
+    </p>
+    <div v-if="hoveredStep.knowledge_points?.length" class="border-t border-dark-border pt-2 mt-1">
+      <div class="text-gray-500 mb-1.5">知识点掌握度：</div>
+      <div
+        v-for="kp in hoveredStep.knowledge_points"
+        :key="kp"
+        class="flex items-center justify-between py-0.5"
+      >
+        <span class="text-gray-400 truncate mr-2">{{ kp }}</span>
+        <span class="font-mono flex-shrink-0" :class="kpMasteryColor(hoveredStep.knowledge_point_mastery?.[kp])">
+          {{ Math.round(hoveredStep.knowledge_point_mastery?.[kp] || 0) }}%
+        </span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useBuddyStore } from '../stores/buddy'
+import { createResource } from '../api'
 
 const buddyStore = useBuddyStore()
 const inputMessage = ref('')
 const inputRef = ref(null)
 const messageListRef = ref(null)
 const expandedNotes = ref({})
+const hoveredStep = ref(null)
+const tooltipStyle = ref({})
+const exportLoading = ref(false)
 
 // ── 计算属性 ──
 
@@ -296,6 +347,19 @@ function scrollToBottom() {
 /** 切换学习笔记展开/收起 */
 function toggleNote(index) {
   expandedNotes.value[index] = !expandedNotes.value[index]
+}
+
+/** 悬浮卡片：显示 / 隐藏 */
+function showTooltip(step, event) {
+  const rect = event.currentTarget.getBoundingClientRect()
+  hoveredStep.value = step
+  tooltipStyle.value = {
+    left: Math.max(8, Math.min(rect.left, window.innerWidth - 296)) + 'px',
+    top: (rect.bottom + 6) + 'px',
+  }
+}
+function hideTooltip() {
+  hoveredStep.value = null
 }
 
 /** 简单的 Markdown 渲染（粗体、换行、列表） */
@@ -356,6 +420,59 @@ async function onPathChange() {
   scrollToBottom()
 }
 
+/** 导出学习笔记至「我的资源」 */
+async function handleExportNotes() {
+  const notes = buddyStore.messages.filter(m => m.type === 'note')
+  if (notes.length === 0) return
+
+  exportLoading.value = true
+  try {
+    const pathTitle = buddyStore.currentPath?.title || '通用'
+    const now = new Date().toLocaleString('zh-CN', { hour12: false })
+    const sections = notes.map((msg, i) => {
+      const kp = msg.meta?.kp || '知识点'
+      const isCorrect = msg.meta?.isCorrect
+      const before = msg.meta?.masteryBefore
+      const after = msg.meta?.masteryAfter
+      const increment = msg.meta?.increment
+
+      let s = `## ${i + 1}. ${kp}\n\n`
+      if (isCorrect !== undefined) {
+        s += `- **掌握度变化**：${Math.round(before)}% → ${Math.round(after)}%（+${increment}）\n`
+        s += `- **答题结果**：${isCorrect ? '✅ 正确' : '❌ 未答对'}\n\n`
+      }
+      s += `${msg.content}\n`
+      return s
+    })
+
+    const content = `# 学习笔记 — ${pathTitle}\n\n> 导出时间：${now}\n\n---\n\n${sections.join('\n---\n\n')}`
+
+    await createResource(
+      buddyStore.studentId,
+      `学习笔记 - ${pathTitle}`,
+      content,
+      '',
+      buddyStore.currentPathId,
+      null,
+    )
+
+    buddyStore.messages.push({
+      type: 'system',
+      content: '✅ 学习笔记已导出至「我的资源」',
+    })
+    scrollToBottom()
+  } catch (e) {
+    console.error('[BuddyChat] 导出笔记失败:', e)
+    buddyStore.messages.push({
+      type: 'system',
+      content: `❌ 导出失败：${e.message}`,
+    })
+    scrollToBottom()
+  } finally {
+    exportLoading.value = false
+  }
+}
+
 // ── 样式工具 ──
 
 function stagePillClass(step) {
@@ -383,6 +500,14 @@ function masteryBadgeClass(mastery) {
   if (m >= 70) return 'bg-green-500/10 text-green-400 border border-green-500/20'
   if (m >= 30) return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
   return 'bg-red-500/10 text-red-400 border border-red-500/20'
+}
+
+function kpMasteryColor(mastery) {
+  const m = mastery || 0
+  if (m >= 70) return 'text-green-400'
+  if (m >= 30) return 'text-yellow-400'
+  if (m > 0) return 'text-red-400'
+  return 'text-gray-500'
 }
 
 function noteHeaderClass(isCorrect) {
