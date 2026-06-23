@@ -167,4 +167,41 @@ export async function updateStepKnowledgePoints(pathId, stepOrder, knowledgePoin
   return res.json()
 }
 
+// ═══════════════════════════════════════════════════════════
+//  虚拟学伴 API
+// ═══════════════════════════════════════════════════════════
+
+/** 学伴提问：根据学习路径掌握度生成一个问题 */
+export async function buddyQuestion(studentId, pathId, focusedStepOrder = null) {
+  const body = { student_id: studentId, path_id: pathId }
+  if (focusedStepOrder !== null) body.focused_step_order = focusedStepOrder
+  const res = await fetch(`/api/buddy/question`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 学伴评估：提交答案，获取角色回复 + 学习笔记，自动更新掌握度 */
+export async function buddyEvaluate(studentId, pathId, stepOrder, knowledgePoint, question, answer, focusedStepOrder = null) {
+  const body = {
+    student_id: studentId,
+    path_id: pathId,
+    step_order: stepOrder,
+    knowledge_point: knowledgePoint,
+    question,
+    answer,
+  }
+  if (focusedStepOrder !== null) body.focused_step_order = focusedStepOrder
+  const res = await fetch(`/api/buddy/evaluate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export default api

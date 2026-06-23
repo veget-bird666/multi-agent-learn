@@ -46,12 +46,19 @@
     </div>
 
     <!-- CTA -->
-    <div class="text-center">
+    <div class="text-center flex flex-col sm:flex-row items-center justify-center gap-4">
       <router-link
         to="/chat"
         class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 rounded-xl text-lg font-medium hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-0.5"
       >
         <span>开始学习</span>
+        <span>→</span>
+      </router-link>
+      <router-link
+        to="/buddy"
+        class="inline-flex items-center gap-2 bg-dark-surface border border-dark-border text-gray-300 px-10 py-4 rounded-xl text-lg font-medium hover:border-blue-500/30 hover:text-blue-300 transition-all duration-300 hover:-translate-y-0.5"
+      >
+        <span>👥 虚拟学伴</span>
         <span>→</span>
       </router-link>
     </div>
@@ -76,14 +83,14 @@ const features = [
     desc: '学习路径随你的进度动态调整，支持回滚重学，确保每个知识点都掌握。',
   },
   {
+    icon: '👥',
+    title: '虚拟学伴',
+    desc: 'AI 学习伙伴"小问"主动提问，通过费曼学习法帮你巩固理解，薄弱知识点优先练习。',
+  },
+  {
     icon: '📄',
     title: '智能文档生成',
     desc: '根据你的认知风格自动生成 Markdown 学习文档，图文并茂通俗易懂。',
-  },
-  {
-    icon: '📊',
-    title: 'PPT 课件生成',
-    desc: '一键生成专业 PPT 课件，适合系统性学习和复习备考。',
   },
   {
     icon: '📝',

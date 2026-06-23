@@ -331,3 +331,41 @@ async def delete_resource(orm_id: int):
     if not ok:
         raise HTTPException(status_code=404, detail="资源不存在")
     return {"message": "删除成功"}
+
+
+# ═══════════════════════════════════════════════════════════
+#  虚拟学伴（独立于主图的双层输出聊天）
+# ═══════════════════════════════════════════════════════════
+
+from app.buddy import buddy_service
+from app.buddy.schemas import QuestionRequest, EvaluateRequest
+
+
+@router.post("/buddy/question")
+async def buddy_question(body: QuestionRequest):
+    """学伴提问：根据学习路径掌握度生成一个问题"""
+    result = buddy_service.generate_question(
+        student_id=body.student_id,
+        path_id=body.path_id,
+        focused_step_order=body.focused_step_order,
+    )
+    if result is None:
+        raise HTTPException(status_code=400, detail="无法生成问题，请确保已选择包含知识点的学习路径")
+    return result
+
+
+@router.post("/buddy/evaluate")
+async def buddy_evaluate(body: EvaluateRequest):
+    """学伴评估：评估学生的回答，返回角色回复 + 学习笔记，并更新掌握度"""
+    result = buddy_service.evaluate_answer(
+        student_id=body.student_id,
+        path_id=body.path_id,
+        step_order=body.step_order,
+        knowledge_point=body.knowledge_point,
+        question=body.question,
+        answer=body.answer,
+        focused_step_order=body.focused_step_order,
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="未找到该学习路径")
+    return result
