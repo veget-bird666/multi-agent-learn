@@ -1,7 +1,8 @@
 <template>
-  <div class="h-[calc(100vh-3.5rem)] flex flex-col max-w-5xl mx-auto px-4 md:px-6">
-    <!-- ═══ 顶部栏：路径选择 + 提问按钮 ═══ -->
-    <div class="flex-shrink-0 flex flex-wrap items-center gap-3 py-4 border-b border-dark-border/60">
+  <div class="h-full">
+    <div class="h-[calc(100vh-3.5rem)] flex flex-col max-w-5xl mx-auto px-4 md:px-6">
+      <!-- ═══ 顶部栏：路径选择 + 提问按钮 ═══ -->
+      <div class="flex-shrink-0 flex flex-wrap items-center gap-3 py-4 border-b border-dark-border/60">
       <!-- 路径选择 -->
       <div class="flex items-center gap-2">
         <span class="text-xs text-gray-500 flex-shrink-0">学习路径</span>
@@ -292,6 +293,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>

@@ -1,14 +1,34 @@
-抱歉，请求处理时出现错误：处理请求时出错: Error code: 500 - {'error': {'message': 'xunfei response error: sid: cht000d8e2b@dx19eef05b70fb91a122 msg: EngineInternalError:Bad Request, timeStamp:19:09:51.044 (request id: 2026062219094968981151106887229)', 'type': 'one_api_error', 'param': '', 'code': '10012'}}
-
-============================================================
-[Supervisor] 第 0 轮决策
-[Supervisor]   message: 你好
-[Supervisor]   重写请求: (无)
-[Supervisor]   画像: 未构建
-[Supervisor]   路径: 未规划
-[Supervisor]   资源数: 0
-[Supervisor]   计划: []
-[Supervisor]   计划步骤: -1
-[Supervisor]   history 条数: 1
-[Supervisor]   LLM 模式: 规划
-INFO:     127.0.0.1:60655 - "POST /api/chat HTTP/1.1" 500 Internal Server Error
+chunk-PRB2KXUH.js?v=32f8bcc7:2225 [Vue warn]: Component inside <Transition> renders non-element root node that cannot be animated. 
+  at <BuddyChat onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< null > key="/buddy" > 
+  at <BaseTransition mode="out-in" appear=false persisted=false  ... > 
+  at <Transition name="page" mode="out-in" > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-PRB2KXUH.js?v=32f8bcc7:2225
+chunk-PRB2KXUH.js?v=32f8bcc7:2225 [Vue warn]: Component inside <Transition> renders non-element root node that cannot be animated. 
+  at <BuddyChat onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > key="/buddy" > 
+  at <BaseTransition mode="out-in" appear=false persisted=false  ... > 
+  at <Transition name="page" mode="out-in" > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-PRB2KXUH.js?v=32f8bcc7:2225
+chunk-PRB2KXUH.js?v=32f8bcc7:2225 [Vue warn]: Component inside <Transition> renders non-element root node that cannot be animated. 
+  at <BuddyChat onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > key="/buddy" > 
+  at <BaseTransition mode="out-in" appear=false persisted=false  ... > 
+  at <Transition name="page" mode="out-in" > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-PRB2KXUH.js?v=32f8bcc7:2225
+chunk-PRB2KXUH.js?v=32f8bcc7:2225 [Vue warn]: Component inside <Transition> renders non-element root node that cannot be animated. 
+  at <BuddyChat onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > key="/buddy" > 
+  at <BaseTransition mode="out-in" appear=false persisted=false  ... > 
+  at <Transition name="page" mode="out-in" > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-PRB2KXUH.js?v=32f8bcc7:2225
+chunk-PRB2KXUH.js?v=32f8bcc7:2225 [Vue warn]: Component inside <Transition> renders non-element root node that cannot be animated. 
+  at <BuddyChat onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > key="/buddy" > 
+  at <BaseTransition mode="out-in" appear=false persisted=false  ... > 
+  at <Transition name="page" mode="out-in" > 
+  at <RouterView> 
+  at <App>

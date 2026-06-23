@@ -23,9 +23,9 @@
 
     <!-- 主内容 -->
     <main class="flex-1">
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
-          <component :is="Component" />
+          <component :is="Component" :key="route.path" />
         </transition>
       </router-view>
     </main>
