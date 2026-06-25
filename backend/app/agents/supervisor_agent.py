@@ -59,7 +59,9 @@ SYSTEM_PROMPT = """你是一个学习系统的调度员（Supervisor），负责
 - 用户想学习某个知识点，画像未建且信息足够 → plan: ["profile_agent", "rewrite_node", "path_agent"]
 - 用户想学习某个知识点，learning_path 已存在 → 不创建 plan，直接 chat_agent
 - 用户想生成特定资源（PPT/文档/试卷），画像已建 → plan: ["rewrite_node", "resource_agent"]
-- 用户想生成特定资源，画像未建 → plan: ["profile_agent", "rewrite_node", "resource_agent"]
+- 用户想生成特定资源，画像未建且无聚焦阶段 → plan: ["profile_agent", "rewrite_node", "resource_agent"]
+- **用户聚焦了学习阶段（focused_step_order 非空），想生成资源 → plan: ["profile_agent", "rewrite_node", "resource_agent"]**（聚焦阶段的知识点/难度等信息足够构建画像，无需等待对话收集）
+- **用户聚焦了学习阶段，想学习该阶段知识点 → plan: ["profile_agent", "rewrite_node", "path_agent"]**（聚焦阶段的 stage_name/knowledge_points/difficulty 足够构建有意义的画像）
 - 用户上传了图片需要分析 → plan: ["tool_node"]
 - 用户闲聊/问候/提问 → 不创建 plan，直接 chat_agent
 - 用户需更新画像（新信息与现有画像矛盾）→ plan: ["profile_agent", ...后续根据消息判断]
@@ -156,6 +158,23 @@ async def supervisor_agent(state: LearningState):
         profile_summary = "暂无"
         profile_status = " 未构建"
 
+    # ── 构建聚焦阶段上下文 ──
+    focused_step = state.get("focused_step_order")
+    focused_context = ""
+    if focused_step is not None and learning_path:
+        for step in learning_path:
+            if step.get("order") == focused_step:
+                kps = "、".join(step.get("knowledge_points", []))
+                focused_context = (
+                    f"用户已聚焦阶段{focused_step}：「{step.get('stage_name', '')}」\n"
+                    f"  阶段描述：{step.get('description', '')}\n"
+                    f"  包含知识点：{kps}\n"
+                    f"  阶段难度：{step.get('difficulty', 'medium')}"
+                )
+                break
+    if focused_context:
+        print(f"[Supervisor]   聚焦阶段: 阶段{focused_step}")
+
     prompt = ChatPromptTemplate.from_messages([
         ("system", SYSTEM_PROMPT),
         ("system", (
@@ -165,6 +184,7 @@ async def supervisor_agent(state: LearningState):
             "对话轮次：第 {turn_count} 轮\n"
             "最新用户消息：{latest_message}\n"
             "学习路径状态：{path_status}\n"
+            "{focused_context}"
             "已生成资源数：{resource_count}（若>0 表示已经生成过，绝对不许再调用resource_agent）\n"
             "本轮重写后的搜索查询（可用于判断是否经过 rewrite_node）：{rewritten_query}\n"
             "=== 对话历史 ==="
@@ -182,6 +202,7 @@ async def supervisor_agent(state: LearningState):
         "turn_count": turn_count,
         "latest_message": latest_message,
         "path_status": path_status,
+        "focused_context": focused_context,
         "resource_count": source_count,
         "rewritten_query": rewritten_query or "(无)",
     })

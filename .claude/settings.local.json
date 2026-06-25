@@ -51,7 +51,8 @@
       "Bash(rm:*)",
       "Bash(cd:*)",
       "Bash(grep -v \"^$\")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node -e \"const p = require\\(''mermaid/package.json''\\); console.log\\(p.version\\)\")"
     ]
   }
 }

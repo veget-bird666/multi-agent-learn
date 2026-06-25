@@ -11,7 +11,7 @@ from app.resource_subgraph.state import ResourceSubState
 
 # ── 结构化输出 ──────────────────────────────────────────
 
-AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video"]
+AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video", "mindmap"]
 
 
 class ResourcePlan(BaseModel):
@@ -41,6 +41,7 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 - **ppt**：PPT 课件。适合需要系统性展示或复习时。
 - **image**：从知识库检索现有图片/图表。适合需要直观理解时。
 - **video**：从知识库检索现有视频。适合需要动态演示时。
+- **mindmap**：Mermaid 思维导图。适合需要梳理知识结构、复习总结时。
 
 ## 决策原则
 1. **document 是兜底选项** — 至少生成一份文档作为主要学习材料

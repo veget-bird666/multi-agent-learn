@@ -79,6 +79,10 @@ def resource_agent(state: LearningState) -> dict:
         "step_knowledge_points": step_kps,
         "resource_plan": [],
         "generated_resources": [],
+        "exam_retry_count": 0,
+        "exam_error_feedback": "",
+        "exam_invalid_resource_id": None,
+        "unsafe_resource_ids": [],
         "response": None,
     }
 
@@ -123,7 +127,7 @@ def resource_agent(state: LearningState) -> dict:
     # ── 4. 写简短摘要到 history（替代原来的完整资源列表）──
     type_labels = {
         "document": "文档", "exam": "试卷", "ppt": "PPT",
-        "image": "图片", "video": "视频",
+        "image": "图片", "video": "视频", "mindmap": "思维导图",
     }
     if new_resources:
         # 按类型去重统计

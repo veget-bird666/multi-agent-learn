@@ -53,6 +53,8 @@
           <div class="flex-1 overflow-y-auto p-6">
             <!-- 文档类型：渲染 Markdown -->
             <div v-if="modalType === 'document'" class="chat-markdown text-sm" v-html="renderedContent"></div>
+            <!-- 思维导图类型：渲染 Mermaid -->
+            <div v-else-if="modalType === 'mindmap'" class="flex justify-center p-4 overflow-x-auto min-h-[300px]" v-html="mindmapSvg"></div>
             <!-- 试卷类型：交互式作答 -->
             <div v-else-if="modalType === 'exam'" class="text-sm">
               <div v-if="examData">
@@ -142,8 +144,23 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch, nextTick } from 'vue'
 import MarkdownIt from 'markdown-it'
+import mermaid from 'mermaid'
+
+// 初始化 Mermaid（全局只执行一次）
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    primaryColor: '#1e293b',
+    primaryTextColor: '#e2e8f0',
+    primaryBorderColor: '#475569',
+    lineColor: '#64748b',
+    secondaryColor: '#0f172a',
+    tertiaryColor: '#1e293b',
+  },
+})
 
 const md = new MarkdownIt({
   html: false,
@@ -157,18 +174,25 @@ const props = defineProps({
 
 const showModal = ref(false)
 const modalType = ref('')
+const mindmapSvg = ref('')
 
 // ── 试卷交互状态 ──
 const userAnswers = reactive({})     // { 题目索引: 用户答案 }
 const revealed = reactive({})        // { 题目索引: true/false } 是否已提交检查
 const selectedOptions = reactive({}) // { 题目索引: 选项索引 } 仅选择题用
 
-// 关闭弹窗时重置试卷状态
-watch(showModal, (val) => {
+// 关闭弹窗时重置状态
+watch(showModal, async (val) => {
+  if (val && modalType.value === 'mindmap') {
+    // 打开思维导图 → 渲染 Mermaid
+    await nextTick()
+    await renderMindmap()
+  }
   if (!val) {
     Object.keys(userAnswers).forEach(k => { delete userAnswers[k] })
     Object.keys(revealed).forEach(k => { delete revealed[k] })
     Object.keys(selectedOptions).forEach(k => { delete selectedOptions[k] })
+    mindmapSvg.value = ''
   }
 })
 
@@ -275,14 +299,27 @@ function difficultyBadge(d) {
   return 'bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded'
 }
 
+async function renderMindmap() {
+  const code = props.resource.content
+  if (!code) return
+  try {
+    const id = 'mindmap-' + Date.now()
+    const { svg } = await mermaid.render(id, code)
+    mindmapSvg.value = svg
+  } catch (e) {
+    console.error('Mermaid 渲染失败:', e)
+    mindmapSvg.value = `<div class="text-red-400 p-4 text-sm">思维导图渲染失败：${e.message}</div>`
+  }
+}
+
 function openResource() {
   const content = props.resource.content
   if (!content) return
 
   const type = resolvedType.value
 
-  // 文档 / 试卷 → 弹窗展示
-  if (type === 'document' || type === 'exam') {
+  // 文档 / 试卷 / 思维导图 → 弹窗展示
+  if (type === 'document' || type === 'exam' || type === 'mindmap') {
     modalType.value = type
     showModal.value = true
     return

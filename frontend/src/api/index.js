@@ -222,4 +222,55 @@ export async function createResource(studentId, title, content, knowledgePoint =
   return res.json()
 }
 
+// ═══════════════════════════════════════════════════════════
+//  SSE 流式对话
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * 流式对话（SSE），通过 EventSource 连接 GET /chat
+ *
+ * @param {string} studentId
+ * @param {string} message
+ * @param {object} callbacks - { onToken, onStatus, onMetadata, onError }
+ * @returns {EventSource} 返回 EventSource 实例，可调用 .close() 取消
+ */
+export function sendChatMessageStream(studentId, message, callbacks = {}, focusedStepOrder = null, currentPathId = null, includePathContext = true) {
+  const params = new URLSearchParams({ student_id: studentId, message, include_path_context: includePathContext })
+  if (focusedStepOrder !== null && includePathContext) {
+    params.append('focused_step_order', focusedStepOrder)
+  }
+  if (currentPathId !== null && includePathContext) {
+    params.append('current_path_id', currentPathId)
+  }
+  const url = `/api/chat?${params.toString()}`
+  const es = new EventSource(url)
+
+  es.addEventListener('status', (e) => {
+    try {
+      callbacks.onStatus?.(JSON.parse(e.data))
+    } catch { /* ignore parse errors */ }
+  })
+
+  es.addEventListener('token', (e) => {
+    try {
+      const { token } = JSON.parse(e.data)
+      if (token) callbacks.onToken?.(token)
+    } catch { /* ignore */ }
+  })
+
+  es.addEventListener('metadata', (e) => {
+    try {
+      callbacks.onMetadata?.(JSON.parse(e.data))
+    } catch { /* ignore */ }
+    es.close()
+  })
+
+  es.addEventListener('error', () => {
+    callbacks.onError?.(new Error('SSE connection failed'))
+    es.close()
+  })
+
+  return es
+}
+
 export default api

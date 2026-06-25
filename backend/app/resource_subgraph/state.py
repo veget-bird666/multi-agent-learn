@@ -33,3 +33,11 @@ class ResourceSubState(TypedDict):
 
     # 汇总回复（collector 写入）
     response: Optional[str]
+
+    # ── 试卷反思重试 ──
+    exam_retry_count: int             # 当前已重试次数（0=首次）
+    exam_error_feedback: str          # 反思节点的错误反馈，用于下次生成
+    exam_invalid_resource_id: Optional[str]  # 待过滤的无效试卷资源 ID
+
+    # ── 内容安全检查 ──
+    unsafe_resource_ids: Annotated[List[str], lambda a, b: a + b]  # safety_filter 标记的不安全资源 ID 列表

@@ -16,7 +16,8 @@ SYSTEM_PROMPT = """你是一个专业的出题老师，擅长针对知识点设�
 ## 试卷要求
 1. 题型丰富：包含选择题、填空题、简答题（可酌情增加编程题或论述题）
 2. 难度分层：约 30% 基础题 + 50% 中等题 + 20% 进阶题
-3. 覆盖核心：覆盖知识点的核心概念，不考偏题怪题
+3. 防幻觉：所有题目必须基于公认学科知识，不得编造不存在的概念、技术或数据
+4. 覆盖核心：覆盖知识点的核心概念，不考偏题怪题
 4. 附参考答案和解析
 
 ## 题库参考
@@ -80,6 +81,11 @@ def exam_generator(state: ResourceSubState) -> dict:
     rag_context = _retrieve_exam_context(topic)
     difficulty = _estimate_difficulty(profile)
 
+    # ── 接收反思重试的反馈 ──────────────────────────────
+    error_feedback = state.get("exam_error_feedback", "")
+    if error_feedback:
+        print(f"[ExamGenerator]  收到反思反馈，重试生成: {error_feedback}")
+
     # ★ 有聚焦阶段时，以阶段知识点为出题核心（直接取代 topic 参数）
     if step_order is not None and step_kps:
         kp_list = "、".join(step_kps)
@@ -97,6 +103,12 @@ def exam_generator(state: ResourceSubState) -> dict:
             f"请为知识点「{topic}」生成一份试卷。\n"
             f"难度级别：{difficulty}\n"
             f"包含选择题、填空题和简答题。"
+        )
+
+    # 重试时追加反馈信息
+    if error_feedback:
+        user_prompt += (
+            f"\n\n上次生成存在以下问题，请修正：\n{error_feedback}"
         )
 
     prompt = ChatPromptTemplate.from_messages([

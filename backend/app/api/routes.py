@@ -5,7 +5,6 @@ from app.graph.graph import learning_graph
 from app.services.profile_service import profile_service
 from app.services.resource_service import resource_service
 from app.services.learning_path_service import learning_path_service
-from langchain_community.chat_models import ChatTongyi
 from langchain_core.messages import HumanMessage
 import json
 import asyncio
@@ -111,24 +110,130 @@ async def chat(request: ChatRequest):
 async def chat_stream(
     student_id: str = Query(..., description="学生 ID"),
     message: str = Query(..., description="用户消息"),
+    session_id: str = Query(None, description="会话 ID"),
+    focused_step_order: int = Query(None, description="当前聚焦的学习阶段序号"),
+    current_path_id: int = Query(None, description="当前选中的路径 ID"),
+    include_path_context: bool = Query(True, description="是否将学习路径上下文发给模型"),
 ):
     """
-    对话式学习入口（GET / SSE 流式）
-    前端通过 EventSource 调用，直接与 LLM 对话
+    SSE 流式对话入口 — 运行多智能体图，流式输出回复
+
+    事件类型：
+      - status:  Agent 执行状态更新
+      - token:   回复文本片段
+      - metadata: 最终状态（画像/资源/路径）
+      - error:   错误信息
     """
-    llm = ChatTongyi(model="qwen3-max", temperature=0.7)
+    # ── 加载学习路径上下文（与 POST 保持一致） ──
+    current_path_id_val = current_path_id
+    learning_path_data = None
+
+    if include_path_context:
+        if current_path_id_val is not None:
+            path = learning_path_service.get_by_id(current_path_id_val)
+            if path:
+                learning_path_data = path.get("steps")
+            else:
+                current_path_id_val = None
+        if current_path_id_val is None:
+            active_path = learning_path_service.get_active(student_id)
+            current_path_id_val = active_path["id"] if active_path else None
+            learning_path_data = active_path["steps"] if active_path else None
+    else:
+        current_path_id_val = None
+        learning_path_data = None
+        focused_step_order = None
+
+    AGENT_LABELS = {
+        "profile_agent": "👤 画像分析",
+        "path_agent": "🗺️ 路径规划",
+        "resource_agent": "📦 资源生成",
+        "rewrite_node": "✏️ 查询重写",
+        "tool_node": "🔧 工具调用",
+        "chat_agent": "💬 生成回答",
+    }
 
     async def event_generator():
         try:
-            async for chunk in llm.astream([HumanMessage(content=message)]):
-                token = chunk.content
-                if token:
-                    yield {"event": "token", "data": json.dumps({"token": token})}
+            # 立即发送开始状态，触发浏览器建立 SSE 连接
+            yield {"event": "status", "data": json.dumps({"agent": "start", "label": "🤔 分析中..."})}
+
+            # ── 构建完整初始 state ──
+            initial_state = {
+                "history": [HumanMessage(content=message)],
+                "operation": 0,
+                "student_id": student_id,
+                "message": message,
+                "session_id": session_id,
+                "profile": None,
+                "current_agent": None,
+                "next_agent": None,
+                "next_reasoning": None,
+                "profile_update_hint": None,
+                "tool_result": None,
+                "rewritten_query": None,
+                "execution_plan": [],
+                "current_plan_step": -1,
+                "image_base64": None,
+                "knowledge_point": None,
+                "learning_path": learning_path_data,
+                "current_path_id": current_path_id_val,
+                "current_step": 0,
+                "focused_step_order": focused_step_order,
+                "generated_resources": [],
+                "teaching_decisions": [],
+                "interaction_pattern": None,
+                "response": None,
+            }
+
+            # ── 运行完整的 LangGraph ──
+            final_state = await learning_graph.ainvoke(initial_state)
+
+            # ── 从 history 中提取 Agent 执行顺序 ──
+            history = final_state.get("history", [])
+            detected = set()
+            for msg in history:
+                content = msg.content if hasattr(msg, "content") else str(msg)
+                for agent_name, label in AGENT_LABELS.items():
+                    if agent_name not in detected and f"[{agent_name}]" in content:
+                        detected.add(agent_name)
+                        yield {"event": "status", "data": json.dumps({
+                            "agent": agent_name,
+                            "label": label,
+                        })}
+
+            if "chat_agent" not in detected:
+                yield {"event": "status", "data": json.dumps({
+                    "agent": "chat_agent",
+                    "label": "💬 生成回答",
+                })}
+
+            # ── 流式输出回复文本 ──
+            response = final_state.get("response", "") or ""
+            CHUNK_SIZE = 3
+            for i in range(0, len(response), CHUNK_SIZE):
+                chunk = response[i:i + CHUNK_SIZE]
+                yield {"event": "token", "data": json.dumps({"token": chunk})}
+                await asyncio.sleep(0.008)  # 8ms 间隔，营造流式效果
+
+            # ── 发送最终元数据 ──
+            profile = final_state.get("profile")
+            resources = final_state.get("generated_resources", [])
+            yield {"event": "metadata", "data": json.dumps({
+                "response": response,
+                "profile": profile.model_dump() if profile and hasattr(profile, "model_dump") else profile,
+                "resources": [
+                    r.model_dump() if hasattr(r, "model_dump") else r
+                    for r in resources
+                ],
+                "learning_path": final_state.get("learning_path"),
+                "current_path_id": final_state.get("current_path_id"),
+            })}
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             yield {"event": "error", "data": json.dumps({"error": str(e)})}
-        finally:
-            yield {"event": "end", "data": "[DONE]"}
 
     return EventSourceResponse(event_generator())
 

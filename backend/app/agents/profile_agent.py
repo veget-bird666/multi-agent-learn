@@ -32,26 +32,52 @@ def profile_agent(state: LearningState):
     if update_hint:
         hint_prompt = f"本次重点关注的画像维度：{update_hint}\n"
 
+    # 如果聚焦了学习阶段，加入阶段上下文辅助画像构建
+    focused_step_order = state.get("focused_step_order")
+    learning_path = state.get("learning_path")
+    stage_context = ""
+    if focused_step_order is not None and learning_path:
+        for step in learning_path:
+            if step.get("order") == focused_step_order:
+                kps = "、".join(step.get("knowledge_points", []))
+                stage_context = (
+                    f"学生当前聚焦的学习阶段信息：\n"
+                    f"  阶段名称：{step.get('stage_name', '')}\n"
+                    f"  阶段描述：{step.get('description', '')}\n"
+                    f"  包含知识点：{kps}\n"
+                    f"  难度等级：{step.get('difficulty', 'medium')}\n"
+                    f"请利用这些阶段信息推断学生的知识基础（如涉及的主题领域）、"
+                    f"兴趣领域、学习目标等画像维度。\n"
+                )
+                print(f"[ProfileAgent]   使用聚焦阶段: 阶段{focused_step_order} - {step.get('stage_name', '')}")
+                break
+
     prompt = ChatPromptTemplate.from_messages([
         ("system", "你是一个学习画像构建助手，负责从学生的对话中抽取特征，"
                     "构建动态画像。字段包括：知识基础、认知风格、学习节奏、"
                     "兴趣领域、易错点偏好、学习目标等。"
                     "{pre_profile_prompt}"
                     "{hint_prompt}"
-                    "如果对话不足以提取特征，则相关字段可以留空。"),
+                    "{stage_context}"
+                    "如果对话不足以提取特征，则相关字段可以留空。"
+                    "重要：每个字段的值请控制在30字以内，简洁明了，不要写长段落。"),
         MessagesPlaceholder("history"),
         ("user", "请根据以上对话，帮我抽取学生的特征，构建画像。"),
       ])
 
     chain = prompt | tool_llm.with_structured_output(StudentProfile)
-    res_profile = chain.invoke({"history": history, "pre_profile_prompt": pre_profile_prompt, "hint_prompt": hint_prompt})
+    res_profile = chain.invoke({"history": history, "pre_profile_prompt": pre_profile_prompt, "hint_prompt": hint_prompt, "stage_context": stage_context})
     res_profile.student_id = state.get("student_id")
 
     profile_service.save_or_update(res_profile)
 
     print(f"[ProfileAgent]  画像已保存: 认知风格={res_profile.cognitive_style}, 知识基础={res_profile.knowledge_base}, 兴趣={res_profile.interest_areas}")
 
-    detail = f"系统：已更新学生画像（认知风格={res_profile.cognitive_style}，知识基础={res_profile.knowledge_base}）"
+    # 简短摘要（不要往 history 写长篇字段值，避免 chat_agent 重复输出）
+    short_reason = ""
+    if update_hint:
+        short_reason = f"，重点更新：{update_hint[:20]}"
+    detail = f"系统：已更新学生画像{short_reason}"
     agent_message = AIMessage(content=f"[profile_agent] {detail}")
 
     return {

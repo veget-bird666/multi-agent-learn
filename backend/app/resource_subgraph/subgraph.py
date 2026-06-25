@@ -1,13 +1,17 @@
 """
 资源生成子图（Subgraph）
 结构：
-  planner → Send() ─┬→ doc_generator ─┐
-                     ├→ exam_generator ─┤
-                     ├→ ppt_generator  ─┤
-                     ├→ image_retriever ─┤
-                     └→ video_retriever ─┘ → collector → END
+  planner → Send() ─┬→ doc_generator ──────────┐
+                     ├→ exam_generator → exam_reflector ─┬→ exam_generator (重试)
+                     ├→ ppt_generator  ─────────────────┤
+                     ├→ image_retriever ────────────────┤
+                     ├→ video_retriever ────────────────┤
+                     └→ mindmap_generator ──────────────┘
+                         → safety_filter → collector → END
 
-planner 一次决策 → Send() 并行派发给多个生成器 → collector 汇总
+exam_generator 单独走"生成→反思"链路，exam_reflector 验证不通过则重试，最多 2 次。
+safety_filter 对所有生成资源做内容安全审查和事实准确性检查（防幻觉），
+            未通过的资源被标记并从最终结果中移除。
 """
 from langgraph.graph import StateGraph, END
 from langgraph.types import Send
@@ -19,6 +23,9 @@ from app.resource_subgraph.exam_generator import exam_generator
 from app.resource_subgraph.ppt_generator import ppt_generator
 from app.resource_subgraph.image_retriever import image_retriever
 from app.resource_subgraph.video_retriever import video_retriever
+from app.resource_subgraph.mindmap_generator import mindmap_generator
+from app.resource_subgraph.exam_reflector import exam_reflector, route_from_exam_reflector
+from app.resource_subgraph.safety_filter import safety_filter
 
 # ── 生成器节点映射 ──────────────────────────────────────
 # planner 输出的 resource_type → 子图节点名称
@@ -28,6 +35,7 @@ GENERATOR_MAP = {
     "ppt": "ppt_generator",
     "image": "image_retriever",
     "video": "video_retriever",
+    "mindmap": "mindmap_generator",
 }
 
 ALL_GENERATORS = list(GENERATOR_MAP.values())
@@ -73,6 +81,20 @@ def resource_collector(state: ResourceSubState) -> dict:
     resources = state.get("generated_resources", [])
     plan = state.get("resource_plan", [])
 
+    # 过滤掉已被反射节点标记为无效的资源（如格式错误的试卷）
+    invalid_id = state.get("exam_invalid_resource_id")
+    if invalid_id:
+        resources = [r for r in resources if r.id != invalid_id]
+
+    # 过滤掉被 safety_filter 标记为不安全的资源
+    unsafe_ids = state.get("unsafe_resource_ids", [])
+    if unsafe_ids:
+        before = len(resources)
+        resources = [r for r in resources if r.id not in unsafe_ids]
+        filtered = before - len(resources)
+        if filtered > 0:
+            print(f"[ResourceCollector]  安全过滤移除 {filtered} 项不安全资源")
+
     print(f"\n[ResourceCollector]  汇总资源生成结果...")
 
     if not resources:
@@ -91,6 +113,7 @@ def resource_collector(state: ResourceSubState) -> dict:
         "ppt": " PPT 课件",
         "image": " 图片",
         "video": " 视频",
+        "mindmap": " 思维导图",
     }
 
     lines = [f"已为当前知识点生成 {len(resources)} 项学习资源：\n"]
@@ -122,6 +145,9 @@ def build_resource_subgraph() -> StateGraph:
     builder.add_node("ppt_generator", ppt_generator)
     builder.add_node("image_retriever", image_retriever)
     builder.add_node("video_retriever", video_retriever)
+    builder.add_node("mindmap_generator", mindmap_generator)
+    builder.add_node("exam_reflector", exam_reflector)
+    builder.add_node("safety_filter", safety_filter)
     builder.add_node("collector", resource_collector)
 
     # 入口：planner
@@ -136,11 +162,26 @@ def build_resource_subgraph() -> StateGraph:
         ALL_GENERATORS + ["collector"],   # path_map 包含所有可能目的地
     )
 
-    # 所有生成器 → collector
+    # 普通生成器 → safety_filter（exam_generator 不走这里，它走反思链路）
     for gen_node in ALL_GENERATORS:
-        builder.add_edge(gen_node, "collector")
+        if gen_node == "exam_generator":
+            continue
+        builder.add_edge(gen_node, "safety_filter")
+
+    # exam_generator → exam_reflector（固定路由）
+    builder.add_edge("exam_generator", "exam_reflector")
+
+    # exam_reflector → exam_generator（重试）或 safety_filter（通过）
+    builder.add_conditional_edges(
+        "exam_reflector",
+        route_from_exam_reflector,
+        {"exam_generator": "exam_generator", "safety_filter": "safety_filter"},
+    )
 
     # collector → END
+    # safety_filter → collector
+    builder.add_edge("safety_filter", "collector")
+
     builder.add_edge("collector", END)
 
     return builder.compile()

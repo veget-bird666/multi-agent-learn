@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { sendChatMessage as apiSendMessage } from '../api'
+import { sendChatMessage as apiSendMessage, sendChatMessageStream } from '../api'
 
 export const useChatStore = defineStore('chat', () => {
   const messages = ref([])
   const isStreaming = ref(false)
   const studentId = ref('student_001')
+  const streamStatus = ref('')  // 当前流式状态：如 "画像分析"、"路径规划" 等
 
   // ── 学习路径上下文 ──
   const currentPathId = ref(null)      // 当前选中的路径 ID
@@ -32,12 +33,11 @@ export const useChatStore = defineStore('chat', () => {
   function togglePathContext() {
     includePathContext.value = !includePathContext.value
     if (!includePathContext.value) {
-      // 关闭开关时自动取消聚焦
       focusedStepOrder.value = null
     }
   }
 
-  /** 发送消息，携带当前路径上下文 */
+  /** 发送消息（非流式，保持向后兼容） */
   async function sendMessage(text) {
     if (!text.trim() || isStreaming.value) return null
 
@@ -54,7 +54,6 @@ export const useChatStore = defineStore('chat', () => {
       )
       addMessage('assistant', data.response)
 
-      // 更新路径上下文（如果后端返回了新路径）
       if (data.current_path_id) {
         currentPathId.value = data.current_path_id
       }
@@ -66,6 +65,55 @@ export const useChatStore = defineStore('chat', () => {
     } finally {
       isStreaming.value = false
     }
+  }
+
+  /** 发送消息（流式），通过 SSE 逐字接收回复 */
+  async function streamMessage(text) {
+    if (!text.trim() || isStreaming.value) return null
+
+    addMessage('user', text)
+    isStreaming.value = true
+    addMessage('assistant', '')  // 占位，后续逐字追加
+    streamStatus.value = '连接中...'
+
+    return new Promise((resolve) => {
+      sendChatMessageStream(
+        studentId.value,
+        text,
+        {
+          onStatus(status) {
+            if (status.label) {
+              streamStatus.value = status.label
+            }
+          },
+          onToken(token) {
+            appendToLastMessage(token)
+          },
+          onMetadata(metadata) {
+            if (metadata.current_path_id) {
+              currentPathId.value = metadata.current_path_id
+            }
+            streamStatus.value = ''
+            isStreaming.value = false
+            resolve(metadata)
+          },
+          onError() {
+            const last = messages.value[messages.value.length - 1]
+            if (last && last.role === 'assistant' && !last.content) {
+              last.content = '抱歉，请求处理时出现错误，请重试。'
+            } else if (last && last.role === 'assistant') {
+              last.content += '\n\n（连接中断，请重试）'
+            }
+            streamStatus.value = ''
+            isStreaming.value = false
+            resolve(null)
+          },
+        },
+        focusedStepOrder.value,
+        currentPathId.value,
+        includePathContext.value,
+      )
+    })
   }
 
   /** 聚焦某个学习阶段 */
@@ -82,6 +130,7 @@ export const useChatStore = defineStore('chat', () => {
     messages,
     isStreaming,
     studentId,
+    streamStatus,
     currentPathId,
     focusedStepOrder,
     pathList,
@@ -90,6 +139,7 @@ export const useChatStore = defineStore('chat', () => {
     appendToLastMessage,
     clearMessages,
     sendMessage,
+    streamMessage,
     togglePathContext,
     focusStep,
     clearFocus,

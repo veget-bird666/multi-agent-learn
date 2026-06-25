@@ -74,18 +74,36 @@
           />
         </template>
 
-        <!-- 加载指示 -->
+        <!-- 流式输出指示 -->
         <div v-if="chatStore.isStreaming" class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
-            AI
-          </div>
-          <div class="bg-dark-surface border border-dark-border rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
-            <div class="flex gap-1.5">
+          <img
+            src="/ai_avatar.png"
+            alt="AI"
+            class="w-8 h-8 rounded-full flex-shrink-0 shadow-sm object-cover"
+          />
+          <div class="bg-dark-surface border border-dark-border rounded-2xl rounded-tl-md px-5 py-4 shadow-sm min-w-[160px]">
+            <!-- 状态标签 -->
+            <div v-if="chatStore.streamStatus" class="text-[11px] text-blue-400 mb-2 font-medium">
+              {{ chatStore.streamStatus }}
+            </div>
+            <!-- 等待中显示三点动画，有内容后隐藏 -->
+            <div v-if="!hasStreamingContent" class="flex gap-1.5">
               <span class="typing-dot"></span>
               <span class="typing-dot"></span>
               <span class="typing-dot"></span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- 流式状态条 -->
+      <div
+        v-if="chatStore.isStreaming && chatStore.streamStatus"
+        class="flex-shrink-0 px-4 md:px-8 pt-2 bg-dark-surface/40 backdrop-blur-sm"
+      >
+        <div class="flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+          <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+          <span class="text-[11px] text-blue-300">{{ chatStore.streamStatus }}</span>
         </div>
       </div>
 
@@ -150,6 +168,14 @@ const activePathName = computed(() => {
   return path?.title || ''
 })
 
+/** 流式输出是否已有内容（有内容则隐藏加载动画） */
+const hasStreamingContent = computed(() => {
+  if (!chatStore.isStreaming) return false
+  const msgs = chatStore.messages
+  const last = msgs[msgs.length - 1]
+  return last && last.role === 'assistant' && last.content.length > 0
+})
+
 /** 当前聚焦阶段的详细信息 */
 const currentFocusedStep = computed(() => {
   if (chatStore.focusedStepOrder === null) return null
@@ -193,7 +219,7 @@ async function sendMessage() {
   inputMessage.value = ''
   autoResize()
 
-  await chatStore.sendMessage(text)
+  await chatStore.streamMessage(text)
   scrollToBottom()
 }
 
@@ -201,7 +227,18 @@ function clearConversation() {
   chatStore.clearMessages()
 }
 
+// 消息数量变化时滚动到底部
 watch(() => chatStore.messages.length, scrollToBottom)
+
+// 流式输出时持续滚动
+watch(() => {
+  const msgs = chatStore.messages
+  return msgs[msgs.length - 1]?.content
+}, () => {
+  if (chatStore.isStreaming) {
+    nextTick(scrollToBottom)
+  }
+})
 
 onMounted(() => {
   inputRef.value?.focus()
