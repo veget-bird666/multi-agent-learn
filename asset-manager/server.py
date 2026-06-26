@@ -106,6 +106,19 @@ def build_oss_url(key: str) -> str:
     return f"https://{OSS_BUCKET}.{OSS_ENDPOINT}/{key}"
 
 
+# ── 学科列表 ────────────────────────────────────────────────
+SUBJECTS = [
+    "C语言",
+    "Java",
+    "Python",
+    "C++",
+    "操作系统",
+    "计算机网络",
+    "计算机组成原理",
+    "算法设计与实现",
+]
+
+
 # ── 资源类型 ────────────────────────────────────────────────
 RESOURCE_TYPES = {
     "image": "图片",
@@ -162,6 +175,69 @@ async def get_status():
     }
 
 
+@app.get("/api/subjects")
+async def list_subjects():
+    """返回学科列表，供前端下拉栏使用。"""
+    return {"subjects": SUBJECTS}
+
+
+@app.get("/api/oss-files")
+async def list_oss_files():
+    """
+    列出 OSS 上所有文件，合并本地元数据（学科/标题/描述/关键词）。
+    返回最近修改时间倒序排列。
+    """
+    if not OSS_AVAILABLE:
+        return {"files": []}
+
+    import oss2
+
+    auth = oss2.Auth(OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET)
+    # endpoint 需要 https:// 前缀
+    endpoint = OSS_ENDPOINT if OSS_ENDPOINT.startswith("https://") else f"https://{OSS_ENDPOINT}"
+    bucket = oss2.Bucket(
+        auth, endpoint, OSS_BUCKET,
+        enable_crc=False,
+        proxies={'http': '', 'https': ''},
+    )
+
+    # 加载本地元数据，以 oss_key 为索引
+    local_index = {}
+    for r in _load_resources():
+        key = r.get("oss_key", "")
+        if key:
+            local_index[key] = r
+
+    results = []
+    for type_id, dir_name in TYPE_DIR_MAP.items():
+        prefix = f"{dir_name}/"
+        try:
+            for obj in oss2.ObjectIteratorV2(bucket, prefix=prefix):
+                if obj.key == prefix:
+                    continue  # 跳过目录本身
+                # 合并本地元数据
+                meta = local_index.get(obj.key, {})
+                results.append({
+                    "key": obj.key,
+                    "size": obj.size,
+                    "last_modified": obj.last_modified,
+                    "etag": obj.etag.strip('"') if obj.etag else "",
+                    "resource_type": meta.get("resource_type", type_id),
+                    "url": build_oss_url(obj.key),
+                    "subject": meta.get("subject", ""),
+                    "title": meta.get("title", ""),
+                    "description": meta.get("description", ""),
+                    "keywords": meta.get("keywords", []),
+                    "filename": meta.get("filename", obj.key.split("/")[-1]),
+                })
+        except Exception as e:
+            print(f"[OSS-Files]  列出 {prefix} 失败: {e}")
+
+    # 按最后修改时间倒序
+    results.sort(key=lambda x: x.get("last_modified", ""), reverse=True)
+    return {"files": results}
+
+
 @app.get("/api/types")
 async def list_types():
     return {"types": [{"id": k, "label": v} for k, v in RESOURCE_TYPES.items()]}
@@ -174,10 +250,65 @@ async def list_resources():
 
 @app.delete("/api/resources/{rid}")
 async def delete_resource(rid: str):
+    """删除本地资源记录（不删 OSS 文件）。"""
     resources = _load_resources()
     resources = [r for r in resources if r.get("id") != rid]
     _save_resources(resources)
     return {"message": "已删除"}
+
+
+@app.delete("/api/oss-files")
+async def delete_oss_file(key: str = "", rid: str = ""):
+    """
+    删除 OSS 文件及对应的本地记录。
+    传 key（OSS 路径）或 rid（本地记录 ID）均可。
+    """
+    if not OSS_AVAILABLE:
+        raise HTTPException(400, "OSS 未配置，无法删除云端文件")
+
+    import oss2
+
+    endpoint = OSS_ENDPOINT if OSS_ENDPOINT.startswith("https://") else f"https://{OSS_ENDPOINT}"
+    auth = oss2.Auth(OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET)
+    bucket = oss2.Bucket(
+        auth, endpoint, OSS_BUCKET,
+        enable_crc=False,
+        proxies={'http': '', 'https': ''},
+    )
+
+    # 通过 key 或 rid 找到 oss_key
+    oss_key = key
+    if not oss_key and rid:
+        resources = _load_resources()
+        for r in resources:
+            if r.get("id") == rid:
+                oss_key = r.get("oss_key", "")
+                break
+
+    if not oss_key:
+        raise HTTPException(400, "未找到要删除的文件")
+
+    # 1. 删除 OSS 文件
+    try:
+        bucket.delete_object(oss_key)
+        print(f"[Delete]  OSS 已删除: {oss_key}")
+    except Exception as e:
+        # OSS 文件可能已不存在，继续清理本地记录
+        print(f"[Delete]  OSS 删除失败（可能已不存在）: {e}")
+
+    # 2. 删除本地记录（按 oss_key 或 rid 匹配）
+    resources = _load_resources()
+    before = len(resources)
+    resources = [
+        r for r in resources
+        if r.get("oss_key") != oss_key and (not rid or r.get("id") != rid)
+    ]
+    removed = before - len(resources)
+    if removed > 0:
+        _save_resources(resources)
+        print(f"[Delete]  已移除 {removed} 条本地记录")
+
+    return {"message": "删除成功", "oss_key": oss_key, "removed_records": removed}
 
 
 @app.post("/api/upload")
@@ -195,12 +326,11 @@ async def upload_resource(
     if not file.filename:
         raise HTTPException(400, "文件名不能为空")
 
-    # ── 生成 OSS 存储路径 ──────────────────────────────
+    # ── 生成 OSS 存储路径（拍平：{type}/{id}.ext）─────────
     ext = Path(file.filename).suffix or ""
     rid = uuid.uuid4().hex[:12]
     sub_dir = TYPE_DIR_MAP.get(resource_type, "other")
-    subject_dir = subject.strip().replace(" ", "_") if subject.strip() else "general"
-    oss_key = f"{sub_dir}/{subject_dir}/{rid}{ext}"
+    oss_key = f"{sub_dir}/{rid}{ext}"
 
     # ── 上传到 OSS（直接 REST API）────────────────────
     file_bytes = await file.read()
@@ -219,8 +349,8 @@ async def upload_resource(
     else:
         uploaded_url = f"local://{oss_key}"
 
-    # ── 关键词解析 ────────────────────────────────────
-    kw_list = [kw.strip() for kw in keywords.split(",") if kw.strip()]
+    # ── 关键词解析（兼容中英文逗号）───────────────────
+    kw_list = [kw.strip() for kw in keywords.replace("，", ",").split(",") if kw.strip()]
 
     # ── 保存元数据 ────────────────────────────────────
     resource_entry = {

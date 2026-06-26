@@ -3,3 +3,4 @@ uvicorn[standard]>=0.34.0
 python-multipart>=0.0.19
 requests>=2.31.0
 python-dotenv>=1.0.0
+oss2>=2.18.0

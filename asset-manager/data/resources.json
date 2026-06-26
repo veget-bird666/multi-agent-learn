@@ -1,39 +1,5 @@
 [
   {
-    "id": "80405dd4b43c",
-    "oss_key": "videos/C语言/80405dd4b43c.mp4",
-    "url": "local://videos/C语言/80405dd4b43c.mp4",
-    "oss_uploaded": false,
-    "filename": "18s三剑鬼.mp4",
-    "file_size": 39500720,
-    "resource_type": "video",
-    "title": "C语言指针的定义",
-    "description": "C语言指针的定义，C语言指针是什么",
-    "keywords": [
-      "指针",
-      "内存",
-      "C语言"
-    ],
-    "subject": "C语言",
-    "created_at": "2026-06-25T20:48:10"
-  },
-  {
-    "id": "ea6dd3f8cc49",
-    "oss_key": "videos/原神/ea6dd3f8cc49.mp4",
-    "url": "local://videos/原神/ea6dd3f8cc49.mp4",
-    "oss_uploaded": false,
-    "filename": "18s三剑鬼.mp4",
-    "file_size": 39500720,
-    "resource_type": "video",
-    "title": "原神深渊18s三剑鬼",
-    "description": "原神深渊18s三剑鬼",
-    "keywords": [
-      "原神 深渊 三剑鬼"
-    ],
-    "subject": "原神",
-    "created_at": "2026-06-25T20:51:45"
-  },
-  {
     "id": "37305821da7b",
     "cos_key": "videos/C语言/37305821da7b.mp4",
     "url": "local://videos/C语言/37305821da7b.mp4",
@@ -242,19 +208,36 @@
     "created_at": "2026-06-26T22:03:53"
   },
   {
-    "id": "72b222748dd7",
-    "oss_key": "images/111/72b222748dd7.mp4",
-    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/images/111/72b222748dd7.mp4",
+    "id": "293eaa60412e",
+    "oss_key": "videos/293eaa60412e.mp4",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/videos/293eaa60412e.mp4",
     "oss_uploaded": true,
-    "filename": "18s三剑鬼.mp4",
-    "file_size": 39500720,
-    "resource_type": "image",
-    "title": "1",
-    "description": "1",
+    "filename": "可爱捏.mp4",
+    "file_size": 52935626,
+    "resource_type": "video",
+    "title": "指针",
+    "description": "指针",
     "keywords": [
-      "1"
+      "指针"
     ],
-    "subject": "111",
-    "created_at": "2026-06-26T22:04:34"
+    "subject": "C语言",
+    "created_at": "2026-06-26T22:38:51"
+  },
+  {
+    "id": "85a12b237153",
+    "oss_key": "videos/85a12b237153.mp4",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/videos/85a12b237153.mp4",
+    "oss_uploaded": true,
+    "filename": "狼队.mp4",
+    "file_size": 1066908,
+    "resource_type": "video",
+    "title": "python字典用法",
+    "description": "python字典的具体用法",
+    "keywords": [
+      "python",
+      "字典"
+    ],
+    "subject": "",
+    "created_at": "2026-06-26T23:00:40"
   }
 ]
