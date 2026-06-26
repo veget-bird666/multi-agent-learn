@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学习资源管理</title>
+  <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js">
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── 布局 ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .header h1 { font-size: 22px; font-weight: 700; }
+    .header .badge {
+      font-size: 11px; color: #94a3b8; background: #1e293b;
+      padding: 4px 10px; border-radius: 6px;
+    }
+
+    /* ── 卡片 ── */
+    .card {
+      background: #1a1d2e; border: 1px solid #2d3148; border-radius: 12px;
+      padding: 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #c8d0e0;
+    }
+
+    /* ── 表单 ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .field label {
+      display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; font-weight: 500;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; font-size: 13px;
+      background: #0f1117; border: 1px solid #2d3148; border-radius: 8px;
+      color: #e2e8f0; outline: none; transition: border-color .2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: #3b82f6;
+    }
+    .field textarea { resize: vertical; min-height: 64px; font-family: inherit; }
+    .field select { cursor: pointer; }
+    .field select option { background: #1a1d2e; }
+
+    /* ── 拖拽区 ── */
+    .dropzone {
+      border: 2px dashed #2d3148; border-radius: 10px; padding: 36px 20px;
+      text-align: center; cursor: pointer; transition: all .2s;
+      margin-bottom: 16px;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: #3b82f6; background: rgba(59, 130, 246, 0.06);
+    }
+    .dropzone-icon { font-size: 36px; margin-bottom: 8px; opacity: .5; }
+    .dropzone-text { font-size: 13px; color: #94a3b8; }
+    .dropzone-hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .file-list {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+    }
+    .file-tag {
+      display: flex; align-items: center; gap: 6px;
+      background: #1e293b; border: 1px solid #2d3148; border-radius: 6px;
+      padding: 4px 10px; font-size: 12px; color: #c8d0e0;
+    }
+    .file-tag .remove {
+      cursor: pointer; color: #ef4444; font-weight: bold; font-size: 14px;
+      line-height: 1;
+    }
+    .file-tag .remove:hover { color: #f87171; }
+
+    /* ── 按钮 ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer; transition: all .2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #fff;
+    }
+    .btn-primary:hover { box-shadow: 0 4px 16px rgba(59, 130, 246, .3); }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+    .btn-danger {
+      background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 12px; font-size: 11px;
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, .1); }
+    .btn-sm { padding: 5px 12px; font-size: 11px; }
+
+    /* ── 进度条 ── */
+    .progress-bar {
+      width: 100%; height: 6px; background: #0f1117; border-radius: 4px;
+      overflow: hidden; margin: 12px 0;
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 4px; transition: width .3s;
+    }
+
+    /* ── 表格 ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th {
+      text-align: left; padding: 10px 12px; color: #94a3b8;
+      border-bottom: 1px solid #2d3148; font-weight: 500; white-space: nowrap;
+    }
+    td {
+      padding: 10px 12px; border-bottom: 1px solid #1e293b; vertical-align: middle;
+    }
+    tr:hover td { background: rgba(59, 130, 246, .03); }
+
+    .type-badge {
+      display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px;
+      font-weight: 500;
+    }
+    .type-image { background: #1e3a5f; color: #60a5fa; }
+    .type-video { background: #312e81; color: #a78bfa; }
+    .type-ppt { background: #422006; color: #fbbf24; }
+    .type-document { background: #064e3b; color: #34d399; }
+    .type-mindmap { background: #3b0764; color: #c084fc; }
+    .type-exam { background: #4c1d95; color: #a78bfa; }
+    .type-code { background: #1e293b; color: #94a3b8; }
+    .type-other { background: #1e293b; color: #64748b; }
+
+    .kws span {
+      display: inline-block; font-size: 10px; background: #1e293b;
+      color: #94a3b8; padding: 1px 6px; border-radius: 4px; margin: 1px 2px;
+    }
+
+    .url-cell {
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .url-cell a { color: #60a5fa; text-decoration: none; }
+    .url-cell a:hover { text-decoration: underline; }
+
+    .status-ok { color: #34d399; font-size: 10px; }
+    .status-no { color: #f87171; font-size: 10px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a1d2e; border: 1px solid #2d3148; border-radius: 10px;
+      padding: 12px 24px; font-size: 13px; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      z-index: 999; animation: fade-in .3s;
+    }
+    @keyframes fade-in { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; } }
+
+    .empty-state {
+      text-align: center; padding: 40px 0; color: #64748b; font-size: 13px;
+    }
+    .empty-state .big { font-size: 40px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+
+      <!-- ═══ 顶部 ═══ -->
+      <div class="header">
+        <div>
+          <h1>📦 学习资源管理</h1>
+          <span style="font-size:12px;color:#64748b;margin-top:2px;display:block">
+            上传文件到腾讯云 COS 并附带元数据，供 RAG 检索使用
+          </span>
+        </div>
+        <span class="badge">共 <strong>{{ resources.length }}</strong> 个资源</span>
+      </div>
+
+      <!-- ═══ COS 状态 ═══ -->
+      <div class="card" style="padding:12px 20px;display:flex;align-items:center;gap:8px;font-size:12px">
+        <span v-if="cosAvailable" style="color:#34d399">●</span>
+        <span v-else style="color:#f87171">●</span>
+        <span v-if="cosAvailable">COS 已配置 — {{ cosBucket }}</span>
+        <span v-else>COS 未配置，上传文件仅保存本地记录</span>
+      </div>
+
+      <!-- ═══ 上传表单 ═══ -->
+      <div class="card">
+        <div class="card-title">⬆️ 上传资源</div>
+
+        <!-- 拖拽区 / 文件选择 -->
+        <div
+          class="dropzone"
+          :class="{ dragover: dragging }"
+          @dragover.prevent="dragging = true"
+          @dragleave="dragging = false"
+          @drop.prevent="onDrop"
+          @click="$refs.fileInput.click()"
+        >
+          <div class="dropzone-icon">📁</div>
+          <div class="dropzone-text">拖拽文件到此处，或点击选择</div>
+          <div class="dropzone-hint">支持图片、视频、PPT、文档等</div>
+          <input
+            ref="fileInput"
+            type="file"
+            multiple
+            style="display:none"
+            @change="onFileSelect"
+          />
+        </div>
+
+        <!-- 已选文件 -->
+        <div class="file-list" v-if="selectedFiles.length">
+          <div class="file-tag" v-for="(f, i) in selectedFiles" :key="i">
+            <span>📄 {{ f.name }}</span>
+            <span class="remove" @click="selectedFiles.splice(i, 1)">×</span>
+          </div>
+        </div>
+
+        <!-- 元数据表单 -->
+        <div class="form-grid">
+          <div class="field">
+            <label>资源类型</label>
+            <select v-model="form.type">
+              <option v-for="t in types" :key="t.id" :value="t.id">{{ t.label }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>所属学科</label>
+            <input v-model="form.subject" placeholder="如: C语言、数据结构" />
+          </div>
+          <div class="field full">
+            <label>标题 <span style="color:#64748b">（留空则用文件名）</span></label>
+            <input v-model="form.title" placeholder="资源的显示标题" />
+          </div>
+          <div class="field full">
+            <label>描述</label>
+            <textarea v-model="form.description" placeholder="资源内容简介，用于 RAG 检索时的摘要"></textarea>
+          </div>
+          <div class="field full">
+            <label>关键词 <span style="color:#64748b">（逗号分隔）</span></label>
+            <input v-model="form.keywords" placeholder="如: 指针, 内存, C语言" />
+          </div>
+        </div>
+
+        <!-- 上传按钮 + 进度 -->
+        <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+          <button
+            class="btn btn-primary"
+            :disabled="uploading || selectedFiles.length === 0"
+            @click="uploadAll"
+          >
+            <span v-if="uploading">⏳ 上传中...</span>
+            <span v-else>⬆️ 上传 ({{ selectedFiles.length }} 个文件)</span>
+          </button>
+          <span v-if="uploading" style="font-size:12px;color:#94a3b8">
+            {{ uploadProgress }} / {{ selectedFiles.length }}
+          </span>
+        </div>
+        <div class="progress-bar" v-if="uploading">
+          <div class="progress-fill" :style="{ width: (uploadProgress / Math.max(selectedFiles.length, 1) * 100) + '%' }"></div>
+        </div>
+      </div>
+
+      <!-- ═══ 资源列表 ═══ -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">📋 已上传资源</div>
+          <button class="btn btn-sm" style="background:#1e293b;border:1px solid #2d3148;color:#94a3b8" @click="loadResources">
+            ↻ 刷新
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table v-if="resources.length">
+            <thead>
+              <tr>
+                <th>类型</th>
+                <th>标题</th>
+                <th>学科</th>
+                <th>关键词</th>
+                <th>文件</th>
+                <th>COS 链接</th>
+                <th>时间</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="r in resources" :key="r.id">
+                <td>
+                  <span class="type-badge" :class="'type-' + r.resource_type">
+                    {{ typeLabel(r.resource_type) }}
+                  </span>
+                </td>
+                <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="r.title">
+                  {{ r.title }}
+                </td>
+                <td>{{ r.subject || '-' }}</td>
+                <td>
+                  <div class="kws">
+                    <span v-for="kw in (r.keywords || [])" :key="kw">{{ kw }}</span>
+                    <span v-if="!r.keywords?.length" style="color:#64748b">-</span>
+                  </div>
+                </td>
+                <td class="url-cell" :title="r.filename">{{ r.filename }}</td>
+                <td class="url-cell">
+                  <span v-if="r.cos_uploaded" class="status-ok">●</span>
+                  <span v-else class="status-no">●</span>
+                  <a v-if="r.url && r.url.startsWith('http')" :href="r.url" target="_blank" :title="r.url">
+                    {{ r.url.slice(0, 30) }}…
+                  </a>
+                  <span v-else style="color:#64748b">-</span>
+                </td>
+                <td style="white-space:nowrap">{{ r.created_at?.slice(0, 10) }}</td>
+                <td>
+                  <button class="btn btn-danger btn-sm" @click="deleteResource(r.id)">删除</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-else class="empty-state">
+            <div class="big">📭</div>
+            <p>暂无资源，上传一些文件吧</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" v-if="toast">{{ toast }}</div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const types = ref([]);
+        const resources = ref([]);
+        const selectedFiles = ref([]);
+        const dragging = ref(false);
+        const uploading = ref(false);
+        const uploadProgress = ref(0);
+        const toast = ref('');
+        const cosAvailable = ref(false);
+        const cosBucket = ref('');
+
+        const form = reactive({
+          type: 'image',
+          subject: '',
+          title: '',
+          description: '',
+          keywords: '',
+        });
+
+        // ── 工具 ──
+        let toastTimer = null;
+        function showToast(msg) {
+          toast.value = msg;
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => toast.value = '', 2500);
+        }
+
+        function typeLabel(id) {
+          const t = types.value.find(t => t.id === id);
+          return t ? t.label : id;
+        }
+
+        // ── API ──
+        async function loadTypes() {
+          try {
+            const res = await fetch('/api/types');
+            const data = await res.json();
+            types.value = data.types;
+          } catch (e) { console.error(e); }
+        }
+
+        async function loadResources() {
+          try {
+            const res = await fetch('/api/resources');
+            const data = await res.json();
+            resources.value = data.resources;
+          } catch (e) { console.error(e); }
+        }
+
+        // ── 检查 COS 状态 ──
+        async function checkStatus() {
+          try {
+            const res = await fetch('/api/status');
+            const data = await res.json();
+            cosAvailable.value = data.cos_configured;
+            cosBucket.value = data.cos_bucket;
+          } catch (e) {}
+        }
+
+        // ── 文件选择 ──
+        function onDrop(e) {
+          dragging.value = false;
+          const files = [...(e.dataTransfer?.files || [])];
+          if (files.length) selectedFiles.value = [...selectedFiles.value, ...files];
+        }
+
+        function onFileSelect(e) {
+          const files = [...(e.target?.files || [])];
+          if (files.length) selectedFiles.value = [...selectedFiles.value, ...files];
+          e.target.value = '';
+        }
+
+        // ── 上传 ──
+        async function uploadAll() {
+          if (uploading.value || selectedFiles.value.length === 0) return;
+
+          uploading.value = true;
+          uploadProgress.value = 0;
+          let success = 0, failed = 0;
+
+          for (const file of selectedFiles.value) {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('resource_type', form.type);
+            fd.append('title', form.title || file.name);
+            fd.append('description', form.description);
+            fd.append('keywords', form.keywords);
+            fd.append('subject', form.subject);
+
+            try {
+              const res = await fetch('/api/upload', { method: 'POST', body: fd });
+              const data = await res.json();
+              if (res.ok) {
+                success++;
+                showToast(`✅ ${file.name} 上传成功`);
+              } else {
+                failed++;
+                showToast(`❌ ${file.name}: ${data.detail || '失败'}`);
+              }
+            } catch (e) {
+              failed++;
+              showToast(`❌ ${file.name}: ${e.message}`);
+            }
+
+            uploadProgress.value++;
+          }
+
+          // 重载列表
+          await loadResources();
+
+          // 清理已上传的文件列表
+          if (failed === 0) {
+            selectedFiles.value = [];
+            form.description = '';
+            form.keywords = '';
+            form.title = '';
+          }
+
+          uploading.value = false;
+
+          if (success > 0) {
+            showToast(`✅ 上传完成：${success} 成功${failed ? `，${failed} 失败` : ''}`);
+          }
+        }
+
+        // ── 删除 ──
+        async function deleteResource(id) {
+          if (!confirm('确认删除此资源记录？（不会删除 COS 上的文件）')) return;
+          try {
+            const res = await fetch(`/api/resources/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+              showToast('已删除');
+              await loadResources();
+            }
+          } catch (e) {
+            showToast('删除失败: ' + e.message);
+          }
+        }
+
+        onMounted(() => {
+          loadTypes();
+          loadResources();
+          checkStatus();
+        });
+
+        return {
+          types, resources, selectedFiles, dragging,
+          uploading, uploadProgress, toast, cosAvailable, cosBucket,
+          form, typeLabel,
+          onDrop, onFileSelect, uploadAll, deleteResource,
+          loadResources, showToast,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

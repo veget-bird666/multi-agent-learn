@@ -52,7 +52,21 @@
       "Bash(cd:*)",
       "Bash(grep -v \"^$\")",
       "Bash(npm run:*)",
-      "Bash(node -e \"const p = require\\(''mermaid/package.json''\\); console.log\\(p.version\\)\")"
+      "Bash(node -e \"const p = require\\(''mermaid/package.json''\\); console.log\\(p.version\\)\")",
+      "WebFetch(domain:help.aliyun.com)",
+      "Bash(PYTHONIOENCODING=utf-8 python test_debug.py)",
+      "Bash(pip show:*)",
+      "Bash(echo \"HTTP_PROXY=$HTTP_PROXY\")",
+      "Bash(echo \"HTTPS_PROXY=$HTTPS_PROXY\")",
+      "Bash(echo \"http_proxy=$http_proxy\")",
+      "Bash(echo \"https_proxy=$https_proxy\")",
+      "Bash(echo \"NO_PROXY=$NO_PROXY\")",
+      "Bash(curl.exe -X PUT -T \"C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\tmpq0mr47yp.bin\" -o nul -w \"HTTP %{http_code}\\\\n\" \"http://pathie.oss-cn-beijing.aliyuncs.com/curl_a86dda7d.bin?OSSAccessKeyId=LTAI5t9MmoxuGZwcGnvD9CD9&Expires=1782394282&Signature=ANlVIcCU7MeX3RVSu7w06x1SDqM%3D\" 2>&1)",
+      "Bash(netstat -ano)",
+      "Bash(env)",
+      "Bash(reg query:*)",
+      "Bash(taskkill /F /PID 24760)",
+      "Bash(taskkill:*)"
     ]
   }
 }
