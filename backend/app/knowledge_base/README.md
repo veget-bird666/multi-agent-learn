@@ -4,8 +4,14 @@
 
 ```
 knowledge_base/
-├── c_programming/     # C 语言相关
-│   └── pointers.md
-├── python/            # Python 相关（待添加）
-└── data_structure/    # 数据结构相关（待添加）
+├── c_programming/       # C 语言相关
+│   ├── 01_hello_c.md
+│   └── ...
+├── operating_systems/   # 操作系统相关
+│   ├── 01_os_overview.md
+│   └── ...
+├── python/              # Python 相关
+│   ├── 01_getting_started.md
+│   └── ...
+└── data_structure/      # 数据结构相关（待添加）
 ```
