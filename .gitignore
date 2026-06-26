@@ -62,6 +62,9 @@ api_keys.json
 config/api_keys.yaml
 config/api_keys.yml
 
+# --- Secrets ---
+config.txt
+
 # --- Data ---
 # 测试数据/知识库原始文件（构建后的数据）
 data/raw/
