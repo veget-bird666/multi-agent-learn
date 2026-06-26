@@ -55,6 +55,34 @@
             <div v-if="modalType === 'document'" class="chat-markdown text-sm" v-html="renderedContent"></div>
             <!-- 思维导图类型：渲染 Mermaid -->
             <div v-else-if="modalType === 'mindmap'" class="flex justify-center p-4 overflow-x-auto min-h-[300px]" v-html="mindmapSvg"></div>
+            <!-- 视频类型：内嵌播放器 -->
+            <div v-else-if="modalType === 'video'" class="flex justify-center">
+              <div v-if="videoError" class="text-center py-12">
+                <div class="text-4xl mb-3">🎬</div>
+                <p class="text-sm text-gray-400">视频加载失败</p>
+                <p class="text-xs text-gray-600 mt-1">请检查网络连接后重试</p>
+                <div class="mt-4">
+                  <a
+                    :href="videoUrl"
+                    target="_blank"
+                    class="text-xs text-blue-400 hover:text-blue-300 underline"
+                  >直接打开视频链接</a>
+                </div>
+              </div>
+              <video
+                v-else
+                ref="videoPlayer"
+                controls
+                autoplay
+                class="w-full max-h-[70vh] rounded-xl bg-black"
+                playsinline
+                preload="auto"
+                @error="videoError = true"
+              >
+                <source :src="videoUrl" />
+                您的浏览器不支持视频播放
+              </video>
+            </div>
             <!-- 试卷类型：交互式作答 -->
             <div v-else-if="modalType === 'exam'" class="text-sm">
               <div v-if="examData">
@@ -175,6 +203,8 @@ const props = defineProps({
 const showModal = ref(false)
 const modalType = ref('')
 const mindmapSvg = ref('')
+const videoPlayer = ref(null)
+const videoError = ref(false)
 
 // ── 试卷交互状态 ──
 const userAnswers = reactive({})     // { 题目索引: 用户答案 }
@@ -183,12 +213,20 @@ const selectedOptions = reactive({}) // { 题目索引: 选项索引 } 仅选择
 
 // 关闭弹窗时重置状态
 watch(showModal, async (val) => {
-  if (val && modalType.value === 'mindmap') {
-    // 打开思维导图 → 渲染 Mermaid
-    await nextTick()
-    await renderMindmap()
+  if (val) {
+    videoError.value = false
+    if (modalType.value === 'mindmap') {
+      // 打开思维导图 → 渲染 Mermaid
+      await nextTick()
+      await renderMindmap()
+    }
   }
   if (!val) {
+    // 暂停视频并释放资源
+    if (videoPlayer.value) {
+      videoPlayer.value.pause()
+      videoPlayer.value.src = ''
+    }
     Object.keys(userAnswers).forEach(k => { delete userAnswers[k] })
     Object.keys(revealed).forEach(k => { delete revealed[k] })
     Object.keys(selectedOptions).forEach(k => { delete selectedOptions[k] })
@@ -293,6 +331,10 @@ const renderedContent = computed(() => {
   return md.render(props.resource.content || '')
 })
 
+const videoUrl = computed(() => {
+  return props.resource.content || ''
+})
+
 function difficultyBadge(d) {
   if (d === 'easy') return 'bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded'
   if (d === 'hard') return 'bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded'
@@ -318,8 +360,8 @@ function openResource() {
 
   const type = resolvedType.value
 
-  // 文档 / 试卷 / 思维导图 → 弹窗展示
-  if (type === 'document' || type === 'exam' || type === 'mindmap') {
+  // 文档 / 试卷 / 思维导图 / 视频 → 弹窗展示
+  if (type === 'document' || type === 'exam' || type === 'mindmap' || type === 'video') {
     modalType.value = type
     showModal.value = true
     return

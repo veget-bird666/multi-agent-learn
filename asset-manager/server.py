@@ -296,17 +296,23 @@ async def delete_oss_file(key: str = "", rid: str = ""):
         # OSS 文件可能已不存在，继续清理本地记录
         print(f"[Delete]  OSS 删除失败（可能已不存在）: {e}")
 
-    # 2. 删除本地记录（按 oss_key 或 rid 匹配）
+    # 2. 删除本地记录（按 oss_key 匹配）
     resources = _load_resources()
     before = len(resources)
-    resources = [
-        r for r in resources
-        if r.get("oss_key") != oss_key and (not rid or r.get("id") != rid)
-    ]
-    removed = before - len(resources)
+    new_resources = []
+    removed = 0
+    for r in resources:
+        if r.get("oss_key") == oss_key or (rid and r.get("id") == rid):
+            removed += 1
+            print(f"[Delete]  移除本地记录: oss_key={r.get('oss_key')}, id={r.get('id')}")
+        else:
+            new_resources.append(r)
+
     if removed > 0:
-        _save_resources(resources)
+        _save_resources(new_resources)
         print(f"[Delete]  已移除 {removed} 条本地记录")
+    else:
+        print(f"[Delete]  警告: 未找到匹配的本地记录 (oss_key={oss_key}, rid={rid})")
 
     return {"message": "删除成功", "oss_key": oss_key, "removed_records": removed}
 
