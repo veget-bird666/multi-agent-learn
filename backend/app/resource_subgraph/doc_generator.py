@@ -84,10 +84,13 @@ def doc_generator(state: ResourceSubState) -> dict:
 
 def _retrieve_doc_context(topic: str) -> str:
     """RAG 检索文档参考资料。"""
-    # TODO: 接入 ChromaDB，检索与 topic 相关的课程切片
-    # 示例：
-    #   docs = chroma_collection.similarity_search(topic, k=3)
-    #   return "\n\n".join(d.page_content for d in docs)
+    try:
+        from app.rag.retriever import search_knowledge, format_rag_results
+        results = search_knowledge(topic, k=3)
+        if results:
+            return format_rag_results(results, max_chars=2000)
+    except Exception as e:
+        print(f"[DocGenerator]  RAG 检索异常: {e}")
     return "（暂无参考资料）"
 
 

@@ -132,6 +132,19 @@ class LearningPathORM(Base):
         self.path_data = json.dumps(steps, ensure_ascii=False)
 
 
+class SessionStateORM(Base):
+    """多轮对话状态持久化 — 对应 session_states 表"""
+
+    __tablename__ = "session_states"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(String(128), unique=True, index=True, nullable=False)
+    student_id = Column(String(64), index=True, nullable=False)
+    state_json = Column(Text, default="{}")       # JSON: 持久化字段快照
+    created_at = Column(String(32), default="")
+    updated_at = Column(String(32), default="")
+
+
 def _migrate_schema(engine) -> None:
     """
     轻量级 schema 迁移：给已有表补充新字段。

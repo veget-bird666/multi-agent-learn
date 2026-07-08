@@ -6,7 +6,8 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref([])
   const isStreaming = ref(false)
   const studentId = ref('student_001')
-  const streamStatus = ref('')  // 当前流式状态：如 "画像分析"、"路径规划" 等
+  const sessionId = ref(null)       // 当前会话 ID
+  const streamStatus = ref('')      // 当前流式状态：如 "画像分析"、"路径规划" 等
 
   // ── 学习路径上下文 ──
   const currentPathId = ref(null)      // 当前选中的路径 ID
@@ -51,6 +52,7 @@ export const useChatStore = defineStore('chat', () => {
         focusedStepOrder.value,
         currentPathId.value,
         includePathContext.value,
+        sessionId.value,
       )
       addMessage('assistant', data.response)
 
@@ -112,6 +114,7 @@ export const useChatStore = defineStore('chat', () => {
         focusedStepOrder.value,
         currentPathId.value,
         includePathContext.value,
+        sessionId.value,
       )
     })
   }
@@ -126,10 +129,21 @@ export const useChatStore = defineStore('chat', () => {
     focusedStepOrder.value = null
   }
 
+  /** 设置当前会话 ID */
+  function setSessionId(id) {
+    sessionId.value = id
+  }
+
+  /** 直接替换消息列表（用于切换会话时加载历史） */
+  function loadMessages(msgs) {
+    messages.value = msgs
+  }
+
   return {
     messages,
     isStreaming,
     studentId,
+    sessionId,
     streamStatus,
     currentPathId,
     focusedStepOrder,
@@ -143,5 +157,7 @@ export const useChatStore = defineStore('chat', () => {
     togglePathContext,
     focusStep,
     clearFocus,
+    setSessionId,
+    loadMessages,
   }
 })

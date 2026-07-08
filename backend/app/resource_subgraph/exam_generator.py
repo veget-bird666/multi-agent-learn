@@ -202,8 +202,14 @@ def _patch_exam_json(content: str, step_order: int, step_kps: list[str]) -> str:
 
 
 def _retrieve_exam_context(topic: str) -> str:
-    """RAG 检索题库。"""
-    # TODO: 接入 ChromaDB，检索与 topic 相关的题目作为参考
+    """RAG 检索题库参考。"""
+    try:
+        from app.rag.retriever import search_knowledge, format_rag_results
+        results = search_knowledge(topic, k=5)
+        if results:
+            return format_rag_results(results, max_chars=2000)
+    except Exception as e:
+        print(f"[ExamGenerator]  RAG 检索异常: {e}")
     return "（暂无题库参考）"
 
 

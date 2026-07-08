@@ -44,19 +44,21 @@ def image_retriever(state: ResourceSubState) -> dict:
 
 def _retrieve_images(topic: str) -> list[dict]:
     """
-    RAG 检索图片资源。
-    从 ChromaDB 中检索与 topic 相关的图片记录（预存了图片 URL 和描述）。
+    从资源库向量索引中检索与 topic 相关的图片资源。
+    由 asset-manager 上传时自动同步到 ChromaDB。
 
     Returns:
         [{"title": "图片标题", "url": "https://..."}, ...]
     """
-    # TODO: 接入 ChromaDB
-    # 示例实现：
-    #   docs = chroma_collection.similarity_search(topic, k=5)
-    #   results = []
-    #   for doc in docs:
-    #       meta = doc.metadata
-    #       if meta.get("type") == "image":
-    #           results.append({"title": meta.get("title", ""), "url": meta.get("url", "")})
-    #   return results
+    try:
+        from app.rag.resource_library import get_resource_library
+        lib = get_resource_library()
+        matches = lib.search(query=topic, k=5, type_filter="image")
+        if matches:
+            return [
+                {"title": m.get("title", ""), "url": m.get("url", "")}
+                for m in matches
+            ]
+    except Exception as e:
+        print(f"[ImageRetriever]  RAG 检索异常: {e}")
     return []

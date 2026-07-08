@@ -14,8 +14,9 @@ const api = axios.create({
  * @param {boolean} includePathContext 是否将路径上下文发给模型
  * @returns {Promise<object>}
  */
-export async function sendChatMessage(studentId, message, focusedStepOrder = null, currentPathId = null, includePathContext = true) {
+export async function sendChatMessage(studentId, message, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null) {
   const body = { student_id: studentId, message, include_path_context: includePathContext }
+  if (sessionId) body.session_id = sessionId
   if (focusedStepOrder !== null && includePathContext) {
     body.focused_step_order = focusedStepOrder
   }
@@ -232,10 +233,15 @@ export async function createResource(studentId, title, content, knowledgePoint =
  * @param {string} studentId
  * @param {string} message
  * @param {object} callbacks - { onToken, onStatus, onMetadata, onError }
- * @returns {EventSource} 返回 EventSource 实例，可调用 .close() 取消
+ * @param {number|null} focusedStepOrder
+ * @param {number|null} currentPathId
+ * @param {boolean} includePathContext
+ * @param {string|null} sessionId
+ * @returns {EventSource}
  */
-export function sendChatMessageStream(studentId, message, callbacks = {}, focusedStepOrder = null, currentPathId = null, includePathContext = true) {
+export function sendChatMessageStream(studentId, message, callbacks = {}, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null) {
   const params = new URLSearchParams({ student_id: studentId, message, include_path_context: includePathContext })
+  if (sessionId) params.append('session_id', sessionId)
   if (focusedStepOrder !== null && includePathContext) {
     params.append('focused_step_order', focusedStepOrder)
   }
@@ -274,3 +280,28 @@ export function sendChatMessageStream(studentId, message, callbacks = {}, focuse
 }
 
 export default api
+
+// ═══════════════════════════════════════════════════════════
+//  多会话管理 API
+// ═══════════════════════════════════════════════════════════
+
+/** 获取某学生的全部会话摘要列表 */
+export async function listSessions(studentId) {
+  const res = await fetch(`/api/sessions/${studentId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 获取某会话的历史消息 */
+export async function getSessionMessages(sessionId) {
+  const res = await fetch(`/api/sessions/${sessionId}/messages`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 删除某个会话 */
+export async function deleteSession(sessionId) {
+  const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}

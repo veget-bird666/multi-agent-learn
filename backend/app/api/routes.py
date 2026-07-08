@@ -6,6 +6,7 @@ from app.services.profile_service import profile_service
 from app.services.resource_service import resource_service
 from app.services.learning_path_service import learning_path_service
 from langchain_core.messages import HumanMessage
+from app.services.session_service import session_service
 import json
 import asyncio
 
@@ -21,9 +22,17 @@ async def health_check():
 async def chat(request: ChatRequest):
     """
     对话式学习入口：学生发送消息，触发多智能体协同处理
-    非流式运行整个 LangGraph 图，返回最终回复
+    支持多轮对话状态持久化。
     """
     try:
+        # ── 会话持久化：确定 session_id ──
+        session_id = request.session_id or f"session_{request.student_id}"
+        previous_state = session_service.load(session_id) or {}
+
+        # ── 构建历史记录（历史 + 新消息） ──
+        history = list(previous_state.get("history", []) or [])
+        history.append(HumanMessage(content=request.message))
+
         # ── 加载学习路径上下文（开关关闭时跳过） ──
         current_path_id = request.current_path_id
         learning_path_data = None
@@ -47,14 +56,15 @@ async def chat(request: ChatRequest):
             learning_path_data = None
             request.focused_step_order = None
 
-        # 构建完整的初始 state
-        initial_state = {
-            "history": [HumanMessage(content=request.message)],
-            "operation": 0,
+        # ── 合并 state：持久化字段 + 新请求覆盖 ──
+        state = dict(previous_state)
+        state.update({
+            "history": history,
+            "operation": 0,  # 每次图执行重置轮次计数
             "student_id": request.student_id,
             "message": request.message,
-            "session_id": request.session_id,
-            "profile": None,
+            "session_id": session_id,
+            # 重置临时运行态
             "current_agent": None,
             "next_agent": None,
             "next_reasoning": None,
@@ -64,19 +74,24 @@ async def chat(request: ChatRequest):
             "execution_plan": [],
             "current_plan_step": -1,
             "image_base64": None,
-            "knowledge_point": None,
-            "learning_path": learning_path_data,
-            "current_path_id": current_path_id,
-            "current_step": 0,
-            "focused_step_order": request.focused_step_order,
-            "generated_resources": [],
-            "teaching_decisions": [],
-            "interaction_pattern": None,
             "response": None,
-        }
+        })
+        # 学习路径用最新 DB 数据覆盖持久化值
+        if request.include_path_context:
+            state["learning_path"] = learning_path_data
+            state["current_path_id"] = current_path_id
+            state["focused_step_order"] = request.focused_step_order
+        else:
+            state["learning_path"] = None
+            state["current_path_id"] = None
+            state["focused_step_order"] = None
+            state["current_step"] = 0
 
         # 跑完整多智能体图
-        final_state = await learning_graph.ainvoke(initial_state)
+        final_state = await learning_graph.ainvoke(state)
+
+        # 持久化当前轮次状态
+        session_service.save(session_id, request.student_id, final_state)
 
         # 调试信息
         resp_field = final_state.get("response", "")
@@ -104,6 +119,39 @@ async def chat(request: ChatRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"处理请求时出错: {str(e)}")
+
+
+# ── 多会话管理 ──────────────────────────────────────────
+
+
+@router.get("/sessions/{student_id}")
+async def list_sessions(student_id: str):
+    """获取某学生的全部会话摘要列表"""
+    sessions = session_service.list_by_student(student_id)
+    return {"sessions": sessions}
+
+
+@router.get("/sessions/{session_id}/messages")
+async def get_session_messages(session_id: str):
+    """获取某会话的历史消息列表"""
+    messages = session_service.get_messages(session_id)
+    # BaseMessage → dict for JSON serialization
+    serialized = []
+    for msg in messages:
+        serialized.append({
+            "role": "user" if msg.type == "human" else "assistant",
+            "content": msg.content,
+        })
+    return {"messages": serialized}
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """删除某个会话"""
+    ok = session_service.delete(session_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="会话不存在")
+    return {"message": "删除成功"}
 
 
 @router.get("/chat")
@@ -158,14 +206,22 @@ async def chat_stream(
             # 立即发送开始状态，触发浏览器建立 SSE 连接
             yield {"event": "status", "data": json.dumps({"agent": "start", "label": "🤔 分析中..."})}
 
-            # ── 构建完整初始 state ──
-            initial_state = {
-                "history": [HumanMessage(content=message)],
+            # ── 会话持久化 ──
+            session_id_val = session_id or f"session_{student_id}"
+            previous_state = session_service.load(session_id_val) or {}
+
+            # ── 构建历史记录（历史 + 新消息） ──
+            history = list(previous_state.get("history", []) or [])
+            history.append(HumanMessage(content=message))
+
+            # ── 合并 state ──
+            state = dict(previous_state)
+            state.update({
+                "history": history,
                 "operation": 0,
                 "student_id": student_id,
                 "message": message,
-                "session_id": session_id,
-                "profile": None,
+                "session_id": session_id_val,
                 "current_agent": None,
                 "next_agent": None,
                 "next_reasoning": None,
@@ -175,19 +231,23 @@ async def chat_stream(
                 "execution_plan": [],
                 "current_plan_step": -1,
                 "image_base64": None,
-                "knowledge_point": None,
-                "learning_path": learning_path_data,
-                "current_path_id": current_path_id_val,
-                "current_step": 0,
-                "focused_step_order": focused_step_order,
-                "generated_resources": [],
-                "teaching_decisions": [],
-                "interaction_pattern": None,
                 "response": None,
-            }
+            })
+            if include_path_context:
+                state["learning_path"] = learning_path_data
+                state["current_path_id"] = current_path_id_val
+                state["focused_step_order"] = focused_step_order
+            else:
+                state["learning_path"] = None
+                state["current_path_id"] = None
+                state["focused_step_order"] = None
+                state["current_step"] = 0
 
             # ── 运行完整的 LangGraph ──
-            final_state = await learning_graph.ainvoke(initial_state)
+            final_state = await learning_graph.ainvoke(state)
+
+            # 持久化当前轮次状态
+            session_service.save(session_id_val, student_id, final_state)
 
             # ── 从 history 中提取 Agent 执行顺序 ──
             history = final_state.get("history", [])

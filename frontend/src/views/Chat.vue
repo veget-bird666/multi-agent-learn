@@ -1,7 +1,43 @@
 <template>
   <div class="h-[calc(100vh-3.5rem)] flex">
-    <!-- 侧边栏：学习路径 -->
-    <PathSidebar />
+    <!-- 侧边栏：路径 / 对话切换 -->
+    <div class="w-[280px] flex-shrink-0 h-full flex flex-col bg-dark-surface/60 backdrop-blur-sm border-r border-dark-border/60 overflow-hidden">
+      <!-- 切换标签 -->
+      <div class="flex-shrink-0 flex border-b border-dark-border/60">
+        <button
+          @click="sidebarTab = 'paths'"
+          class="flex-1 text-xs py-3 font-medium transition-all duration-200 relative"
+          :class="sidebarTab === 'paths'
+            ? 'text-blue-300'
+            : 'text-gray-500 hover:text-gray-300'"
+        >
+          🗺️ 学习路径
+          <span
+            v-if="sidebarTab === 'paths'"
+            class="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-blue-500 rounded-full"
+          ></span>
+        </button>
+        <button
+          @click="sidebarTab = 'sessions'"
+          class="flex-1 text-xs py-3 font-medium transition-all duration-200 relative"
+          :class="sidebarTab === 'sessions'
+            ? 'text-blue-300'
+            : 'text-gray-500 hover:text-gray-300'"
+        >
+          💬 对话历史
+          <span
+            v-if="sidebarTab === 'sessions'"
+            class="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-blue-500 rounded-full"
+          ></span>
+        </button>
+      </div>
+
+      <!-- 标签内容 -->
+      <div class="flex-1 overflow-hidden">
+        <PathSidebar v-show="sidebarTab === 'paths'" />
+        <SessionSidebar v-show="sidebarTab === 'sessions'" />
+      </div>
+    </div>
 
     <!-- 主对话区 -->
     <div class="flex-1 flex flex-col min-w-0 bg-dark-bg">
@@ -147,10 +183,15 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useChatStore } from '../stores/chat'
+import { useSessionsStore } from '../stores/sessions'
 import ChatMessage from '../components/ChatMessage.vue'
 import PathSidebar from '../components/PathSidebar.vue'
+import SessionSidebar from '../components/SessionSidebar.vue'
 
 const chatStore = useChatStore()
+const sessionsStore = useSessionsStore()
+
+const sidebarTab = ref('paths')  // 'paths' | 'sessions'
 const inputMessage = ref('')
 const messageListRef = ref(null)
 const inputRef = ref(null)
@@ -242,6 +283,12 @@ watch(() => {
 
 onMounted(() => {
   inputRef.value?.focus()
+  // 加载会话列表（SessionSidebar 的 onMounted 也会触发，但 loading 守卫防重）
+  sessionsStore.loadSessions(chatStore.studentId)
+  // 无当前会话时自动创建一个
+  if (!chatStore.sessionId) {
+    sessionsStore.createSession()
+  }
 })
 </script>
 
