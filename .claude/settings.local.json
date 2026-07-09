@@ -70,7 +70,11 @@
       "Bash(git config:*)",
       "Bash(git filter-branch:*)",
       "Bash(node -c \"D:/software_competition/frontend/src/api/index.js\")",
-      "Bash(node -c \"D:/software_competition/frontend/src/stores/chat.js\")"
+      "Bash(node -c \"D:/software_competition/frontend/src/stores/chat.js\")",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//d/software_competition/backend/app/resource_subgraph/**)",
+      "Bash(done)"
     ]
   }
 }

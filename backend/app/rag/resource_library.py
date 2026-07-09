@@ -82,6 +82,7 @@ class ResourceLibrary:
             "description": resource.get("description", "") or "",
             "filename": resource.get("filename", "") or "",
             "oss_key": resource.get("oss_key", "") or "",
+            "difficulty": resource.get("difficulty", "") or "",
             "keywords": ",".join(
                 str(k) for k in (resource.get("keywords", []) or [])
             ),
@@ -152,6 +153,7 @@ class ResourceLibrary:
                     "filename": meta.get("filename", ""),
                     "oss_key": meta.get("oss_key", ""),
                     "resource_type": meta.get("type", ""),
+                    "difficulty": meta.get("difficulty", ""),
                     "keywords": keywords,
                     "distance": raw["distances"][0][i] if raw["distances"] else 0.0,
                 })

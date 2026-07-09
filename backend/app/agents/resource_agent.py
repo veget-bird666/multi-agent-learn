@@ -128,6 +128,7 @@ def resource_agent(state: LearningState) -> dict:
     type_labels = {
         "document": "文档", "exam": "试卷", "ppt": "PPT",
         "image": "图片", "video": "视频", "mindmap": "思维导图",
+        "extra_reading": "拓展阅读",
     }
     if new_resources:
         # 按类型去重统计

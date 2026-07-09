@@ -355,8 +355,11 @@ async function renderMindmap() {
 }
 
 function openResource() {
-  const content = props.resource.content
-  if (!content) return
+  const rawContent = props.resource.content
+  if (!rawContent) return
+
+  // 兼容旧数据：content 可能包含 "url|推荐理由" 格式，取 | 前的部分作为实际 URL
+  const content = rawContent.split('|')[0].trim()
 
   const type = resolvedType.value
 

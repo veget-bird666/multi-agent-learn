@@ -131,6 +131,7 @@
     .type-mindmap { background: #3b0764; color: #c084fc; }
     .type-exam { background: #4c1d95; color: #a78bfa; }
     .type-code { background: #1e293b; color: #94a3b8; }
+    .type-extra_reading { background: #1c1917; color: #fb923c; }
     .type-other { background: #1e293b; color: #64748b; }
 
     .kws span {
@@ -192,7 +193,7 @@
         >
           <div class="dropzone-icon">📁</div>
           <div class="dropzone-text">拖拽文件到此处，或点击选择</div>
-          <div class="dropzone-hint">支持图片、视频、PPT、文档等</div>
+          <div class="dropzone-hint">支持图片、视频、PPT、文档、拓展阅读（PDF等）</div>
           <input
             ref="fileInput"
             type="file"
@@ -228,6 +229,17 @@
           <div class="field full">
             <label>标题 <span style="color:#64748b">（留空则用文件名）</span></label>
             <input v-model="form.title" placeholder="资源的显示标题" />
+          </div>
+          <!-- 拓展阅读专用：难度等级 -->
+          <div class="field full" v-if="form.type === 'extra_reading'" style="margin-top:-4px">
+            <label>难度等级 <span style="color:#64748b">（用于个性化推荐匹配）</span></label>
+            <div style="display:flex;gap:8px">
+              <label v-for="d in difficulties" :key="d.value" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:#94a3b8;padding:4px 10px;background:#0f1117;border:1px solid #2d3148;border-radius:6px;transition:all .2s" :style="form.difficulty === d.value ? 'border-color:#3b82f6;color:#60a5fa;background:rgba(59,130,246,.08)' : ''">
+                <input type="radio" :value="d.value" v-model="form.difficulty" style="display:none" />
+                <span>{{ d.icon }}</span>
+                <span>{{ d.label }}</span>
+              </label>
+            </div>
           </div>
           <div class="field full">
             <label>描述</label>
@@ -364,8 +376,14 @@
           title: '',
           description: '',
           keywords: [],
+          difficulty: 'medium',
         });
         const kwInputText = ref('');
+        const difficulties = [
+          { value: 'easy',   icon: '🌱', label: '入门' },
+          { value: 'medium', icon: '🌿', label: '中等' },
+          { value: 'hard',   icon: '🌳', label: '进阶' },
+        ];
 
         function addKeyword() {
           const kw = kwInputText.value.trim().replace(/[,，]/g, '');
@@ -506,6 +524,7 @@
             fd.append('description', form.description);
             fd.append('keywords', form.keywords.join(','));
             fd.append('subject', form.subject);
+            fd.append('difficulty', form.difficulty);
 
             try {
               const res = await fetch('/api/upload', { method: 'POST', body: fd });

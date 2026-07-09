@@ -128,6 +128,7 @@ RESOURCE_TYPES = {
     "mindmap": "思维导图",
     "exam": "试卷",
     "code": "代码示例",
+    "extra_reading": "拓展阅读",
     "other": "其他",
 }
 
@@ -139,6 +140,7 @@ TYPE_DIR_MAP = {
     "mindmap": "mindmaps",
     "exam": "exams",
     "code": "code",
+    "extra_reading": "readings",
     "other": "other",
 }
 
@@ -325,6 +327,7 @@ async def upload_resource(
     description: str = Form(""),
     keywords: str = Form(""),
     subject: str = Form(""),
+    difficulty: str = Form("medium"),
 ):
     """上传文件到 OSS 并记录元数据。"""
     if resource_type not in RESOURCE_TYPES:
@@ -371,6 +374,7 @@ async def upload_resource(
         "description": description,
         "keywords": kw_list,
         "subject": subject,
+        "difficulty": difficulty if resource_type == "extra_reading" else "",
         "created_at": datetime.now().isoformat(timespec="seconds"),
     }
     resources = _load_resources()

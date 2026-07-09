@@ -6,7 +6,8 @@
                      ├→ ppt_generator  ─────────────────┤
                      ├→ image_retriever ────────────────┤
                      ├→ video_retriever ────────────────┤
-                     └→ mindmap_generator ──────────────┘
+                     ├→ mindmap_generator ──────────────┤
+                     └→ reading_retriever ──────────────┘
                          → safety_filter → collector → END
 
 exam_generator 单独走"生成→反思"链路，exam_reflector 验证不通过则重试，最多 2 次。
@@ -24,6 +25,7 @@ from app.resource_subgraph.ppt_generator import ppt_generator
 from app.resource_subgraph.image_retriever import image_retriever
 from app.resource_subgraph.video_retriever import video_retriever
 from app.resource_subgraph.mindmap_generator import mindmap_generator
+from app.resource_subgraph.reading_retriever import reading_retriever
 from app.resource_subgraph.exam_reflector import exam_reflector, route_from_exam_reflector
 from app.resource_subgraph.safety_filter import safety_filter
 
@@ -36,6 +38,7 @@ GENERATOR_MAP = {
     "image": "image_retriever",
     "video": "video_retriever",
     "mindmap": "mindmap_generator",
+    "extra_reading": "reading_retriever",
 }
 
 ALL_GENERATORS = list(GENERATOR_MAP.values())
@@ -114,6 +117,7 @@ def resource_collector(state: ResourceSubState) -> dict:
         "image": " 图片",
         "video": " 视频",
         "mindmap": " 思维导图",
+        "extra_reading": " 拓展阅读",
     }
 
     lines = [f"已为当前知识点生成 {len(resources)} 项学习资源：\n"]
@@ -146,6 +150,7 @@ def build_resource_subgraph() -> StateGraph:
     builder.add_node("image_retriever", image_retriever)
     builder.add_node("video_retriever", video_retriever)
     builder.add_node("mindmap_generator", mindmap_generator)
+    builder.add_node("reading_retriever", reading_retriever)
     builder.add_node("exam_reflector", exam_reflector)
     builder.add_node("safety_filter", safety_filter)
     builder.add_node("collector", resource_collector)

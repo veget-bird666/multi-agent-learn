@@ -11,7 +11,7 @@ from app.resource_subgraph.state import ResourceSubState
 
 # ── 结构化输出 ──────────────────────────────────────────
 
-AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video", "mindmap"]
+AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video", "mindmap", "extra_reading"]
 
 
 class ResourcePlan(BaseModel):
@@ -20,14 +20,15 @@ class ResourcePlan(BaseModel):
     cleaned_topic: str = Field(
         default="",
         description=(
-            "从用户消息中提取的纯净知识点/主题名称（去掉'生成/PPT/文档'等指令词）。"
+            "从用户消息中提取的纯净知识点/主题名称（去掉'生成/PPT/文档/阅读材料'等指令词）。"
             "如用户说'我想学C语言指针，帮我生成PPT'，则提取为'C语言指针'。"
             "控制在 20 字以内。"
         ),
     )
     resource_types: list[str] = Field(
         default=["document"],
-        description=f"要生成的资源类型列表，可选：{', '.join(AVAILABLE_RESOURCES)}",
+        description=f"要生成的资源类型列表，可选：{', '.join(AVAILABLE_RESOURCES)}。"
+                    f"如需扩展阅读用 extra_reading（同时加 document 作为主文档）",
     )
 
 
@@ -42,6 +43,7 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 - **image**：从知识库检索现有图片/图表。适合需要直观理解时。
 - **video**：从知识库检索现有视频。适合需要动态演示时。
 - **mindmap**：Mermaid 思维导图。适合需要梳理知识结构、复习总结时。
+- **extra_reading**：扩展阅读材料（PDF/文章/书籍章节等）。适合提供深度延伸阅读、拓宽知识面时。
 
 ## 决策原则
 1. **document 是兜底选项** — 至少生成一份文档作为主要学习材料
@@ -49,7 +51,8 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 3. **学生提到"做题"、"练习"、"测验"、"考试"** → exam（可搭配 document）
 4. **知识点涉及可视化内容**（流程图、架构图等）→ image
 5. **知识点涉及操作演示**（编程、实验等）→ video
-6. **不要贪多** — 每次只生成 1-3 种最合适的资源，质量优先
+6. **学生需要深入理解、拓展视野或课后巩固** → extra_reading
+7. **不要贪多** — 每次只生成 1-3 种最合适的资源，质量优先
 
 ## 输出
 1. **cleaned_topic**：从用户消息中提取的纯净知识点名称。去掉"生成/制作/PPT/文档/教案/帮我"等指令词。
