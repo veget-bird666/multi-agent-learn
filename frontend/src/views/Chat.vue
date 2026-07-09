@@ -45,6 +45,35 @@
       <div class="flex-shrink-0 flex items-center justify-between px-6 py-3 border-b border-dark-border/60 bg-dark-surface/40 backdrop-blur-sm">
         <div class="flex items-center gap-3">
           <h2 class="text-sm font-semibold text-gray-300">对话式学习</h2>
+          <!-- 功能开关 -->
+          <div class="flex items-center gap-3 ml-2 pl-3 border-l border-dark-border/60">
+            <label class="flex items-center gap-1.5 cursor-pointer" title="允许生成学习路径">
+              <span class="text-[11px] text-gray-400 select-none">🗺️ 路径</span>
+              <button
+                @click="chatStore.enablePathPlanning = !chatStore.enablePathPlanning"
+                class="relative w-8 h-4 rounded-full transition-all duration-200"
+                :class="chatStore.enablePathPlanning ? 'bg-blue-500/60' : 'bg-gray-600/50'"
+              >
+                <span
+                  class="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200"
+                  :class="chatStore.enablePathPlanning ? 'left-[18px]' : 'left-[2px]'"
+                ></span>
+              </button>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer" title="允许生成学习资源（PPT/文档/试卷等）">
+              <span class="text-[11px] text-gray-400 select-none">📦 资源</span>
+              <button
+                @click="chatStore.enableResourceGeneration = !chatStore.enableResourceGeneration"
+                class="relative w-8 h-4 rounded-full transition-all duration-200"
+                :class="chatStore.enableResourceGeneration ? 'bg-blue-500/60' : 'bg-gray-600/50'"
+              >
+                <span
+                  class="absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200"
+                  :class="chatStore.enableResourceGeneration ? 'left-[18px]' : 'left-[2px]'"
+                ></span>
+              </button>
+            </label>
+          </div>
           <!-- 聚焦状态指示 -->
           <div
             v-if="chatStore.focusedStepOrder !== null && activePathName"

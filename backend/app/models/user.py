@@ -45,3 +45,5 @@ class ChatRequest(BaseModel):
     focused_step_order: Optional[int] = None   # 用户聚焦的学习阶段
     current_path_id: Optional[int] = None      # 前端当前选中的路径 ID
     include_path_context: bool = True           # 是否将学习路径上下文发给模型
+    enable_path_planning: bool = True           # 是否允许生成学习路径
+    enable_resource_generation: bool = True     # 是否允许生成资源

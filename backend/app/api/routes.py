@@ -87,6 +87,10 @@ async def chat(request: ChatRequest):
             state["focused_step_order"] = None
             state["current_step"] = 0
 
+        # 用户开关：控制是否允许生成路径/资源
+        state["enable_path_planning"] = request.enable_path_planning
+        state["enable_resource_generation"] = request.enable_resource_generation
+
         # 跑完整多智能体图
         final_state = await learning_graph.ainvoke(state)
 
@@ -109,7 +113,12 @@ async def chat(request: ChatRequest):
             last_msg = final_state["history"][-1]
             reply = last_msg.content
 
+        # 获取标题（刚保存完，从 DB 取）
+        session_title = session_service.get_title(session_id) or ""
+
         return {
+            "session_id": session_id,
+            "title": session_title,
             "response": reply or "抱歉，我没有生成有效回复。",
             "profile": final_state.get("profile"),
             "resources": final_state.get("generated_resources", []),
@@ -154,6 +163,18 @@ async def delete_session(session_id: str):
     return {"message": "删除成功"}
 
 
+@router.put("/sessions/{session_id}/title")
+async def update_session_title(session_id: str, body: dict):
+    """手动修改某个会话的标题"""
+    title = body.get("title", "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="标题不能为空")
+    ok = session_service.update_title(session_id, title)
+    if not ok:
+        raise HTTPException(status_code=404, detail="会话不存在")
+    return {"message": "标题更新成功", "session_id": session_id, "title": title}
+
+
 @router.get("/chat")
 async def chat_stream(
     student_id: str = Query(..., description="学生 ID"),
@@ -162,6 +183,8 @@ async def chat_stream(
     focused_step_order: int = Query(None, description="当前聚焦的学习阶段序号"),
     current_path_id: int = Query(None, description="当前选中的路径 ID"),
     include_path_context: bool = Query(True, description="是否将学习路径上下文发给模型"),
+    enable_path_planning: bool = Query(True, description="是否允许生成学习路径"),
+    enable_resource_generation: bool = Query(True, description="是否允许生成资源"),
 ):
     """
     SSE 流式对话入口 — 运行多智能体图，流式输出回复
@@ -243,6 +266,10 @@ async def chat_stream(
                 state["focused_step_order"] = None
                 state["current_step"] = 0
 
+            # 用户开关：控制是否允许生成路径/资源
+            state["enable_path_planning"] = enable_path_planning
+            state["enable_resource_generation"] = enable_resource_generation
+
             # ── 运行完整的 LangGraph ──
             final_state = await learning_graph.ainvoke(state)
 
@@ -279,7 +306,11 @@ async def chat_stream(
             # ── 发送最终元数据 ──
             profile = final_state.get("profile")
             resources = final_state.get("generated_resources", [])
+            # 刚保存完，从 DB 取最新的 title
+            session_title = session_service.get_title(session_id_val) or ""
             yield {"event": "metadata", "data": json.dumps({
+                "session_id": session_id_val,
+                "title": session_title,
                 "response": response,
                 "profile": profile.model_dump() if profile and hasattr(profile, "model_dump") else profile,
                 "resources": [

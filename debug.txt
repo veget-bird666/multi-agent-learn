@@ -1,41 +1,19 @@
-PS D:\software_competition\asset-manager> python server.py
-[OK] OSS 配置就绪: bucket=pathie, endpoint=oss-cn-beijing.aliyuncs.com
-[START] http://localhost:8001
-[DATA] D:\software_competition\asset-manager\data\resources.json
+============================================================
+[Supervisor] 第 1 轮决策
+[Supervisor]   message: C语言的指针是什么？
+[Supervisor]   重写请求: (无)
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'path_agent']
+[Supervisor]   计划步骤: 0
+[Supervisor]   history 条数: 2
+[Supervisor]   执行计划步骤 2/2: path_agent
+============================================================
+[Graph]   路由: supervisor → path_agent
 
-INFO:     Started server process [22648]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     127.0.0.1:64775 - "GET / HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64775 - "GET /api/types HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64852 - "GET /api/resources HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62525 - "GET /api/status HTTP/1.1" 200 OK
-[Upload]  PUT → https://pathie.oss-cn-beijing.aliyuncs.com/videos/C%E8%AF%AD%E8%A8%80/204107204739.mp4 (38574.9 KB)
-[Upload]  HTTP 403 Forbidden
-[Upload]  OSS 错误: <?xml version="1.0" encoding="UTF-8"?>
-<Error>
-  <Code>SignatureDoesNotMatch</Code>
-  <Message>The request signature we calculated does not match the signature you provided. Check your key and signing method.</Message>
-  <RequestId>6A3E80934EB0003735E9FA75</RequestId>
-  <HostId>pathie.oss-cn-beijing.aliyuncs.com</HostId>
-  <OSSAccessKeyId>LTAI5t9MmoxuGZwcGnvD9CD9</OSSAccessKeyId>
-  <SignatureProvided>TKkhcvU9vvmsM7zUJyfVJeLVxfo=</SignatureProvided>
-  <StringToSign>PUT
-
-video/mp4
-Fri, 26 Jun 2026
-[Upload]  上传失败: <?xml version="1.0" encoding="UTF-8"?>
-<Error>
-  <Code>SignatureDoesNotMatch</Code>
-  <Message>The request signature we calculated does not match the signature you provided. Check your key and signing method.</Message>
-  <RequestId>6A3E80934EB0003735E9FA75</RequestId>
-  <HostId>pathie.oss-cn-beijing.aliyuncs.com</HostId>
-  <OSSAccessKeyId>LTAI5t9MmoxuGZwcGnvD9CD9</OSSAccessKeyId>
-  <SignatureProvided>TKkhcvU9vvmsM7zUJyfVJeLVxfo=</SignatureProvided>
-  <StringToSign>PUT
-
-video/mp4
-Fri, 26 Jun 2026
-INFO:     127.0.0.1:51908 - "POST /api/upload HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51908 - "GET /api/resources HTTP/1.1" 200 OK
+[PathAgent]   开始规划学习路径...
+[PathAgent]   knowledge_point: None
+[PathAgent]   原始消息: C语言的指针是什么？...
+[RAG]  知识库为空，跳过检索
+INFO:     Shutting down

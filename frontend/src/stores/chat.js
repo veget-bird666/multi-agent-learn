@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { sendChatMessage as apiSendMessage, sendChatMessageStream } from '../api'
+import { useSessionsStore } from './sessions'
 
 export const useChatStore = defineStore('chat', () => {
   const messages = ref([])
@@ -14,6 +15,10 @@ export const useChatStore = defineStore('chat', () => {
   const focusedStepOrder = ref(null)   // 聚焦的学习阶段序号
   const pathList = ref([])             // 所有路径的摘要列表
   const includePathContext = ref(true) // 是否将路径上下文发给模型
+
+  // ── 功能开关 ──
+  const enablePathPlanning = ref(true)       // 是否允许生成学习路径
+  const enableResourceGeneration = ref(true)  // 是否允许生成资源
 
   function addMessage(role, content, resources = []) {
     messages.value.push({ role, content, resources })
@@ -53,9 +58,19 @@ export const useChatStore = defineStore('chat', () => {
         currentPathId.value,
         includePathContext.value,
         sessionId.value,
+        enablePathPlanning.value,
+        enableResourceGeneration.value,
       )
       addMessage('assistant', data.response)
 
+      if (data.session_id) {
+        sessionId.value = data.session_id
+      }
+      if (data.title) {
+        const ss = useSessionsStore()
+        const found = ss.sessions.find(item => item.session_id === (data.session_id || sessionId.value))
+        if (found) found.title = data.title
+      }
       if (data.current_path_id) {
         currentPathId.value = data.current_path_id
       }
@@ -92,6 +107,15 @@ export const useChatStore = defineStore('chat', () => {
             appendToLastMessage(token)
           },
           onMetadata(metadata) {
+            // 同步会话 ID 和标题
+            if (metadata.session_id) {
+              sessionId.value = metadata.session_id
+            }
+            if (metadata.title) {
+              const sessionsStore = useSessionsStore()
+              const found = sessionsStore.sessions.find(item => item.session_id === (metadata.session_id || sessionId.value))
+              if (found) found.title = metadata.title
+            }
             if (metadata.current_path_id) {
               currentPathId.value = metadata.current_path_id
             }
@@ -115,6 +139,8 @@ export const useChatStore = defineStore('chat', () => {
         currentPathId.value,
         includePathContext.value,
         sessionId.value,
+        enablePathPlanning.value,
+        enableResourceGeneration.value,
       )
     })
   }
@@ -159,5 +185,7 @@ export const useChatStore = defineStore('chat', () => {
     clearFocus,
     setSessionId,
     loadMessages,
+    enablePathPlanning,
+    enableResourceGeneration,
   }
 })

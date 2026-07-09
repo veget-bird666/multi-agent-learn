@@ -42,6 +42,18 @@ def route_from_supervisor(state: LearningState) -> str:
         return "FINISH"
 
     next_agent = state.get("next_agent", "FINISH")
+
+    # ── 用户开关硬约束 ─────────────────────────────────
+    enable_path = state.get("enable_path_planning", True)
+    enable_resource = state.get("enable_resource_generation", True)
+
+    if not enable_path and next_agent == "path_agent":
+        print(f"[Graph]  !! 路径规划已禁用，跳过 path_agent → chat_agent")
+        next_agent = "chat_agent"
+    if not enable_resource and next_agent == "resource_agent":
+        print(f"[Graph]  !! 资源生成已禁用，跳过 resource_agent → chat_agent")
+        next_agent = "chat_agent"
+
     if next_agent not in ROUTE_MAP:
         print(f"[Graph]  未知的 next_agent: {next_agent}，兜底到 chat_agent")
         return "chat_agent"

@@ -14,8 +14,8 @@ const api = axios.create({
  * @param {boolean} includePathContext 是否将路径上下文发给模型
  * @returns {Promise<object>}
  */
-export async function sendChatMessage(studentId, message, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null) {
-  const body = { student_id: studentId, message, include_path_context: includePathContext }
+export async function sendChatMessage(studentId, message, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null, enablePathPlanning = true, enableResourceGeneration = true) {
+  const body = { student_id: studentId, message, include_path_context: includePathContext, enable_path_planning: enablePathPlanning, enable_resource_generation: enableResourceGeneration }
   if (sessionId) body.session_id = sessionId
   if (focusedStepOrder !== null && includePathContext) {
     body.focused_step_order = focusedStepOrder
@@ -239,8 +239,8 @@ export async function createResource(studentId, title, content, knowledgePoint =
  * @param {string|null} sessionId
  * @returns {EventSource}
  */
-export function sendChatMessageStream(studentId, message, callbacks = {}, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null) {
-  const params = new URLSearchParams({ student_id: studentId, message, include_path_context: includePathContext })
+export function sendChatMessageStream(studentId, message, callbacks = {}, focusedStepOrder = null, currentPathId = null, includePathContext = true, sessionId = null, enablePathPlanning = true, enableResourceGeneration = true) {
+  const params = new URLSearchParams({ student_id: studentId, message, include_path_context: includePathContext, enable_path_planning: enablePathPlanning, enable_resource_generation: enableResourceGeneration })
   if (sessionId) params.append('session_id', sessionId)
   if (focusedStepOrder !== null && includePathContext) {
     params.append('focused_step_order', focusedStepOrder)
@@ -302,6 +302,17 @@ export async function getSessionMessages(sessionId) {
 /** 删除某个会话 */
 export async function deleteSession(sessionId) {
   const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 更新会话标题 */
+export async function updateSessionTitle(sessionId, title) {
+  const res = await fetch(`/api/sessions/${sessionId}/title`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title }),
+  })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }

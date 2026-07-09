@@ -141,6 +141,7 @@ class SessionStateORM(Base):
     session_id = Column(String(128), unique=True, index=True, nullable=False)
     student_id = Column(String(64), index=True, nullable=False)
     state_json = Column(Text, default="{}")       # JSON: 持久化字段快照
+    title = Column(String(256), default="")       # 对话标题（自动生成或手动编辑）
     created_at = Column(String(32), default="")
     updated_at = Column(String(32), default="")
 
@@ -163,6 +164,40 @@ def _migrate_schema(engine) -> None:
                 ))
                 conn.commit()
                 print("[Migration]  learning_paths 表已添加 is_active 字段")
+
+    # ── session_states 表 ──
+    if "session_states" in inspector.get_table_names():
+        ss_cols = {c["name"] for c in inspector.get_columns("session_states")}
+        with engine.connect() as conn:
+            if "title" not in ss_cols:
+                conn.execute(sa.text(
+                    "ALTER TABLE session_states ADD COLUMN title VARCHAR(256) DEFAULT ''"
+                ))
+                conn.commit()
+                print("[Migration]  session_states 表已添加 title 字段")
+
+                # 为已有会话生成默认标题（取第一条用户消息前 60 字）
+                from sqlalchemy import text
+                rows = conn.execute(
+                    text("SELECT id, state_json FROM session_states WHERE title IS NULL OR title = ''")
+                ).fetchall()
+                for row_id, state_json in rows:
+                    try:
+                        payload = json.loads(state_json)
+                        history = payload.get("history", [])
+                        title = ""
+                        if history:
+                            first = history[0]
+                            if isinstance(first, dict) and first.get("role") == "human":
+                                title = first.get("content", "")[:60]
+                        conn.execute(
+                            text("UPDATE session_states SET title = :title WHERE id = :id"),
+                            {"title": title, "id": row_id},
+                        )
+                    except Exception:
+                        pass
+                conn.commit()
+                print(f"[Migration]  已为 {len(rows)} 条旧会话填充默认标题")
 
     # ── resources 表 ──
     if "resources" in inspector.get_table_names():

@@ -47,9 +47,24 @@
           : 'hover:bg-dark-surface-hover border border-transparent'"
       >
         <!-- 会话信息 -->
-        <div class="flex-1 min-w-0">
-          <p class="text-xs font-medium truncate"
+        <div class="flex-1 min-w-0" @click="(e) => editingId !== s.session_id && handleTitleClick(e, s.session_id, s.title)">
+          <!-- 编辑模式 -->
+          <input
+            v-if="editingId === s.session_id"
+            v-model="editingText"
+            :data-session-id="s.session_id"
+            @keydown.enter.prevent="confirmEdit"
+            @keydown.escape.prevent="cancelEdit"
+            @blur="confirmEdit"
+            @click.stop
+            class="title-input text-xs font-medium w-full bg-dark-bg border border-blue-500/50 rounded px-1.5 py-0.5 text-gray-100 outline-none"
+          />
+          <!-- 显示模式 -->
+          <p
+            v-else
+            class="text-xs font-medium truncate cursor-text hover:text-blue-300 transition-colors"
             :class="isActive(s.session_id) ? 'text-blue-200' : 'text-gray-300'"
+            :title="'点击编辑标题'"
           >
             {{ s.title }}
           </p>
@@ -70,12 +85,50 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { useSessionsStore } from '../stores/sessions'
 
 const chatStore = useChatStore()
 const sessionsStore = useSessionsStore()
+
+// ── 行内标题编辑 ──
+const editingId = ref(null)      // 正在编辑的 session_id
+const editingText = ref('')      // 输入框当前值
+
+function startEdit(sessionId, currentTitle) {
+  editingId.value = sessionId
+  editingText.value = currentTitle || ''
+  // 等 DOM 渲染后自动聚焦
+  setTimeout(() => {
+    const input = document.querySelector(`.title-input[data-session-id="${sessionId}"]`)
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  }, 50)
+}
+
+function confirmEdit() {
+  if (!editingId.value) return
+  const title = editingText.value.trim()
+  if (title) {
+    sessionsStore.updateTitle(editingId.value, title)
+  }
+  editingId.value = null
+  editingText.value = ''
+}
+
+function cancelEdit() {
+  editingId.value = null
+  editingText.value = ''
+}
+
+function handleTitleClick(e, sessionId, currentTitle) {
+  // 避免误触删除按钮等
+  if (e.target.closest('button')) return
+  startEdit(sessionId, currentTitle)
+}
 
 function isActive(sessionId) {
   return chatStore.sessionId === sessionId

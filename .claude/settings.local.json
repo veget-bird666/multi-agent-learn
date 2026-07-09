@@ -68,7 +68,9 @@
       "Bash(taskkill /F /PID 24760)",
       "Bash(taskkill:*)",
       "Bash(git config:*)",
-      "Bash(git filter-branch:*)"
+      "Bash(git filter-branch:*)",
+      "Bash(node -c \"D:/software_competition/frontend/src/api/index.js\")",
+      "Bash(node -c \"D:/software_competition/frontend/src/stores/chat.js\")"
     ]
   }
 }

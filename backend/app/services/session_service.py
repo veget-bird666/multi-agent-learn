@@ -90,6 +90,7 @@ class SessionService:
         将 state 中的持久化字段序列化后存入 SQLite。
 
         调用时机：每次图执行完毕后。
+        新会话自动生成标题（LLM 摘要）。
         """
         payload = {}
         for field in PERSIST_FIELDS:
@@ -108,11 +109,19 @@ class SessionService:
             if orm:
                 orm.state_json = state_json
                 orm.updated_at = now
+                # 空标题时自动生成
+                if not orm.title:
+                    title = self._auto_generate_title(state, orm.state_json)
+                    if title:
+                        orm.title = title
             else:
+                # 初次保存：自动生成标题
+                title = self._auto_generate_title(state, state_json)
                 session.add(SessionStateORM(
                     session_id=session_id,
                     student_id=student_id,
                     state_json=state_json,
+                    title=title or "",
                     created_at=now,
                     updated_at=now,
                 ))
@@ -154,7 +163,7 @@ class SessionService:
 
         result = []
         for orm in orms:
-            title = self._extract_title(orm.state_json)
+            title = orm.title or self._extract_title(orm.state_json)
             result.append({
                 "session_id": orm.session_id,
                 "title": title,
@@ -162,6 +171,34 @@ class SessionService:
                 "updated_at": orm.updated_at,
             })
         return result
+
+    def get_title(self, session_id: str) -> Optional[str]:
+        """获取某个会话的标题（如有）。"""
+        with get_session() as session:
+            orm = session.query(SessionStateORM).filter_by(
+                session_id=session_id
+            ).first()
+            if not orm:
+                return None
+            return orm.title or self._extract_title(orm.state_json)
+
+    def update_title(self, session_id: str, title: str) -> bool:
+        """
+        手动更新某个会话的标题。
+        返回 True 表示更新成功，False 表示会话不存在。
+        """
+        if len(title) > 256:
+            title = title[:256]
+        with get_session() as session:
+            orm = session.query(SessionStateORM).filter_by(
+                session_id=session_id
+            ).first()
+            if not orm:
+                return False
+            orm.title = title
+            orm.updated_at = datetime.now().isoformat(timespec="seconds")
+            session.commit()
+            return True
 
     def get_messages(self, session_id: str) -> list:
         """
@@ -195,6 +232,52 @@ class SessionService:
             return True
 
     # ── 序列化 / 反序列化 ──────────────────────────────────
+
+    @staticmethod
+    def _auto_generate_title(state: dict, state_json: str) -> str:
+        """
+        根据对话历史自动生成简洁标题（利用 LLM）。
+        返回空字符串表示生成失败。
+        """
+        try:
+            payload = json.loads(state_json)
+            history = payload.get("history", [])
+            if not history:
+                return ""
+
+            # 取前两轮对话（用户首条 + AI 首条回复）作为摘要素材
+            user_msgs = [h for h in history if h.get("role") == "human"]
+            if not user_msgs:
+                return ""
+            first_user = user_msgs[0].get("content", "")[:200]
+
+            # 如果只有一句话，直接用前 30 字
+            if len(first_user) < 15:
+                return first_user
+
+            # 用 LLM 生成简洁标题
+            try:
+                from app.core.llm import chat_llm
+                from langchain_core.prompts import ChatPromptTemplate
+
+                prompt = ChatPromptTemplate.from_messages([
+                    ("system", "你是一个对话标题生成器。根据用户的第一条消息，生成一个简洁的对话标题（5-20字），直接返回标题，不要任何解释。"),
+                    ("user", "{message}"),
+                ])
+                chain = prompt | chat_llm
+                response = chain.invoke({"message": first_user})
+                title = response.content.strip().strip('"').strip("'").strip("《》")
+
+                # 限制长度
+                if 2 <= len(title) <= 60:
+                    return title
+            except Exception:
+                pass
+
+            # 兜底：取首条消息前 40 字
+            return first_user[:40]
+        except Exception:
+            return ""
 
     @staticmethod
     def _extract_title(state_json: str) -> str:

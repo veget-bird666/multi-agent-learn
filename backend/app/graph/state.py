@@ -50,5 +50,9 @@ class LearningState(TypedDict):
     # 好奇心 / 卡壳检测
     interaction_pattern: Optional[dict]  # 停留时间、追问次数等
 
+    # 用户开关：控制是否允许生成学习路径和资源（None=启用）
+    enable_path_planning: Optional[bool]
+    enable_resource_generation: Optional[bool]
+
     # 输出
     response: Optional[str]

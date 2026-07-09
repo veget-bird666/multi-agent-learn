@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { listSessions as apiListSessions, deleteSession as apiDeleteSession, getSessionMessages } from '../api'
+import { listSessions as apiListSessions, deleteSession as apiDeleteSession, getSessionMessages, updateSessionTitle as apiUpdateTitle } from '../api'
 import { useChatStore } from './chat'
 
 export const useSessionsStore = defineStore('sessions', () => {
@@ -82,6 +82,18 @@ export const useSessionsStore = defineStore('sessions', () => {
     }
   }
 
+  /** 更新会话标题（本地 + 后端） */
+  async function updateTitle(sessionId, newTitle) {
+    // 立即更新本地
+    const s = sessions.value.find(s => s.session_id === sessionId)
+    if (s) s.title = newTitle
+    try {
+      await apiUpdateTitle(sessionId, newTitle)
+    } catch (e) {
+      console.error('更新标题失败:', e)
+    }
+  }
+
   return {
     sessions,
     loading,
@@ -90,5 +102,6 @@ export const useSessionsStore = defineStore('sessions', () => {
     createSession,
     switchSession,
     deleteSession,
+    updateTitle,
   }
 })
