@@ -11,7 +11,7 @@ from app.resource_subgraph.state import ResourceSubState
 
 # ── 结构化输出 ──────────────────────────────────────────
 
-AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video", "mindmap", "extra_reading"]
+AVAILABLE_RESOURCES = ["document", "exam", "ppt", "image", "video", "mindmap", "extra_reading", "code_example"]
 
 
 class ResourcePlan(BaseModel):
@@ -44,6 +44,7 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 - **video**：从知识库检索现有视频。适合需要动态演示时。
 - **mindmap**：Mermaid 思维导图。适合需要梳理知识结构、复习总结时。
 - **extra_reading**：扩展阅读材料（PDF/文章/书籍章节等）。适合提供深度延伸阅读、拓宽知识面时。
+- **code_example**：代码实操案例（含题目、模板代码、测试用例）。适合编程类知识点、实践型学生、用户提到"写代码/编程/实现"时。
 
 ## 决策原则
 1. **document 是兜底选项** — 至少生成一份文档作为主要学习材料
@@ -52,7 +53,8 @@ SYSTEM_PROMPT = """你是一个学习资源规划师，负责根据学生情况�
 4. **知识点涉及可视化内容**（流程图、架构图等）→ image
 5. **知识点涉及操作演示**（编程、实验等）→ video
 6. **学生需要深入理解、拓展视野或课后巩固** → extra_reading
-7. **不要贪多** — 每次只生成 1-3 种最合适的资源，质量优先
+7. **知识点涉及编程/算法，且学生是实践型或提到"写代码/实现/编程"** → code_example
+8. **不要贪多** — 每次只生成 1-3 种最合适的资源，质量优先
 
 ## 输出
 1. **cleaned_topic**：从用户消息中提取的纯净知识点名称。去掉"生成/制作/PPT/文档/教案/帮我"等指令词。

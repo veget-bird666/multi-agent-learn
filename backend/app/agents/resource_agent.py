@@ -90,6 +90,8 @@ def resource_agent(state: LearningState) -> dict:
     try:
         result = resource_subgraph.invoke(sub_state)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"[ResourceAgent]  子图运行异常: {e}")
         return {
             "generated_resources": [],
@@ -126,9 +128,9 @@ def resource_agent(state: LearningState) -> dict:
 
     # ── 4. 写简短摘要到 history（替代原来的完整资源列表）──
     type_labels = {
-        "document": "文档", "exam": "试卷", "ppt": "PPT",
-        "image": "图片", "video": "视频", "mindmap": "思维导图",
-        "extra_reading": "拓展阅读",
+        "document": "文档", "exam": "试卷", "code_example": "代码案例",
+        "ppt": "PPT", "image": "图片", "video": "视频",
+        "mindmap": "思维导图", "extra_reading": "拓展阅读",
     }
     if new_resources:
         # 按类型去重统计

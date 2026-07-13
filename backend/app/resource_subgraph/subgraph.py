@@ -3,6 +3,7 @@
 结构：
   planner → Send() ─┬→ doc_generator ──────────┐
                      ├→ exam_generator → exam_reflector ─┬→ exam_generator (重试)
+                     ├→ code_generator → code_reflector ─┬→ code_generator (重试)
                      ├→ ppt_generator  ─────────────────┤
                      ├→ image_retriever ────────────────┤
                      ├→ video_retriever ────────────────┤
@@ -10,7 +11,7 @@
                      └→ reading_retriever ──────────────┘
                          → safety_filter → collector → END
 
-exam_generator 单独走"生成→反思"链路，exam_reflector 验证不通过则重试，最多 2 次。
+exam_generator 和 code_generator 单独走"生成→反思"链路，验证不通过则重试，最多 2 次。
 safety_filter 对所有生成资源做内容安全审查和事实准确性检查（防幻觉），
             未通过的资源被标记并从最终结果中移除。
 """
@@ -26,6 +27,8 @@ from app.resource_subgraph.image_retriever import image_retriever
 from app.resource_subgraph.video_retriever import video_retriever
 from app.resource_subgraph.mindmap_generator import mindmap_generator
 from app.resource_subgraph.reading_retriever import reading_retriever
+from app.resource_subgraph.code_generator import code_generator
+from app.resource_subgraph.code_reflector import code_reflector, route_from_code_reflector
 from app.resource_subgraph.exam_reflector import exam_reflector, route_from_exam_reflector
 from app.resource_subgraph.safety_filter import safety_filter
 
@@ -39,6 +42,7 @@ GENERATOR_MAP = {
     "video": "video_retriever",
     "mindmap": "mindmap_generator",
     "extra_reading": "reading_retriever",
+    "code_example": "code_generator",
 }
 
 ALL_GENERATORS = list(GENERATOR_MAP.values())
@@ -84,10 +88,17 @@ def resource_collector(state: ResourceSubState) -> dict:
     resources = state.get("generated_resources", [])
     plan = state.get("resource_plan", [])
 
-    # 过滤掉已被反射节点标记为无效的资源（如格式错误的试卷）
-    invalid_id = state.get("exam_invalid_resource_id")
-    if invalid_id:
-        resources = [r for r in resources if r.id != invalid_id]
+    # 过滤掉已被反射节点标记为无效的资源（如格式错误的试卷或代码案例）
+    invalid_ids = set()
+    for key in ("exam_invalid_resource_id", "code_invalid_resource_id"):
+        rid = state.get(key)
+        if rid:
+            invalid_ids.add(rid)
+    if invalid_ids:
+        before = len(resources)
+        resources = [r for r in resources if r.id not in invalid_ids]
+        if before != len(resources):
+            print(f"[ResourceCollector]  反射验证过滤移除 {before - len(resources)} 项无效资源")
 
     # 过滤掉被 safety_filter 标记为不安全的资源
     unsafe_ids = state.get("unsafe_resource_ids", [])
@@ -113,6 +124,7 @@ def resource_collector(state: ResourceSubState) -> dict:
     type_labels = {
         "document": " 学习文档",
         "exam": " 试卷",
+        "code_example": " 代码案例",
         "ppt": " PPT 课件",
         "image": " 图片",
         "video": " 视频",
@@ -151,6 +163,8 @@ def build_resource_subgraph() -> StateGraph:
     builder.add_node("video_retriever", video_retriever)
     builder.add_node("mindmap_generator", mindmap_generator)
     builder.add_node("reading_retriever", reading_retriever)
+    builder.add_node("code_generator", code_generator)
+    builder.add_node("code_reflector", code_reflector)
     builder.add_node("exam_reflector", exam_reflector)
     builder.add_node("safety_filter", safety_filter)
     builder.add_node("collector", resource_collector)
@@ -167,9 +181,10 @@ def build_resource_subgraph() -> StateGraph:
         ALL_GENERATORS + ["collector"],   # path_map 包含所有可能目的地
     )
 
-    # 普通生成器 → safety_filter（exam_generator 不走这里，它走反思链路）
+    # 普通生成器 → safety_filter（exam_generator 和 code_generator 不走这里，它们走反思链路）
+    SKIP_REFLECT = {"exam_generator", "code_generator"}
     for gen_node in ALL_GENERATORS:
-        if gen_node == "exam_generator":
+        if gen_node in SKIP_REFLECT:
             continue
         builder.add_edge(gen_node, "safety_filter")
 
@@ -181,6 +196,16 @@ def build_resource_subgraph() -> StateGraph:
         "exam_reflector",
         route_from_exam_reflector,
         {"exam_generator": "exam_generator", "safety_filter": "safety_filter"},
+    )
+
+    # code_generator → code_reflector（固定路由）
+    builder.add_edge("code_generator", "code_reflector")
+
+    # code_reflector → code_generator（重试）或 safety_filter（通过）
+    builder.add_conditional_edges(
+        "code_reflector",
+        route_from_code_reflector,
+        {"code_generator": "code_generator", "safety_filter": "safety_filter"},
     )
 
     # collector → END

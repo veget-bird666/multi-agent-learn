@@ -17,6 +17,21 @@ async def lifespan(application: FastAPI):
     """应用启动/关闭生命周期"""
     # 启动时：自动建表
     Base.metadata.create_all(engine)
+
+    # 预拉取 Docker 代码沙箱镜像（避免首次运行超时）
+    _IMAGES = {
+        "python:3.11-slim": "Python 沙箱",
+        "node:20-slim": "JavaScript 沙箱",
+    }
+    import subprocess
+    for image, label in _IMAGES.items():
+        try:
+            print(f"[Startup] 预拉取 {label} 镜像 ({image})...")
+            subprocess.run(["docker", "pull", image], capture_output=True, timeout=120)
+            print(f"[Startup]   {label} 镜像就绪")
+        except Exception as e:
+            print(f"[Startup]   {label} 镜像拉取失败（将按需拉取）: {e}")
+
     yield
     # 关闭时：释放资源（如有需要）
 

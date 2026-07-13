@@ -39,5 +39,10 @@ class ResourceSubState(TypedDict):
     exam_error_feedback: str          # 反思节点的错误反馈，用于下次生成
     exam_invalid_resource_id: Optional[str]  # 待过滤的无效试卷资源 ID
 
+    # ── 代码案例反思重试 ──
+    code_retry_count: int
+    code_error_feedback: str
+    code_invalid_resource_id: Optional[str]
+
     # ── 内容安全检查 ──
     unsafe_resource_ids: Annotated[List[str], lambda a, b: a + b]  # safety_filter 标记的不安全资源 ID 列表

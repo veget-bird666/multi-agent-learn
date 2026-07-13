@@ -59,6 +59,17 @@ class ResourceService:
                 items.append(d)
             return items
 
+    def get_by_orm_id(self, orm_id: int) -> Optional[dict]:
+        """按 ORM 主键查询单条资源，返回 dict（含 orm_id）。"""
+        with get_session() as session:
+            orm = session.query(ResourceORM).filter_by(id=orm_id).first()
+            if orm is None:
+                return None
+            r = orm.to_pydantic()
+            d = r.model_dump()
+            d["orm_id"] = orm.id
+            return d
+
     def delete(self, resource_id: int) -> bool:
         """按 ORM 主键删除"""
         with get_session() as session:

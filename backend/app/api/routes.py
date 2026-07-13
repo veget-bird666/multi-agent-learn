@@ -75,6 +75,8 @@ async def chat(request: ChatRequest):
             "current_plan_step": -1,
             "image_base64": None,
             "response": None,
+            # 每轮重置：资源已持久化到DB，不跨轮累加
+            "generated_resources": [],
         })
         # 学习路径用最新 DB 数据覆盖持久化值
         if request.include_path_context:
@@ -255,6 +257,8 @@ async def chat_stream(
                 "current_plan_step": -1,
                 "image_base64": None,
                 "response": None,
+                # 每轮重置：资源已持久化到DB，不跨轮累加
+                "generated_resources": [],
             })
             if include_path_context:
                 state["learning_path"] = learning_path_data
@@ -551,6 +555,162 @@ async def create_resource(body: dict):
     )
     resource_service.save(resource, student_id)
     return {"message": "保存成功", "resource_id": resource.id}
+
+
+@router.get("/resources/detail/{orm_id}")
+async def get_resource_detail(orm_id: int):
+    """获取单条资源的详细信息（含完整的 content JSON）"""
+    item = resource_service.get_by_orm_id(orm_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="资源不存在")
+    return item
+
+
+# ═══════════════════════════════════════════════════════════
+#  代码运行沙箱
+# ═══════════════════════════════════════════════════════════
+
+import subprocess
+import tempfile
+import os
+import shutil
+from pydantic import BaseModel
+class CodeRunRequest(BaseModel):
+    language: str = "python"
+    code: str
+    stdin: str = ""
+
+
+# 语言 → Docker 镜像映射（只保留轻量级解释型语言）
+_LANG_IMAGE = {
+    "python": "python:3.11-slim",
+    "javascript": "node:20-slim",
+}
+
+# 语言 → 文件扩展名 + 运行命令
+_LANG_RUNNER = {
+    "python": (".py", "python {file}"),
+    "javascript": (".js", "node {file}"),
+}
+
+
+_LANG_TIMEOUT = {
+    "python": 20,
+    "javascript": 20,
+}
+
+
+@router.post("/code/run")
+async def run_code(body: CodeRunRequest):
+    """
+    在 Docker 沙箱中运行代码，返回 stdout / stderr / exit_code。
+    需要服务器安装 Docker 并有 docker 命令权限。
+    """
+    import time
+    _t_start = time.time()
+
+    lang = body.language
+    code = body.code
+    stdin = body.stdin or ""
+
+    if lang not in _LANG_RUNNER:
+        raise HTTPException(status_code=400, detail=f"不支持的语言: {lang}（支持: {', '.join(_LANG_RUNNER.keys())}）")
+
+    # ── 检查 Docker 是否可用 ──
+    _t_docker_check = time.time()
+    try:
+        subprocess.run(["docker", "info"], capture_output=True, timeout=5, check=True)
+        print(f"[CodeRun] Docker 检测通过 ({time.time()-_t_docker_check:.1f}s)")
+    except (FileNotFoundError, subprocess.TimeoutExpired, subprocess.CalledProcessError):
+        print(f"[CodeRun] Docker 不可用 ({time.time()-_t_docker_check:.1f}s)")
+        return {
+            "stdout": "",
+            "stderr": "⚠️ 代码沙箱（Docker）未就绪，代码无法在服务器端运行。\n请本地安装 Docker 后重试。",
+            "exit_code": -1,
+            "timed_out": False,
+        }
+
+    ext, runner_template = _LANG_RUNNER[lang]
+    image = _LANG_IMAGE.get(lang, "python:3.11-slim")
+    timeout = _LANG_TIMEOUT.get(lang, 20)
+
+    # ── 写入临时文件 ──
+    tmp_dir = tempfile.mkdtemp(prefix="coderun_")
+    try:
+        src_path = os.path.join(tmp_dir, f"main{ext}")
+        with open(src_path, "w", encoding="utf-8") as f:
+            f.write(code)
+
+        # Java 需要文件名匹配类名
+        if lang == "java":
+            import re
+            m = re.search(r"public\s+class\s+(\w+)", code)
+            if m:
+                class_name = m.group(1)
+                src_path = os.path.join(tmp_dir, f"{class_name}{ext}")
+                with open(src_path, "w", encoding="utf-8") as f:
+                    f.write(code)
+                runner_cmd = runner_template.format(file=f"/code/{class_name}{ext}", classname=class_name)
+            else:
+                runner_cmd = runner_template.format(file=f"/code/main{ext}", classname="Main")
+        else:
+            runner_cmd = runner_template.format(file=f"/code/main{ext}")
+
+        # ── Docker 运行 ──
+        _t_docker = time.time()
+        print(f"[CodeRun] 启动 Docker 容器: lang={lang}, timeout={timeout}s, image={image} (准备耗时 {_t_docker-_t_start:.1f}s)")
+
+        container = subprocess.run(
+            [
+                "docker", "run", "--rm",
+                "--network", "none",
+                "--memory", "128m",
+                "--cpus", "1",
+                "--init",
+                "-v", f"{tmp_dir}:/code:ro",
+                image,
+                "sh", "-c", runner_cmd,
+            ],
+            input=stdin.encode("utf-8"),
+            capture_output=True,
+            timeout=timeout,
+        )
+
+        _t_end = time.time()
+        elapsed = _t_end - _t_docker
+        total = _t_end - _t_start
+        stdout_str = container.stdout.decode("utf-8", errors="replace")
+        stderr_str = container.stderr.decode("utf-8", errors="replace")
+        print(f"[CodeRun] Docker 完成 ({elapsed:.1f}s, 总计 {total:.1f}s), exit={container.returncode}, "
+              f"stdout={len(stdout_str)}B, stderr={len(stderr_str)}B")
+
+        return {
+            "stdout": stdout_str,
+            "stderr": stderr_str,
+            "exit_code": container.returncode,
+            "timed_out": False,
+        }
+
+    except subprocess.TimeoutExpired:
+        _t_end = time.time()
+        print(f"[CodeRun] ❌ Docker 超时 (已等待 {timeout}s, 总计 {_t_end-_t_start:.1f}s)")
+        return {
+            "stdout": "",
+            "stderr": f"⏱️ 代码执行超时（超过 {timeout} 秒）",
+            "exit_code": -1,
+            "timed_out": True,
+        }
+    except Exception as e:
+        _t_end = time.time()
+        print(f"[CodeRun] ❌ 执行出错: {e} ({_t_end-_t_start:.1f}s)")
+        return {
+            "stdout": "",
+            "stderr": f"❌ 执行出错: {str(e)}",
+            "exit_code": -1,
+            "timed_out": False,
+        }
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 # ═══════════════════════════════════════════════════════════

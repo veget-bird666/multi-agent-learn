@@ -4,6 +4,8 @@ import Chat from '../views/Chat.vue'
 import LearningPath from '../views/LearningPath.vue'
 import Resources from '../views/Resources.vue'
 import BuddyChat from '../views/BuddyChat.vue'
+import CodePractice from '../views/CodePractice.vue'
+import PythonSandbox from '../views/PythonSandbox.vue'
 
 const routes = [
   { path: '/', name: 'Home', component: Home },
@@ -11,6 +13,8 @@ const routes = [
   { path: '/learning-path', name: 'LearningPath', component: LearningPath },
   { path: '/resources', name: 'Resources', component: Resources },
   { path: '/buddy', name: 'BuddyChat', component: BuddyChat },
+  { path: '/code-practice/:orm_id', name: 'CodePractice', component: CodePractice },
+  { path: '/sandbox', name: 'PythonSandbox', component: PythonSandbox },
 ]
 
 const router = createRouter({

@@ -22,7 +22,7 @@
     </header>
 
     <!-- 主内容 -->
-    <main class="flex-1">
+    <main class="flex-1 flex flex-col min-h-0">
       <router-view v-slot="{ Component, route }">
         <transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -46,6 +46,7 @@ const navItems = [
   { path: '/chat', label: '开始学习' },
   { path: '/buddy', label: '虚拟学伴' },
   { path: '/resources', label: '我的资源' },
+  { path: '/sandbox', label: '沙盒' },
   { path: '/learning-path', label: '学习路径' },
 ]
 

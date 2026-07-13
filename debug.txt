@@ -1,19 +1,364 @@
 ============================================================
+[Supervisor] 第 0 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: (无)
+[Supervisor]   画像: 未构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: []
+[Supervisor]   计划步骤: -1
+[Supervisor]   history 条数: 1
+[Supervisor]   LLM 模式: 规划
+INFO:     Shutting down
+INFO:     Waiting for connections to close. (CTRL+C to force quit)
+[Supervisor]   决策: next_agent=profile_agent
+[Supervisor]   reasoning: 用户想要生成关于C语言循环和分支控制的代码案例。这属于生成特定资源（代码案例）的需求。目前学生画像尚未构建，而用户请求中包含了学习主题（C语言循环、分支控制）这一关键信息，这足够作为初始信息来构建一个基本的学生画像。根据决策规则，对于‘生成特定资源，画像未建且无聚焦阶段’的场景，应先调用 profile_agent 构建画像。因此，下一步调用 profile_agent 来构建初始画像。
+[Supervisor]   执行计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   update_hint: 用户正在学习C语言，具体涉及循环和分支控制结构。可以基于此信息初始化学生画像的知识基础和兴趣领域等维度。
+============================================================
+[Graph]   路由: supervisor → profile_agent
+
+[ProfileAgent]  开始构建/更新画像...
+[ProfileAgent]   update_hint: 用户正在学习C语言，具体涉及循环和分支控制结构。可以基于此信息初始化学生画像的知识基础和兴趣领域等维度。
+2026-07-13 10:07:54,398 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:07:54,399 INFO sqlalchemy.engine.Engine SELECT student_profiles.id AS student_profiles_id, student_profiles.student_id AS student_profiles_student_id, student_profiles.name AS student_profiles_name, student_profiles.major AS student_profiles_major, student_profiles.knowledge_base AS student_profiles_knowledge_base, student_profiles.cognitive_style AS student_profiles_cognitive_style, student_profiles.learning_pace AS student_profiles_learning_pace, student_profiles.interest_areas AS student_profiles_interest_areas, student_profiles.common_mistakes AS student_profiles_common_mistakes, student_profiles.goal AS student_profiles_goal 
+FROM student_profiles 
+WHERE student_profiles.student_id = ?
+ LIMIT ? OFFSET ?
+2026-07-13 10:07:54,399 INFO sqlalchemy.engine.Engine [cached since 492.6s ago] ('student_001', 1, 0)
+2026-07-13 10:07:54,400 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-07-13 10:08:00,749 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:08:00,750 INFO sqlalchemy.engine.Engine SELECT student_profiles.id AS student_profiles_id, student_profiles.student_id AS student_profiles_student_id, student_profiles.name AS student_profiles_name, student_profiles.major AS student_profiles_major, student_profiles.knowledge_base AS student_profiles_knowledge_base, student_profiles.cognitive_style AS student_profiles_cognitive_style, student_profiles.learning_pace AS student_profiles_learning_pace, student_profiles.interest_areas AS student_profiles_interest_areas, student_profiles.common_mistakes AS student_profiles_common_mistakes, student_profiles.goal AS student_profiles_goal 
+FROM student_profiles 
+WHERE student_profiles.student_id = ?
+ LIMIT ? OFFSET ?
+2026-07-13 10:08:00,750 INFO sqlalchemy.engine.Engine [cached since 499s ago] ('student_001', 1, 0)
+2026-07-13 10:08:00,751 INFO sqlalchemy.engine.Engine COMMIT
+[ProfileAgent]  画像已保存: 认知风格=偏好知识系统化与结构化。, 知识基础=正在学习C语言循环与分支控制。, 兴趣=['编程（C语言）', '编程（C++）', '编程（Python）', '操作系统入门']
+
+============================================================
 [Supervisor] 第 1 轮决策
-[Supervisor]   message: C语言的指针是什么？
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
 [Supervisor]   重写请求: (无)
 [Supervisor]   画像: 已构建
 [Supervisor]   路径: 未规划
 [Supervisor]   资源数: 0
-[Supervisor]   计划: ['rewrite_node', 'path_agent']
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
 [Supervisor]   计划步骤: 0
 [Supervisor]   history 条数: 2
-[Supervisor]   执行计划步骤 2/2: path_agent
+[Supervisor]   执行计划步骤 2/2: resource_agent
 ============================================================
-[Graph]   路由: supervisor → path_agent
+[Graph]   路由: supervisor → resource_agent
 
-[PathAgent]   开始规划学习路径...
-[PathAgent]   knowledge_point: None
-[PathAgent]   原始消息: C语言的指针是什么？...
+============================================================
+[ResourceAgent]  启动资源生成子图
+[ResourceAgent]   知识点: 
+[ResourceAgent]   重写查询: None
+[ResourceAgent]   提取主题: 我正在学习c语言的循环分支控制你能为我生
+============================================================
+
+[ResourcePlanner]  开始规划...
+[ResourcePlanner]   知识点: 我正在学习c语言的循环分支控制你能为我生
+[ResourcePlanner]   消息: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[ResourcePlanner]  规划完成: ['document', 'code_example']
+[ResourcePlanner]   cleaned_topic: C语言循环与分支控制
+[ResourcePlanner]   reasoning: 用户明确提到正在学习C语言的循环与分支控制，并直接要求生成‘代码案例’。这表明用户是实践型学习者，希望通过编写代码来掌握这些核心的编程控制结构。根据决策原则，知识点涉及编程且用户明确要求代码案例时，应生成 code_example。同时，考虑到用户偏好知识系统化与结构化，以及‘document是兜底选项’的原则，应生成一份 document 作为系统性的讲解材料，以巩固概念理解。因此，最合适的资源组合是 document + code_example。
+[Subgraph] Send 并行派发: doc_generator, code_generator
+
+[DocGenerator]  开始生成文档: C语言循环与分支控制
 [RAG]  知识库为空，跳过检索
-INFO:     Shutting down
+
+[CodeGenerator]  开始生成代码案例: C语言循环与分支控制
+[DocGenerator]  文档生成完成 (3636 字)
+[ResourceAgent]  子图运行异常: Invalid format specifier in f-string template. Nested replacement fields are not allowed.
+
+============================================================
+[Supervisor] 第 2 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: (无)
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 1
+[Supervisor]   history 条数: 2
+[Supervisor]   计划执行完毕，进入 LLM 反思阶段
+[Supervisor]   LLM 模式: 反思
+[Supervisor]   决策: next_agent=rewrite_node
+[Supervisor]   reasoning: 用户请求生成C语言循环和分支控制的代码案例。学生画像已构建，且兴趣领域包含编程（C语言）。为了生成精准的资源，需要先通过rewrite_node将用户请求重写为更精确的搜索查询，以便后续resource_agent能准确检索和生成相关代码案例。
+[Supervisor]   执行计划: ['rewrite_node', 'resource_agent']
+============================================================
+[Graph]   路由: supervisor → rewrite_node
+
+[RewriteNode]   开始重写查询...
+[RewriteNode]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[QueryRewrite] 原始: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？... → 重写: C语言 循环结构 分支结构 代码案例...
+[RewriteNode]  重写结果: C语言 循环结构 分支结构 代码案例
+
+============================================================
+[Supervisor] 第 3 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环结构 分支结构 代码案例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 0
+[Supervisor]   history 条数: 2
+[Supervisor]   执行计划步骤 2/2: resource_agent
+============================================================
+[Graph]   路由: supervisor → resource_agent
+
+============================================================
+[ResourceAgent]  启动资源生成子图
+[ResourceAgent]   知识点: 
+[ResourceAgent]   重写查询: C语言 循环结构 分支结构 代码案例
+[ResourceAgent]   提取主题: C语言 循环结构 分支结构 代码案例
+============================================================
+
+[ResourcePlanner]  开始规划...
+[ResourcePlanner]   知识点: C语言 循环结构 分支结构 代码案例
+[ResourcePlanner]   消息: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[ResourcePlanner]  规划完成: ['document', 'code_example']
+[ResourcePlanner]   cleaned_topic: C语言循环与分支结构
+[ResourcePlanner]   reasoning: 学生明确请求‘代码案例’，表明其实践型学习需求和动手练习的意图。该知识点涉及编程，适合通过具体代码来理解和掌握。根据决策原则7，对于编程类知识点且学生提到‘代码案例’时，应生成 code_example。同时，根据原则1，document作为兜底选项，提供系统性的理论知识讲解，与代码案例形成‘理论+实践’的互补组合。因此，生成 document 和 code_example 两种资源。
+[Subgraph] Send 并行派发: doc_generator, code_generator
+
+[DocGenerator]  开始生成文档: C语言循环与分支结构
+[RAG]  知识库为空，跳过检索
+
+[CodeGenerator]  开始生成代码案例: C语言循环与分支结构
+[DocGenerator]  文档生成完成 (4619 字)
+[ResourceAgent]  子图运行异常: Invalid format specifier in f-string template. Nested replacement fields are not allowed.
+
+============================================================
+[Supervisor] 第 4 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环结构 分支结构 代码案例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 1
+[Supervisor]   history 条数: 2
+[Supervisor]   计划执行完毕，进入 LLM 反思阶段
+[Supervisor]   LLM 模式: 反思
+[Supervisor]   决策: next_agent=rewrite_node
+[Supervisor]   reasoning: 学生已构建画像，并明确请求生成C语言循环和分支控制相关的代码案例。需要将用户的自然语言请求重写为精准的搜索查询，然后由resource_agent根据画像和查询生成具体的代码资源。计划为两步：先重写查询，再生成资源。chat_agent不应出现在计划中，将在资源生成后由系统调用。
+[Supervisor]   执行计划: ['rewrite_node', 'resource_agent']
+============================================================
+[Graph]   路由: supervisor → rewrite_node
+
+[RewriteNode]   开始重写查询...
+[RewriteNode]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[QueryRewrite] 原始: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？... → 重写: C语言 循环 分支控制 代码案例 典型示例...
+[RewriteNode]  重写结果: C语言 循环 分支控制 代码案例 典型示例
+
+============================================================
+[Supervisor] 第 5 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环 分支控制 代码案例 典型示例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 0
+[Supervisor]   history 条数: 2
+[Supervisor]   执行计划步骤 2/2: resource_agent
+============================================================
+[Graph]   路由: supervisor → resource_agent
+
+============================================================
+[ResourceAgent]  启动资源生成子图
+[ResourceAgent]   知识点: 
+[ResourceAgent]   重写查询: C语言 循环 分支控制 代码案例 典型示例
+[ResourceAgent]   提取主题: C语言 循环 分支控制 代码案例 典型示例
+============================================================
+
+[ResourcePlanner]  开始规划...
+[ResourcePlanner]   知识点: C语言 循环 分支控制 代码案例 典型示例
+[ResourcePlanner]   消息: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[ResourcePlanner]  规划完成: ['document', 'code_example']
+[ResourcePlanner]   cleaned_topic: C语言循环与分支控制
+[ResourcePlanner]   reasoning: 用户明确要求生成代码案例，且学生画像显示其兴趣领域在编程（C语言），学习目标是掌握循环与分支结构。这符合为编程类知识点、实践型学生生成 code_example 的原则。同时，作为兜底和系统学习的基础，应生成一份 document。用户未明确要求PPT、测验或可视化内容，因此本次只生成最核心的 document 和 code_example 两种资源。
+[Subgraph] Send 并行派发: doc_generator, code_generator
+
+[DocGenerator]  开始生成文档: C语言循环与分支控制
+[RAG]  知识库为空，跳过检索
+
+[CodeGenerator]  开始生成代码案例: C语言循环与分支控制
+[DocGenerator]  文档生成完成 (4428 字)
+[ResourceAgent]  子图运行异常: Invalid format specifier in f-string template. Nested replacement fields are not allowed.
+
+============================================================
+[Supervisor] 第 6 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环 分支控制 代码案例 典型示例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 1
+[Supervisor]   history 条数: 2
+[Supervisor]   计划执行完毕，进入 LLM 反思阶段
+[Supervisor]   LLM 模式: 反思
+[Supervisor]   决策: next_agent=resource_agent
+[Supervisor]   reasoning: 用户明确请求生成C语言循环与分支控制的代码案例。学生画像已存在，且最新消息已包含明确的知识点（循环、分支控制），这本身就是用户当前学习状态的体现。本轮对话中，用户消息（“我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？”）已经直接表达了学习内容和需求，可以作为画像更新的有效信息。profile_agent 刚刚执行完毕，表明系统已捕获此信息并更新了画像。当前核心需求是生成资源（代码案例）。画像信息（知识基础、兴趣领域）已足够支持resource_agent进行个性化资源生成。用户没有要求规划路径或上传图片，因此计划应直接调用resource_agent来生成代码案例。无需创建多步计划。
+============================================================
+[Graph]   路由: supervisor → resource_agent
+
+============================================================
+[ResourceAgent]  启动资源生成子图
+[ResourceAgent]   知识点: 
+[ResourceAgent]   重写查询: C语言 循环 分支控制 代码案例 典型示例
+[ResourceAgent]   提取主题: C语言 循环 分支控制 代码案例 典型示例
+============================================================
+
+[ResourcePlanner]  开始规划...
+[ResourcePlanner]   知识点: C语言 循环 分支控制 代码案例 典型示例
+[ResourcePlanner]   消息: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[ResourcePlanner]  规划完成: ['document', 'code_example']
+[ResourcePlanner]   cleaned_topic: C语言循环与分支控制
+[ResourcePlanner]   reasoning: 学生明确要求代码案例，且正在学习C语言循环与分支控制，属于编程实践型需求。根据决策原则，当知识点涉及编程且学生提到'代码案例'时，应生成code_example。同时，document作为兜底选项，提供系统性讲解，确保学生有完整的知识框架。因此，生成document和code_example两种资源。
+[Subgraph] Send 并行派发: doc_generator, code_generator
+
+[DocGenerator]  开始生成文档: C语言循环与分支控制
+[RAG]  知识库为空，跳过检索
+
+[CodeGenerator]  开始生成代码案例: C语言循环与分支控制
+[DocGenerator]  文档生成完成 (3762 字)
+[ResourceAgent]  子图运行异常: Invalid format specifier in f-string template. Nested replacement fields are not allowed.
+
+============================================================
+[Supervisor] 第 7 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环 分支控制 代码案例 典型示例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: []
+[Supervisor]   计划步骤: -1
+[Supervisor]   history 条数: 2
+[Supervisor]   LLM 模式: 规划
+[Supervisor]   决策: next_agent=resource_agent
+[Supervisor]   reasoning: 学生画像已构建，学习路径未规划，但用户明确要求生成代码案例。本轮对话的搜索查询已由rewrite_node生成（C语言 循环 分支控制 代码案例 典型示例），可直接提供给resource_agent用于生成资源。这是一个单一任务，不需要多步骤计划，可以直接调用resource_agent。
+============================================================
+[Graph]   路由: supervisor → resource_agent
+
+============================================================
+[ResourceAgent]  启动资源生成子图
+[ResourceAgent]   知识点: 
+[ResourceAgent]   重写查询: C语言 循环 分支控制 代码案例 典型示例
+[ResourceAgent]   提取主题: C语言 循环 分支控制 代码案例 典型示例
+============================================================
+
+[ResourcePlanner]  开始规划...
+[ResourcePlanner]   知识点: C语言 循环 分支控制 代码案例 典型示例
+[ResourcePlanner]   消息: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[ResourcePlanner]  规划完成: ['code_example', 'document']
+[ResourcePlanner]   cleaned_topic: C语言循环与分支控制
+[ResourcePlanner]   reasoning: 学生正在学习C语言循环与分支控制，并明确请求‘代码案例’。其认知风格偏好系统化与结构化，且兴趣领域为编程。因此，主要资源应为代码实操案例（code_example），以满足实践需求。同时，为确保知识结构的系统性和完整性，提供一份文档（document）作为理论基础和结构化讲解是必要的。这符合决策原则中‘document是兜底选项’和‘知识点涉及编程/算法，且学生是实践型或提到写代码/实现/编程时 → code_example’的要求。
+[Subgraph] Send 并行派发: code_generator, doc_generator
+
+[CodeGenerator]  开始生成代码案例: C语言循环与分支控制
+
+[DocGenerator]  开始生成文档: C语言循环与分支控制
+[RAG]  知识库为空，跳过检索
+[DocGenerator]  文档生成完成 (4568 字)
+[ResourceAgent]  子图运行异常: Invalid format specifier in f-string template. Nested replacement fields are not allowed.
+
+============================================================
+[Supervisor] 第 8 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环 分支控制 代码案例 典型示例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: []
+[Supervisor]   计划步骤: -1
+[Supervisor]   history 条数: 2
+[Supervisor]   LLM 模式: 规划
+[Supervisor]   决策: next_agent=rewrite_node
+[Supervisor]   reasoning: 用户请求生成C语言循环与分支控制的代码案例。学生画像已构建，且最新消息直接提出了明确的资源生成需求。因此，规划一个两步执行计划：首先，通过rewrite_node将用户请求重写为更精准的搜索查询，以便后续资源检索；然后，由resource_agent根据重写后的查询和现有画像，生成相关的代码案例资源。chat_agent不应包含在plan中，它将在资源生成后，于反思阶段被调用以向用户展示结果。
+[Supervisor]   执行计划: ['rewrite_node', 'resource_agent']
+============================================================
+[Graph]   路由: supervisor → rewrite_node
+
+[RewriteNode]   开始重写查询...
+[RewriteNode]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？...
+[QueryRewrite] 原始: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？... → 重写: C语言 循环 分支控制 代码案例 结构化示例...
+[RewriteNode]  重写结果: C语言 循环 分支控制 代码案例 结构化示例
+
+============================================================
+[Supervisor] 第 9 轮决策
+[Supervisor]   message: 我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？
+[Supervisor]   重写请求: C语言 循环 分支控制 代码案例 结构化示例...
+[Supervisor]   画像: 已构建
+[Supervisor]   路径: 未规划
+[Supervisor]   资源数: 0
+[Supervisor]   计划: ['rewrite_node', 'resource_agent']
+[Supervisor]   计划步骤: 0
+[Supervisor]   history 条数: 2
+[Supervisor]   执行计划步骤 2/2: resource_agent
+============================================================
+[Graph]  达到最大迭代次数 10，强制结束
+2026-07-13 10:15:01,704 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:01,704 INFO sqlalchemy.engine.Engine SELECT session_states.id AS session_states_id, session_states.session_id AS session_states_session_id, session_states.student_id AS session_states_student_id, session_states.state_json AS session_states_state_json, session_states.title AS session_states_title, session_states.created_at AS session_states_created_at, session_states.updated_at AS session_states_updated_at 
+FROM session_states 
+WHERE session_states.session_id = ?
+ LIMIT ? OFFSET ?
+2026-07-13 10:15:01,704 INFO sqlalchemy.engine.Engine [cached since 1244s ago] ('f63c62ee-38d2-4d01-bf68-59d87b9f26a0', 1, 0)
+2026-07-13 10:15:02,983 INFO sqlalchemy.engine.Engine INSERT INTO session_states (session_id, student_id, state_json, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)
+2026-07-13 10:15:02,983 INFO sqlalchemy.engine.Engine [cached since 684.3s ago] ('f63c62ee-38d2-4d01-bf68-59d87b9f26a0', 'student_001', '{"history": [{"role": "human", "content": "我正在学习c语言的循环、分支控制，你能为我生成相关代码案例吗？"}, {"role": "ai", "content": "[profile_agent] 系统：已更新学生画像，重点更新：用户正在学习C语言，具体 ... (231 characters truncated) ... "编程（Python）", "操作系统入门"], "common_mistakes": ["暂无"], "goal": "掌握C语言循环与分支结构。"}, "current_step": 0, "generated_resources": [], "teaching_decisions": []}', 'C语言控制结构代码案例', '2026-07-13T10:15:01', '2026-07-13T10:15:01')
+2026-07-13 10:15:02,984 INFO sqlalchemy.engine.Engine COMMIT
+2026-07-13 10:15:03,509 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:03,510 INFO sqlalchemy.engine.Engine SELECT session_states.id AS session_states_id, session_states.session_id AS session_states_session_id, session_states.student_id AS session_states_student_id, session_states.state_json AS session_states_state_json, session_states.title AS session_states_title, session_states.created_at AS session_states_created_at, session_states.updated_at AS session_states_updated_at 
+FROM session_states 
+WHERE session_states.session_id = ?
+ LIMIT ? OFFSET ?
+2026-07-13 10:15:03,510 INFO sqlalchemy.engine.Engine [cached since 1246s ago] ('f63c62ee-38d2-4d01-bf68-59d87b9f26a0', 1, 0)
+2026-07-13 10:15:03,512 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22448]
+2026-07-13 10:15:17,640 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:17,640 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("student_profiles")
+2026-07-13 10:15:17,640 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,641 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("resources")
+2026-07-13 10:15:17,641 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,641 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("learning_paths")
+2026-07-13 10:15:17,641 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("session_states")
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine COMMIT
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite~_%' ESCAPE '~' ORDER BY name
+2026-07-13 10:15:17,642 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine PRAGMA main.table_xinfo("learning_paths")
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-07-13 10:15:17,643 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine PRAGMA main.table_xinfo("session_states")
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine PRAGMA main.table_xinfo("resources")
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:17,644 INFO sqlalchemy.engine.Engine ROLLBACK
+[Embedding]  Spark Embedding 不可用 ('NoneType' object has no attribute 'encode')，切换到本地模式
+[Embedding]  使用本地嵌入模式（兜底）
+INFO:     Started server process [39408]
+INFO:     Waiting for application startup.
+2026-07-13 10:15:18,431 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-13 10:15:18,431 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("student_profiles")
+2026-07-13 10:15:18,431 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("resources")
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("learning_paths")
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine PRAGMA main.table_info("session_states")
+2026-07-13 10:15:18,432 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-13 10:15:18,433 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Application startup complete.

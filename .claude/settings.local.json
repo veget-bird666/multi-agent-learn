@@ -74,7 +74,20 @@
       "Bash(for f:*)",
       "Bash(do echo:*)",
       "Read(//d/software_competition/backend/app/resource_subgraph/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ps -p 21084 -o comm=)",
+      "Bash(ps -p 10500 -o comm=)",
+      "Bash(tasklist //FI 'PID eq 21084' //FO CSV)",
+      "Bash(tasklist //FI 'PID eq 10500' //FO CSV)",
+      "Bash(wmic process:*)",
+      "Bash(tasklist //FI 'PID eq 10500' //V //FO CSV)",
+      "Bash(docker ps:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker stop:*)",
+      "Bash(tasklist //FI 'PID eq 41088' //FO CSV)",
+      "Bash(findstr :8000)",
+      "Bash(findstr :5173)",
+      "Bash(node -e \":*)"
     ]
   }
 }

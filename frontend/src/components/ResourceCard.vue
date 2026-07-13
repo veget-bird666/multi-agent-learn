@@ -173,8 +173,11 @@
 
 <script setup>
 import { computed, ref, reactive, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import MarkdownIt from 'markdown-it'
 import mermaid from 'mermaid'
+
+const router = useRouter()
 
 // 初始化 Mermaid（全局只执行一次）
 mermaid.initialize({
@@ -358,10 +361,19 @@ function openResource() {
   const rawContent = props.resource.content
   if (!rawContent) return
 
+  const type = resolvedType.value
+
+  // 代码实操 → 跳转专用页面
+  if (type === 'code_example') {
+    const ormId = props.resource.orm_id
+    if (ormId) {
+      router.push(`/code-practice/${ormId}`)
+    }
+    return
+  }
+
   // 兼容旧数据：content 可能包含 "url|推荐理由" 格式，取 | 前的部分作为实际 URL
   const content = rawContent.split('|')[0].trim()
-
-  const type = resolvedType.value
 
   // 文档 / 试卷 / 思维导图 / 视频 → 弹窗展示
   if (type === 'document' || type === 'exam' || type === 'mindmap' || type === 'video') {

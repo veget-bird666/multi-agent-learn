@@ -279,6 +279,31 @@ export function sendChatMessageStream(studentId, message, callbacks = {}, focuse
   return es
 }
 
+// ═══════════════════════════════════════════════════════════
+//  代码实操 API
+// ═══════════════════════════════════════════════════════════
+
+/** 获取资源详情（含完整 content JSON） */
+export async function fetchResourceDetail(ormId) {
+  const res = await fetch(`/api/resources/detail/${ormId}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** 在 Docker 沙箱中运行代码 */
+export async function runCode(language, code, stdin = '') {
+  const res = await fetch(`/api/code/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ language, code, stdin }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
 export default api
 
 // ═══════════════════════════════════════════════════════════

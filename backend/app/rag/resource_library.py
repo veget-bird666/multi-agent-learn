@@ -66,10 +66,11 @@ class ResourceLibrary:
             resource.get("description", ""),
             resource.get("subject", ""),
             " ".join(str(k) for k in (resource.get("keywords", []) or [])),
+            resource.get("filename", ""),
         ]
         search_text = " ".join(t for t in text_parts if t).strip()
         if not search_text:
-            search_text = resource.get("filename", resource.get("oss_key", ""))
+            search_text = resource.get("oss_key", "")
 
         embedding = self._embedder.embed_documents([search_text])[0]
 

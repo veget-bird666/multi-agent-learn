@@ -185,7 +185,7 @@ async def supervisor_agent(state: LearningState):
             "最新用户消息：{latest_message}\n"
             "学习路径状态：{path_status}\n"
             "{focused_context}"
-            "已生成资源数：{resource_count}（若>0 表示已经生成过，绝对不许再调用resource_agent）\n"
+            "本轮已生成资源数：{resource_count}（如果用户再次要求新的资源，可以继续调用resource_agent生成）\n"
             "本轮重写后的搜索查询（可用于判断是否经过 rewrite_node）：{rewritten_query}\n"
             "=== 对话历史 ==="
         )),

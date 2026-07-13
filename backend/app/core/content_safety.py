@@ -207,10 +207,7 @@ class ContentSafetyChecker:
 
         try:
             prompt = ChatPromptTemplate.from_messages([
-                ("system", FACT_CHECK_PROMPT.format(
-                    context_section=context_section,
-                    content=content[:3000],
-                )),
+                ("system", FACT_CHECK_PROMPT),
             ])
             chain = prompt | chat_llm
             result = chain.invoke({

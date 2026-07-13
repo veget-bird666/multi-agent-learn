@@ -114,14 +114,16 @@ CHAT_PROMPT = """
 对话历史中可能包含以下系统消息，你需要据此回复：
 - **画像更新记录**：格式为"系统：已更新学生画像..." — 据此了解学生当前画像状态
 - **学习路径规划**：格式为"系统：已生成个性化学习路径..." — 如果存在，向学生展示这个路径规划，作为你的回复重点
-- 如果没有以上信息，正常回答学生的问题即可
+- **资源生成记录**：格式为"[resource_agent] 已为「知识点」生成 X 项学习资源..." 或下方「本轮新生成资源」— 如果存在，向学生说明已生成的资源类型和名称，引导前往资源页面查看
 
 ## 目前学习系统具备的功能
 - 回答学生的提问，提供学习建议
 - 生成个性化的学习资源推荐
+- 当学生请求生成学习资源时，系统会自动生成并持久化到数据库
 
 ## 资源查看提示
-- 当系统生成了学习资源（文档、PPT、试卷等）后，请提示学生前往「我的学习资源」页面查看和管理，不要在聊天中展示完整内容。
+- 当系统生成了学习资源（文档、PPT、试卷、代码案例等）后，请提示学生前往「我的学习资源」页面查看和管理，不要在聊天中展示完整内容。
+- 如果当前有刚刚生成的资源（见下方的「本轮新生成资源」），请主动告知学生生成了哪些具体资源。
 - 示例回复："已为你生成 C语言指针的学习文档和PPT，请前往「我的学习资源」页面查看。"
 """
 
@@ -208,9 +210,32 @@ def chat_agent(state: LearningState):
             print(f"[ChatAgent]  知识库检索失败: {e}")
 
     # ════════════════════════════════════════════════════════
+    #  本轮新生成资源上下文
+    # ════════════════════════════════════════════════════════
+    resource_context = ""
+    new_resources = state.get("generated_resources", [])
+    if new_resources:
+        type_labels = {
+            "document": "文档", "exam": "试卷", "code_example": "代码案例",
+            "ppt": "PPT", "image": "图片", "video": "视频",
+            "mindmap": "思维导图", "extra_reading": "拓展阅读",
+        }
+        items = []
+        for r in new_resources:
+            t = r.type.value if hasattr(r.type, "value") else str(r.type)
+            label = type_labels.get(t, t)
+            items.append(f"  - {label}：{r.title}")
+        resource_context = (
+            "\n\n## 本轮新生成资源\n"
+            "本轮对话中新生成的学习资源列表（已保存到数据库）：\n"
+            + "\n".join(items)
+        )
+        print(f"[ChatAgent]  检测到 {len(new_resources)} 项本轮新生成资源")
+
+    # ════════════════════════════════════════════════════════
     #  生成回复
     # ════════════════════════════════════════════════════════
-    effective_prompt = CHAT_PROMPT + teaching_context + knowledge_context
+    effective_prompt = CHAT_PROMPT + teaching_context + knowledge_context + resource_context
 
     prompt = ChatPromptTemplate.from_messages([
         SystemMessage(content=effective_prompt),
