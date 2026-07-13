@@ -6,7 +6,7 @@ from app.config import settings
 # 创建引擎（连接池）
 engine = create_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG,  # 开发时打印 SQL，方便调试
+    echo=False,
 )
 
 # session 工厂
