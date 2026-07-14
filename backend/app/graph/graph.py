@@ -10,7 +10,6 @@ from app.agents.path_agent import path_agent
 from app.agents.error_sim_agent import error_sim_agent
 from app.agents.buddy_agent import buddy_agent
 from app.agents.curiosity_agent import curiosity_agent
-from app.agents.reflection_agent import reflection_agent
 from app.agents.tool_node import tool_node
 from app.agents.chat_agent import chat_agent
 from app.agents.rewrite_node import rewrite_node
@@ -21,7 +20,7 @@ MAX_ITERATIONS = 10  # 最大循环轮次，防止无限循环
 # 标准 Agent：注册为节点，执行完后回到 Supervisor，由它继续调度
 ALL_AGENTS = [
     "chat_agent", "profile_agent", "path_agent", "resource_agent",
-    "error_sim_agent", "buddy_agent", "curiosity_agent", "reflection_agent",
+    "error_sim_agent", "buddy_agent", "curiosity_agent",
     "tool_node",
 ]
 

@@ -1,38 +1,1044 @@
 [
   {
-    "id": "85a12b237153",
-    "oss_key": "videos/85a12b237153.mp4",
-    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/videos/85a12b237153.mp4",
+    "id": "20b115ab6222",
+    "oss_key": "ppt/20b115ab6222.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/20b115ab6222.pdf",
     "oss_uploaded": true,
-    "filename": "狼队.mp4",
-    "file_size": 1066908,
-    "resource_type": "video",
-    "title": "python字典用法",
-    "description": "python字典的具体用法",
+    "filename": "C0-Overview.pdf",
+    "file_size": 1308249,
+    "resource_type": "ppt",
+    "title": "操作系统课程概述",
+    "description": "课程总览与导论",
     "keywords": [
-      "python",
-      "字典"
-    ],
-    "subject": "",
-    "created_at": "2026-06-26T23:00:40"
-  },
-  {
-    "id": "caeea2561e7f",
-    "oss_key": "readings/caeea2561e7f.pdf",
-    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/readings/caeea2561e7f.pdf",
-    "oss_uploaded": true,
-    "filename": "Operating+System+Concepts+10th+Edition.pdf",
-    "file_size": 31133896,
-    "resource_type": "extra_reading",
-    "title": "操作系统概述",
-    "description": "操作系统概述，系统性讲解操作系统，适合初学者",
-    "keywords": [
-      "基础",
-      "入门",
-      "操作系统"
+      "OS概述",
+      "课程结构",
+      "学习目标"
     ],
     "subject": "操作系统",
-    "difficulty": "medium",
-    "created_at": "2026-07-09T14:45:01"
+    "created_at": "2026-07-13T19:29:19"
+  },
+  {
+    "id": "0b11228724a9",
+    "oss_key": "ppt/0b11228724a9.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/0b11228724a9.pdf",
+    "oss_uploaded": true,
+    "filename": "C1&2-Introduction.pdf",
+    "file_size": 4819213,
+    "resource_type": "ppt",
+    "title": "操作系统引言与系统结构",
+    "description": "操作系统引言与系统结构",
+    "keywords": [
+      "操作系统定义",
+      "系统调用",
+      "中断",
+      "内核态/用户态"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:38:10"
+  },
+  {
+    "id": "46c5b7a028df",
+    "oss_key": "ppt/46c5b7a028df.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/46c5b7a028df.pdf",
+    "oss_uploaded": true,
+    "filename": "C3-Processes.pdf",
+    "file_size": 3239822,
+    "resource_type": "ppt",
+    "title": "进程管理",
+    "description": "进程管理",
+    "keywords": [
+      "进程概念",
+      "PCB",
+      "进程状态转换",
+      "进程调度"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:38:19"
+  },
+  {
+    "id": "79c599735ba1",
+    "oss_key": "ppt/79c599735ba1.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/79c599735ba1.pdf",
+    "oss_uploaded": true,
+    "filename": "C4-Threads.pdf",
+    "file_size": 1807076,
+    "resource_type": "ppt",
+    "title": "线程",
+    "description": "线程",
+    "keywords": [
+      "用户线程",
+      "内核线程",
+      "多线程模型",
+      "线程池"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:38:28"
+  },
+  {
+    "id": "0fb468ecc4bf",
+    "oss_key": "ppt/0fb468ecc4bf.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/0fb468ecc4bf.pdf",
+    "oss_uploaded": true,
+    "filename": "C5-CPU+Scheduling.pdf",
+    "file_size": 4463787,
+    "resource_type": "ppt",
+    "title": "CPU调度",
+    "description": "CPU调度",
+    "keywords": [
+      "调度算法（FCFS/SJF/优先级/轮转RR）",
+      "多级队列"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:38:39"
+  },
+  {
+    "id": "5d66e7fe6b5b",
+    "oss_key": "ppt/5d66e7fe6b5b.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/5d66e7fe6b5b.pdf",
+    "oss_uploaded": true,
+    "filename": "C6-Process+Synchronization.pdf",
+    "file_size": 3625484,
+    "resource_type": "ppt",
+    "title": "进程同步",
+    "description": "进程同步",
+    "keywords": [
+      "临界区",
+      "信号量",
+      "管程",
+      "生产者-消费者",
+      "读者-写者"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:38:51"
+  },
+  {
+    "id": "8e049322cbdf",
+    "oss_key": "ppt/8e049322cbdf.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/8e049322cbdf.pdf",
+    "oss_uploaded": true,
+    "filename": "C7-Deadlocks.pdf",
+    "file_size": 5723137,
+    "resource_type": "ppt",
+    "title": "死锁",
+    "description": "死锁",
+    "keywords": [
+      "死锁必要条件",
+      "死锁预防/避免/检测/恢复",
+      "银行家算法"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:39:03"
+  },
+  {
+    "id": "61bf7924a5ef",
+    "oss_key": "ppt/61bf7924a5ef.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/61bf7924a5ef.pdf",
+    "oss_uploaded": true,
+    "filename": "C8-Main+Memory.pdf",
+    "file_size": 2558723,
+    "resource_type": "ppt",
+    "title": "主存管理",
+    "description": "主存管理",
+    "keywords": [
+      "连续分配",
+      "分页",
+      "分段",
+      "段页式"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:39:39"
+  },
+  {
+    "id": "99f7c6eb5aa6",
+    "oss_key": "ppt/99f7c6eb5aa6.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/99f7c6eb5aa6.pdf",
+    "oss_uploaded": true,
+    "filename": "C9-Virtual+Memory.pdf",
+    "file_size": 2684839,
+    "resource_type": "ppt",
+    "title": "虚拟内存",
+    "description": "虚拟内存",
+    "keywords": [
+      "请求分页",
+      "页面置换（FIFO/LRU/CLOCK）",
+      "页表",
+      "TLB"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:39:48"
+  },
+  {
+    "id": "3f2c80f1b566",
+    "oss_key": "ppt/3f2c80f1b566.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/3f2c80f1b566.pdf",
+    "oss_uploaded": true,
+    "filename": "C10-File+System.pdf",
+    "file_size": 3585884,
+    "resource_type": "ppt",
+    "title": "文件系统",
+    "description": "文件系统",
+    "keywords": [
+      "文件组织",
+      "目录结构",
+      "磁盘空间管理",
+      "文件保护"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:40:00"
+  },
+  {
+    "id": "7566c0ad7fcc",
+    "oss_key": "ppt/7566c0ad7fcc.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/7566c0ad7fcc.pdf",
+    "oss_uploaded": true,
+    "filename": "C11-Mass-Storage+Structure.pdf",
+    "file_size": 1907600,
+    "resource_type": "ppt",
+    "title": "大容量存储结构",
+    "description": "大容量存储结构",
+    "keywords": [
+      "磁盘调度（SCAN/C-SCAN）",
+      "RAID",
+      "磁盘格式化"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:40:10"
+  },
+  {
+    "id": "681c1477e09f",
+    "oss_key": "ppt/681c1477e09f.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/681c1477e09f.pdf",
+    "oss_uploaded": true,
+    "filename": "C12-IO+System.pdf",
+    "file_size": 3150964,
+    "resource_type": "ppt",
+    "title": "I/O系统",
+    "description": "I/O系统",
+    "keywords": [
+      "I/O硬件",
+      "中断驱动",
+      "DMA",
+      "SPOOLing"
+    ],
+    "subject": "操作系统",
+    "created_at": "2026-07-13T19:40:38"
+  },
+  {
+    "id": "18add1e9e29e",
+    "oss_key": "ppt/18add1e9e29e.ppt",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/18add1e9e29e.ppt",
+    "oss_uploaded": true,
+    "filename": "02-Numerical representation and calculation_2.1&2.2.ppt",
+    "file_size": 2669056,
+    "resource_type": "ppt",
+    "title": "数值表示与计算",
+    "description": "数值表示与计算",
+    "keywords": [
+      "IEEE 754浮点标准",
+      "原码两位乘",
+      "补码加减法",
+      "溢出判断"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:40:51"
+  },
+  {
+    "id": "631a50e379c9",
+    "oss_key": "ppt/631a50e379c9.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/631a50e379c9.pptx",
+    "oss_uploaded": true,
+    "filename": "03-Memory2.pptx",
+    "file_size": 2518733,
+    "resource_type": "ppt",
+    "title": "存储器系统",
+    "description": "存储器系统",
+    "keywords": [
+      "ROM/RAM扩展",
+      "地址线分配",
+      "片选信号",
+      "存储器字位扩展"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:02"
+  },
+  {
+    "id": "015945c463c2",
+    "oss_key": "ppt/015945c463c2.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/015945c463c2.pptx",
+    "oss_uploaded": true,
+    "filename": "04-Instruction system 4.1&4.2-中文.pptx",
+    "file_size": 765722,
+    "resource_type": "ppt",
+    "title": "指令系统",
+    "description": "指令系统",
+    "keywords": [
+      "操作码扩展编码",
+      "寻址方式（立即/直接/隐含）",
+      "BCD码",
+      "移位操作"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:14"
+  },
+  {
+    "id": "b699542fd1d0",
+    "oss_key": "documents/b699542fd1d0.doc",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/b699542fd1d0.doc",
+    "oss_uploaded": true,
+    "filename": "2：课程教学大纲编写建议格式.doc",
+    "file_size": 353952,
+    "resource_type": "document",
+    "title": "教学大纲",
+    "description": "教学大纲",
+    "keywords": [
+      "课程安排",
+      "教学内容",
+      "考核方式"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:23"
+  },
+  {
+    "id": "505c1cecfab1",
+    "oss_key": "exams/505c1cecfab1.docx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/505c1cecfab1.docx",
+    "oss_uploaded": true,
+    "filename": "Homework4 - 答案(2).docx",
+    "file_size": 17347,
+    "resource_type": "exam",
+    "title": "作业4 Cache答案",
+    "description": "作业4 Cache答案",
+    "keywords": [
+      "Cache地址格式",
+      "直接映射/组相联/全相联",
+      "命中率计算",
+      "速度提升比"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:28"
+  },
+  {
+    "id": "63801a83a53a",
+    "oss_key": "documents/63801a83a53a.docx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/63801a83a53a.docx",
+    "oss_uploaded": true,
+    "filename": "Homework5.docx",
+    "file_size": 41342,
+    "resource_type": "document",
+    "title": "作业5",
+    "description": "作业5",
+    "keywords": [
+      "计组课后作业"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:33"
+  },
+  {
+    "id": "82a237dac941",
+    "oss_key": "documents/82a237dac941.docx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/82a237dac941.docx",
+    "oss_uploaded": true,
+    "filename": "Homework6.docx",
+    "file_size": 298207,
+    "resource_type": "document",
+    "title": "作业6",
+    "description": "作业6",
+    "keywords": [
+      "计组课后作业"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:46"
+  },
+  {
+    "id": "99e36bf11004",
+    "oss_key": "ppt/99e36bf11004.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/99e36bf11004.pptx",
+    "oss_uploaded": true,
+    "filename": "实验1全加器实验.pptx",
+    "file_size": 2255838,
+    "resource_type": "ppt",
+    "title": "全加器实验",
+    "description": "全加器实验",
+    "keywords": [
+      "Full-Adder",
+      "一位加法器",
+      "异或门与门电路",
+      "进位信号Cin/Cout"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:41:56"
+  },
+  {
+    "id": "803e9640d651",
+    "oss_key": "ppt/803e9640d651.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/803e9640d651.pptx",
+    "oss_uploaded": true,
+    "filename": "实验2运算器实验.pptx",
+    "file_size": 2753938,
+    "resource_type": "ppt",
+    "title": "运算器实验",
+    "description": "运算器实验",
+    "keywords": [
+      "74LS181 ALU芯片",
+      "算术逻辑运算",
+      "减法实现",
+      "实验电路图"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:42:09"
+  },
+  {
+    "id": "7e89a5e4d175",
+    "oss_key": "ppt/7e89a5e4d175.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/7e89a5e4d175.pptx",
+    "oss_uploaded": true,
+    "filename": "实验4微程序实验 - 中文.pptx",
+    "file_size": 1958376,
+    "resource_type": "ppt",
+    "title": "微程序控制器实验",
+    "description": "微程序控制器实验",
+    "keywords": [
+      "微程序控制",
+      "控制存储器",
+      "微指令格式"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:42:21"
+  },
+  {
+    "id": "6454f4c60c8b",
+    "oss_key": "ppt/6454f4c60c8b.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/6454f4c60c8b.pptx",
+    "oss_uploaded": true,
+    "filename": "计组复习2025.pptx",
+    "file_size": 618090,
+    "resource_type": "ppt",
+    "title": "期末复习汇总",
+    "description": "期末复习汇总",
+    "keywords": [
+      "IEEE 754",
+      "数值表示和运算",
+      "综合复习"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:42:28"
+  },
+  {
+    "id": "670676cd8259",
+    "oss_key": "exams/670676cd8259.docx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/670676cd8259.docx",
+    "oss_uploaded": true,
+    "filename": "计组测试题917.docx",
+    "file_size": 47286,
+    "resource_type": "exam",
+    "title": "阶段性测试题",
+    "description": "阶段性测试题",
+    "keywords": [
+      "计组随堂测试"
+    ],
+    "subject": "计算机组成原理",
+    "created_at": "2026-07-13T19:42:34"
+  },
+  {
+    "id": "0e95973ee33c",
+    "oss_key": "documents/0e95973ee33c.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/0e95973ee33c.pdf",
+    "oss_uploaded": true,
+    "filename": "1. “计算机网络”课程说明-学生版.pdf",
+    "file_size": 550669,
+    "resource_type": "document",
+    "title": "课程说明与大纲",
+    "description": "课程说明与大纲",
+    "keywords": [
+      "课程目标",
+      "教学安排",
+      "考核方式"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:42:42"
+  },
+  {
+    "id": "19fcd1f608bc",
+    "oss_key": "exams/19fcd1f608bc.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/19fcd1f608bc.pdf",
+    "oss_uploaded": true,
+    "filename": "2025年计算机网络第一阶段测试题（答案）.pdf",
+    "file_size": 827233,
+    "resource_type": "exam",
+    "title": "第一阶段测试及答案",
+    "description": "第一阶段测试及答案",
+    "keywords": [
+      "计网阶段性测试"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:42:51"
+  },
+  {
+    "id": "af1c5b14c570",
+    "oss_key": "exams/af1c5b14c570.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/af1c5b14c570.pdf",
+    "oss_uploaded": true,
+    "filename": "3. 计算机网络习题集.pdf",
+    "file_size": 2742617,
+    "resource_type": "exam",
+    "title": "习题集",
+    "description": "习题集",
+    "keywords": [
+      "各章节练习题汇总"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:43:02"
+  },
+  {
+    "id": "422ce96a761b",
+    "oss_key": "documents/422ce96a761b.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/422ce96a761b.pdf",
+    "oss_uploaded": true,
+    "filename": "实验指导书1-认识Packet Tracer仿真软件.pdf",
+    "file_size": 10315479,
+    "resource_type": "document",
+    "title": "Packet Tracer仿真实验",
+    "description": "Packet Tracer仿真实验",
+    "keywords": [
+      "网络仿真",
+      "设备配置",
+      "网络拓扑搭建"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:43:14"
+  },
+  {
+    "id": "e21ee02d17bd",
+    "oss_key": "ppt/e21ee02d17bd.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/e21ee02d17bd.pptx",
+    "oss_uploaded": true,
+    "filename": "第2章 物理层-2025.pptx",
+    "file_size": 61939666,
+    "resource_type": "ppt",
+    "title": "第2章 物理层",
+    "description": "第2章 物理层",
+    "keywords": [
+      "信道复用（FDM/TDM/WDM）",
+      "带通调制",
+      "导向型/非导向型传输媒体（无线电/微波/红外）"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:43:56"
+  },
+  {
+    "id": "993404ea0f4e",
+    "oss_key": "exams/993404ea0f4e.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/993404ea0f4e.pdf",
+    "oss_uploaded": true,
+    "filename": "第3章 数据链路层 习题答案及解析.pdf",
+    "file_size": 10172752,
+    "resource_type": "exam",
+    "title": "第3章 数据链路层习题答案",
+    "description": "第3章 数据链路层习题答案",
+    "keywords": [
+      "习题解析"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:44:08"
+  },
+  {
+    "id": "fedddcad1d90",
+    "oss_key": "ppt/fedddcad1d90.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/fedddcad1d90.pptx",
+    "oss_uploaded": true,
+    "filename": "第3章 数据链路层-2025.pptx",
+    "file_size": 6153830,
+    "resource_type": "ppt",
+    "title": "第3章 数据链路层",
+    "description": "第3章 数据链路层",
+    "keywords": [
+      "PPP协议",
+      "共享式/交换式以太网",
+      "碰撞域/广播域",
+      "CSMA/CD",
+      "CRC/FCS差错检测"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:44:22"
+  },
+  {
+    "id": "3993b44f8450",
+    "oss_key": "exams/3993b44f8450.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/3993b44f8450.pdf",
+    "oss_uploaded": true,
+    "filename": "第4章 网络层 习题答案及解析.pdf",
+    "file_size": 13134829,
+    "resource_type": "exam",
+    "title": "第4章 网络层习题答案",
+    "description": "第4章 网络层习题答案",
+    "keywords": [
+      "习题解析"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:01"
+  },
+  {
+    "id": "d57f422595a9",
+    "oss_key": "ppt/d57f422595a9.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/d57f422595a9.pptx",
+    "oss_uploaded": true,
+    "filename": "第4章 网络层-2025.pptx",
+    "file_size": 8139271,
+    "resource_type": "ppt",
+    "title": "第4章 网络层",
+    "description": "第4章 网络层",
+    "keywords": [
+      "IPv4首部格式",
+      "IP分片(MTU)",
+      "RIP距离向量算法",
+      "OSPF",
+      "首部检验和",
+      "TTL"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:12"
+  },
+  {
+    "id": "1303777b9a32",
+    "oss_key": "ppt/1303777b9a32.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/1303777b9a32.pptx",
+    "oss_uploaded": true,
+    "filename": "第5章 运输层-2025.pptx",
+    "file_size": 5880625,
+    "resource_type": "ppt",
+    "title": "第5章 运输层",
+    "description": "第5章 运输层",
+    "keywords": [
+      "TCP首部格式",
+      "三报文握手建立连接",
+      "SYN标志位",
+      "端口复用分用",
+      "CLOSED状态"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:22"
+  },
+  {
+    "id": "c64069bc398a",
+    "oss_key": "exams/c64069bc398a.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/c64069bc398a.pdf",
+    "oss_uploaded": true,
+    "filename": "第6章 应用层  习题答案及解析.pdf",
+    "file_size": 6040811,
+    "resource_type": "exam",
+    "title": "第6章 应用层习题答案",
+    "description": "第6章 应用层习题答案",
+    "keywords": [
+      "习题解析"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:36"
+  },
+  {
+    "id": "ebd655f51320",
+    "oss_key": "ppt/ebd655f51320.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/ebd655f51320.pdf",
+    "oss_uploaded": true,
+    "filename": "计算机网络考点汇总-2025.pdf",
+    "file_size": 252376,
+    "resource_type": "ppt",
+    "title": "考点汇总",
+    "description": "考点汇总",
+    "keywords": [
+      "各章重点考点总结"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:44"
+  },
+  {
+    "id": "071f6b1b0e4c",
+    "oss_key": "exams/071f6b1b0e4c.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/071f6b1b0e4c.pdf",
+    "oss_uploaded": true,
+    "filename": "计算机网络课程模拟题1-2025.pdf",
+    "file_size": 539330,
+    "resource_type": "exam",
+    "title": "模拟试题",
+    "description": "模拟试题",
+    "keywords": [
+      "综合模拟考试"
+    ],
+    "subject": "计算机网络",
+    "created_at": "2026-07-13T19:45:55"
+  },
+  {
+    "id": "c51002c55e66",
+    "oss_key": "ppt/c51002c55e66.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/c51002c55e66.pdf",
+    "oss_uploaded": true,
+    "filename": "1-AI概述.pdf",
+    "file_size": 2045615,
+    "resource_type": "ppt",
+    "title": "AI概述与导论",
+    "description": "AI概述与导论",
+    "keywords": [
+      "人工智能定义",
+      "发展历史",
+      "主要流派（符号主义/连接主义/行为主义）"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:46:05"
+  },
+  {
+    "id": "513956fc695a",
+    "oss_key": "ppt/513956fc695a.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/513956fc695a.pdf",
+    "oss_uploaded": true,
+    "filename": "2-知识表示与知识图谱.pdf",
+    "file_size": 1288867,
+    "resource_type": "ppt",
+    "title": "知识表示与知识图谱",
+    "description": "知识表示与知识图谱",
+    "keywords": [
+      "谓词逻辑",
+      "产生式规则",
+      "语义网络",
+      "框架表示",
+      "知识图谱构建技术"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:46:13"
+  },
+  {
+    "id": "e02d21147334",
+    "oss_key": "ppt/e02d21147334.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/e02d21147334.pdf",
+    "oss_uploaded": true,
+    "filename": "3-搜索策略.pdf",
+    "file_size": 2741690,
+    "resource_type": "ppt",
+    "title": "搜索策略",
+    "description": "搜索策略",
+    "keywords": [
+      "盲目搜索（DFS/BFS/迭代加深）",
+      "启发式搜索（A*算法）",
+      "博弈搜索（α-β剪枝）"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:46:24"
+  },
+  {
+    "id": "8dc0439d30ac",
+    "oss_key": "ppt/8dc0439d30ac.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/8dc0439d30ac.pdf",
+    "oss_uploaded": true,
+    "filename": "4-机器学习.pdf",
+    "file_size": 3328571,
+    "resource_type": "ppt",
+    "title": "机器学习基础",
+    "description": "机器学习基础",
+    "keywords": [
+      "监督学习/无监督学习/半监督学习",
+      "过拟合与欠拟合",
+      "模型评估",
+      "决策树",
+      "SVM"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:46:54"
+  },
+  {
+    "id": "e5191ca47208",
+    "oss_key": "ppt/e5191ca47208.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/e5191ca47208.pdf",
+    "oss_uploaded": true,
+    "filename": "6-典型卷积神经网络.pdf",
+    "file_size": 3888121,
+    "resource_type": "ppt",
+    "title": "典型卷积神经网络",
+    "description": "典型卷积神经网络",
+    "keywords": [
+      "CNN基本架构",
+      "卷积层/池化层/全连接层",
+      "AlexNet/VGG/ResNet",
+      "迁移学习"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:48:01"
+  },
+  {
+    "id": "732374e1ce47",
+    "oss_key": "ppt/732374e1ce47.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/732374e1ce47.pdf",
+    "oss_uploaded": true,
+    "filename": "7-智能图像处理.pdf",
+    "file_size": 3316923,
+    "resource_type": "ppt",
+    "title": "智能图像处理",
+    "description": "智能图像处理",
+    "keywords": [
+      "图像识别与分类",
+      "目标检测（YOLO/SSD/Faster R-CNN）",
+      "图像分割（FCN/U-Net）"
+    ],
+    "subject": "人工智能安全",
+    "created_at": "2026-07-13T19:48:14"
+  },
+  {
+    "id": "c527eae7ca4e",
+    "oss_key": "exams/c527eae7ca4e.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/exams/c527eae7ca4e.pdf",
+    "oss_uploaded": true,
+    "filename": "Software Testing-2025-10-28-Week-7.pdf",
+    "file_size": 3778195,
+    "resource_type": "exam",
+    "title": "第7周 软件测试基础（PDF）",
+    "description": "第7周 软件测试基础（PDF）",
+    "keywords": [
+      "测试基础",
+      "测试类型"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:48:26"
+  },
+  {
+    "id": "66c21ca92f82",
+    "oss_key": "ppt/66c21ca92f82.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/66c21ca92f82.pptx",
+    "oss_uploaded": true,
+    "filename": "Software Testing-2025-10-28-Week-7.pptx",
+    "file_size": 2023916,
+    "resource_type": "ppt",
+    "title": "第7周 软件测试基础（PPT）",
+    "description": "第7周 软件测试基础（PPT）",
+    "keywords": [
+      "测试基础",
+      "测试流程"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:48:34"
+  },
+  {
+    "id": "df2350bf7d09",
+    "oss_key": "ppt/df2350bf7d09.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/df2350bf7d09.pptx",
+    "oss_uploaded": true,
+    "filename": "Software Testing-2025-11-4-Week-8-upload.pptx",
+    "file_size": 1753149,
+    "resource_type": "ppt",
+    "title": "第8周 软件测试方法",
+    "description": "第8周 软件测试方法",
+    "keywords": [
+      "测试方法"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:48:47"
+  },
+  {
+    "id": "5986601da4ca",
+    "oss_key": "ppt/5986601da4ca.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/5986601da4ca.pptx",
+    "oss_uploaded": true,
+    "filename": "Software Testing-2025-11-11-Week-9.pptx",
+    "file_size": 1601043,
+    "resource_type": "ppt",
+    "title": "第9周 软件测试技术",
+    "description": "第9周 软件测试技术",
+    "keywords": [
+      "测试技术"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:48:56"
+  },
+  {
+    "id": "87f5443b43fc",
+    "oss_key": "ppt/87f5443b43fc.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/87f5443b43fc.pptx",
+    "oss_uploaded": true,
+    "filename": "Software Testing-2025-11-18-Week-10.pptx",
+    "file_size": 14960636,
+    "resource_type": "ppt",
+    "title": "第10周 软件测试实践",
+    "description": "第10周 软件测试实践",
+    "keywords": [
+      "测试实践"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:49:11"
+  },
+  {
+    "id": "f8a9b7498e43",
+    "oss_key": "ppt/f8a9b7498e43.pptx",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/f8a9b7498e43.pptx",
+    "oss_uploaded": true,
+    "filename": "Software+Testing-2025-12-23-12-30-Short+Version-Week-15&16.pptx",
+    "file_size": 8752086,
+    "resource_type": "ppt",
+    "title": "第15&16周 期末短版总结",
+    "description": "第15&16周 期末短版总结",
+    "keywords": [
+      "期末总结",
+      "知识点回顾"
+    ],
+    "subject": "软件安全",
+    "created_at": "2026-07-13T19:49:23"
+  },
+  {
+    "id": "b10ab89bd7ce",
+    "oss_key": "ppt/b10ab89bd7ce.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/b10ab89bd7ce.pdf",
+    "oss_uploaded": true,
+    "filename": "6.Rasterization-2.pdf",
+    "file_size": 8869202,
+    "resource_type": "ppt",
+    "title": "光栅化（第2部分）",
+    "description": "光栅化（第2部分）",
+    "keywords": [
+      "三角形光栅化",
+      "抗锯齿(MSAA)",
+      "深度缓冲(Z-buffer)"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:49:36"
+  },
+  {
+    "id": "fe2f9473f6a9",
+    "oss_key": "ppt/fe2f9473f6a9.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/fe2f9473f6a9.pdf",
+    "oss_uploaded": true,
+    "filename": "8.Shading-1.pdf",
+    "file_size": 5696500,
+    "resource_type": "ppt",
+    "title": "着色（第1部分）",
+    "description": "着色（第1部分）",
+    "keywords": [
+      "光照模型（Blinn-Phong）",
+      "漫反射/镜面反射/环境光",
+      "着色频率（Flat/Gouraud/Phong）"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:49:49"
+  },
+  {
+    "id": "42d2797cfc8b",
+    "oss_key": "ppt/42d2797cfc8b.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/42d2797cfc8b.pdf",
+    "oss_uploaded": true,
+    "filename": "9.Shading-2.pdf",
+    "file_size": 1343405,
+    "resource_type": "ppt",
+    "title": "着色（第2部分）",
+    "description": "着色（第2部分）",
+    "keywords": [
+      "纹理映射",
+      "双线性插值",
+      "Mipmap各级纹理",
+      "法线贴图"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:49:59"
+  },
+  {
+    "id": "83df82b06fec",
+    "oss_key": "ppt/83df82b06fec.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/83df82b06fec.pdf",
+    "oss_uploaded": true,
+    "filename": "10.Geometry-1.pdf",
+    "file_size": 11971372,
+    "resource_type": "ppt",
+    "title": "几何（第1部分）",
+    "description": "几何（第1部分）",
+    "keywords": [
+      "几何表示方法",
+      "隐式/显式表示",
+      "贝塞尔曲线",
+      "B样条曲线"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:50:55"
+  },
+  {
+    "id": "9342c02bcba1",
+    "oss_key": "ppt/9342c02bcba1.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/9342c02bcba1.pdf",
+    "oss_uploaded": true,
+    "filename": "11.Geometry-2.pdf",
+    "file_size": 5238873,
+    "resource_type": "ppt",
+    "title": "几何（第2部分）",
+    "description": "几何（第2部分）",
+    "keywords": [
+      "网格处理",
+      "细分曲面（Catmull-Clark/Loop细分）",
+      "网格简化"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:51:06"
+  },
+  {
+    "id": "a42d072aa7e0",
+    "oss_key": "ppt/a42d072aa7e0.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/a42d072aa7e0.pdf",
+    "oss_uploaded": true,
+    "filename": "12.Geometry-3.pdf",
+    "file_size": 3808019,
+    "resource_type": "ppt",
+    "title": "几何（第3部分）",
+    "description": "几何（第3部分）",
+    "keywords": [
+      "几何高级主题"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:51:16"
+  },
+  {
+    "id": "0697d0397f42",
+    "oss_key": "ppt/0697d0397f42.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/0697d0397f42.pdf",
+    "oss_uploaded": true,
+    "filename": "13.Ray+Tracing-1.pdf",
+    "file_size": 7246246,
+    "resource_type": "ppt",
+    "title": "光线追踪（第1部分）",
+    "description": "光线追踪（第1部分）",
+    "keywords": [
+      "光线投射算法",
+      "Whitted风格光线追踪",
+      "反射/折射/阴影"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:51:32"
+  },
+  {
+    "id": "e558ca823ced",
+    "oss_key": "ppt/e558ca823ced.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/ppt/e558ca823ced.pdf",
+    "oss_uploaded": true,
+    "filename": "14.Ray+Tracing-2.pdf",
+    "file_size": 5436516,
+    "resource_type": "ppt",
+    "title": "光线追踪（第2部分）",
+    "description": "光线追踪（第2部分）",
+    "keywords": [
+      "路径追踪",
+      "蒙特卡洛积分",
+      "BVH加速结构",
+      "重要性采样"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:51:43"
+  },
+  {
+    "id": "57ec86ff301f",
+    "oss_key": "documents/57ec86ff301f.pdf",
+    "url": "https://pathie.oss-cn-beijing.aliyuncs.com/documents/57ec86ff301f.pdf",
+    "oss_uploaded": true,
+    "filename": "《计算机图形学》（26春）期末课程论文要求.pdf",
+    "file_size": 120067,
+    "resource_type": "document",
+    "title": "期末课程论文要求",
+    "description": "期末课程论文要求",
+    "keywords": [
+      "论文选题方向",
+      "格式规范",
+      "提交截止时间"
+    ],
+    "subject": "图形学",
+    "created_at": "2026-07-13T19:51:50"
   }
 ]

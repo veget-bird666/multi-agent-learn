@@ -304,6 +304,32 @@ export async function runCode(language, code, stdin = '') {
   return res.json()
 }
 
+// ═══════════════════════════════════════════════════════════
+//  学习效果评估 API
+// ═══════════════════════════════════════════════════════════
+
+/** 触发学习效果评估 */
+export async function triggerEvaluation(studentId, pathId = null) {
+  const body = pathId ? { path_id: pathId } : {}
+  const res = await fetch(`/api/evaluation/${studentId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
+/** 获取最近一次评估结果 */
+export async function getLatestEvaluation(studentId) {
+  const res = await fetch(`/api/evaluation/${studentId}/latest`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export default api
 
 // ═══════════════════════════════════════════════════════════

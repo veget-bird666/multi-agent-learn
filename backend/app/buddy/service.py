@@ -11,25 +11,9 @@ from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 
 from app.core.llm import chat_llm
+from app.core.mastery_config import get_buddy_increment
 from app.services.learning_path_service import learning_path_service
 from app.buddy.schemas import BuddyQuestion, BuddyEvaluation
-
-
-# ── 掌握度增量规则：越低越弱答对奖励越高 ──
-MASTERY_BRACKETS = [
-    (0, 20, 12),     # 基础薄弱 → 答对 +12（大幅提升）
-    (20, 50, 8),     # 有一定了解 → +8
-    (50, 70, 5),     # 较好掌握 → +5
-    (70, 101, 3),    # 已掌握 → +3（挑战）
-]
-
-
-def _get_increment(mastery: float) -> int:
-    """根据当前掌握度返回答对后的增量"""
-    for lo, hi, inc in MASTERY_BRACKETS:
-        if lo <= mastery < hi:
-            return inc
-    return 5  # 兜底
 
 
 # ── 路径上下文格式化 ─────────────────────────────────
@@ -326,17 +310,34 @@ class BuddyService:
             "answer": answer,
         })
 
-        # 3. 更新掌握度（只增不降）
+        # 3. 更新掌握度 + 记录学习日志
+        from datetime import datetime
         increment = 0
         if result.is_correct:
-            increment = _get_increment(mastery_before)
-            learning_path_service.update_kp_mastery(
-                path_id, step_order, knowledge_point, increment
-            )
+            increment = get_buddy_increment(mastery_before)
 
         mastery_after = mastery_before + increment
         if mastery_after > 120:
             mastery_after = 120.0
+
+        log_entry = {
+            "kp": knowledge_point,
+            "source": "buddy",
+            "difficulty": result.difficulty or "medium",
+            "question": question,
+            "user_answer": answer,
+            "is_correct": result.is_correct,
+            "increment": increment,
+            "mastery_before": round(mastery_before, 1),
+            "mastery_after": round(mastery_after, 1),
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+        }
+        if not result.is_correct:
+            log_entry["error_detail"] = ""  # LLM 评估结果中可后续提取具体错误
+
+        learning_path_service.update_kp_mastery(
+            path_id, step_order, knowledge_point, increment, log_entry=log_entry,
+        )
 
         # 4. 处理跟进问题
         follow_up = None

@@ -54,5 +54,8 @@ class LearningState(TypedDict):
     enable_path_planning: Optional[bool]
     enable_resource_generation: Optional[bool]
 
+    # 学习评估
+    evaluation: Optional[dict]  # reflection_agent 生成的评估报告
+
     # 输出
     response: Optional[str]

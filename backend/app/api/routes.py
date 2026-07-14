@@ -75,6 +75,7 @@ async def chat(request: ChatRequest):
             "current_plan_step": -1,
             "image_base64": None,
             "response": None,
+            "evaluation": None,
             # 每轮重置：资源已持久化到DB，不跨轮累加
             "generated_resources": [],
         })
@@ -257,6 +258,7 @@ async def chat_stream(
                 "current_plan_step": -1,
                 "image_base64": None,
                 "response": None,
+                "evaluation": None,
                 # 每轮重置：资源已持久化到DB，不跨轮累加
                 "generated_resources": [],
             })
@@ -440,7 +442,7 @@ async def submit_exam(path_id: int, body: dict):
     }
     熟练度增量规则：easy=5, medium=8, hard=12（答对加分，答错不加）
     """
-    DIFFICULTY_MAP = {"easy": 5, "medium": 8, "hard": 12}
+    from app.core.mastery_config import get_exam_increment
     step_order = body.get("step_order")
     results = body.get("results", [])
 
@@ -449,14 +451,52 @@ async def submit_exam(path_id: int, body: dict):
     if not results:
         raise HTTPException(status_code=400, detail="results 不能为空")
 
+    from datetime import datetime
     updated_count = 0
+    total_count = len(results)
     for r in results:
         kp = r.get("knowledge_point")
         is_correct = r.get("is_correct", False)
         difficulty = r.get("difficulty", "medium")
-        if kp and is_correct:
-            increment = DIFFICULTY_MAP.get(difficulty, 5)
-            learning_path_service.update_kp_mastery(path_id, step_order, kp, increment)
+        question = r.get("question", "")
+        user_answer = r.get("user_answer", "")
+
+        if not kp:
+            continue
+
+        increment = get_exam_increment(difficulty) if is_correct else 0
+
+        # 先查当前熟练度，用于日志
+        current_path = learning_path_service.get_by_id(path_id)
+        mastery_before = 0.0
+        if current_path:
+            for step in current_path.get("steps", []):
+                if step.get("order") == step_order:
+                    kp_m = (step.get("knowledge_point_mastery") or {}).get(kp, 0.0)
+                    mastery_before = kp_m
+                    break
+
+        mastery_after = mastery_before + increment
+        if mastery_after > 120:
+            mastery_after = 120.0
+
+        log_entry = {
+            "kp": kp,
+            "source": "exam",
+            "difficulty": difficulty,
+            "question": question,
+            "user_answer": user_answer,
+            "is_correct": is_correct,
+            "increment": increment,
+            "mastery_before": round(mastery_before, 1),
+            "mastery_after": round(mastery_after, 1),
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+        }
+
+        learning_path_service.update_kp_mastery(
+            path_id, step_order, kp, increment, log_entry=log_entry,
+        )
+        if is_correct:
             updated_count += 1
 
     # 返回更新后的路径
@@ -749,3 +789,74 @@ async def buddy_evaluate(body: EvaluateRequest):
     if result is None:
         raise HTTPException(status_code=404, detail="未找到该学习路径")
     return result
+
+
+# ═══════════════════════════════════════════════════════════
+#  学习效果评估
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/evaluation/{student_id}")
+async def trigger_evaluation(student_id: str, body: dict = {}):
+    """
+    触发学习效果评估（运行 reflection_agent）。
+    body 可选: {"path_id": int} —— 不传则评估当前选中的路径。
+    返回评估报告。
+    """
+    path_id = body.get("path_id")
+    if not path_id:
+        active_path = learning_path_service.get_active(student_id)
+        if not active_path:
+            raise HTTPException(
+                status_code=404,
+                detail="暂无学习路径，无法评估。请先生成学习路径。",
+            )
+        path_id = active_path["id"]
+
+    from app.agents.reflection_agent import reflection_agent
+
+    state = {
+        "current_path_id": path_id,
+        "student_id": student_id,
+    }
+    result = reflection_agent(state)
+
+    evaluation = result.get("evaluation")
+    response_text = result.get("response", "")
+
+    if evaluation is None:
+        return {
+            "evaluation": None,
+            "response": response_text,
+            "message": "暂无足够数据完成评估",
+        }
+
+    session_id = f"session_{student_id}"
+    from app.services.session_service import session_service
+    existing = session_service.load(session_id) or {}
+    existing["evaluation"] = evaluation
+    session_service.save(session_id, student_id, existing)
+
+    print(f"[Evaluation]  评估完成 - 学生{student_id}, 路径#{path_id}")
+
+    return {
+        "evaluation": evaluation,
+        "response": response_text,
+    }
+
+
+@router.get("/evaluation/{student_id}/latest")
+async def get_latest_evaluation(student_id: str):
+    """获取最近一次评估结果"""
+    from app.services.session_service import session_service
+
+    session_id = f"session_{student_id}"
+    state = session_service.load(session_id) or {}
+    evaluation = state.get("evaluation")
+
+    if not evaluation:
+        return {
+            "evaluation": None,
+            "message": "暂无评估结果，请先触发评估",
+        }
+    return {"evaluation": evaluation}

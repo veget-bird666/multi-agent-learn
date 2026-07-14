@@ -48,6 +48,7 @@ const navItems = [
   { path: '/resources', label: '我的资源' },
   { path: '/sandbox', label: '沙盒' },
   { path: '/learning-path', label: '学习路径' },
+  { path: '/evaluation', label: '学习评估' },
 ]
 
 function isActive(path) {

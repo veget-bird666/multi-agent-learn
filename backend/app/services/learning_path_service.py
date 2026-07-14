@@ -143,7 +143,8 @@ class LearningPathService:
         return self.get_by_id(path_id)
 
     def update_kp_mastery(
-        self, path_id: int, step_order: int, kp_name: str, increment: float
+        self, path_id: int, step_order: int, kp_name: str, increment: float,
+        log_entry: Optional[dict] = None,
     ) -> Optional[dict]:
         """
         更新某个知识点的熟练度（增量累加）。
@@ -156,6 +157,21 @@ class LearningPathService:
             step_order: 阶段序号
             kp_name: 知识点名称
             increment: 本次增加的熟练度（答对加分，答错不加）
+            log_entry: 可选的学习日志，包含来源/题目/答案/对错等
+
+        日志格式:
+            {
+                "kp": str,              # 知识点名称
+                "source": str,          # "buddy" | "exam" | "code_practice"
+                "question": str,        # 题目内容
+                "user_answer": str,     # 用户回答
+                "is_correct": bool,     # 是否正确
+                "increment": float,     # 本次加分
+                "mastery_before": float, # 加分前熟练度
+                "mastery_after": float,  # 加分后熟练度
+                "timestamp": str,       # ISO 时间戳
+                "error_detail": str,    # 可选：答错时的具体错误
+            }
 
         Returns:
             更新后的路径 dict，或 None（路径不存在时）
@@ -194,6 +210,12 @@ class LearningPathService:
                             step["mastery"] = round(
                                 sum(kp_mastery.values()) / len(kp_mastery), 1
                             )
+
+                    # ── 记录学习日志（不论对错，有则记录） ──
+                    if log_entry:
+                        logs: list = step.get("learning_logs") or []
+                        logs.append(log_entry)
+                        step["learning_logs"] = logs
 
                     print(
                         f"[KPMastery]  step{step_order}/{kp_name}: "
