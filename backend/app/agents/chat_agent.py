@@ -79,9 +79,9 @@ def _summarize_teaching(question: str, answer: str) -> dict:
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
             "你是一个教学分析师。分析下面的教学对话，提取三项信息，直接返回 JSON：\n"
-            '{"knowledge_point": "涉及的知识点名称，如指针概念", '
+            '{{"knowledge_point": "涉及的知识点名称，如指针概念", '
             '"teaching_approach": "使用了什么教学策略/方法，如用生活类比", '
-            '"focus_points": "讲解侧重点是什么，如强调变量本质区别"}'
+            '"focus_points": "讲解侧重点是什么，如强调变量本质区别"}}'
         )),
         ("user", "学生问题：{question}\n\n教师回答：{answer}"),
     ])

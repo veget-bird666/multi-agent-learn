@@ -50,7 +50,7 @@
             >✕</button>
           </div>
           <!-- 弹窗内容 -->
-          <div class="flex-1 overflow-y-auto p-6">
+          <div class="flex-1 overflow-y-auto p-6 text-gray-200">
             <!-- 文档类型：渲染 Markdown -->
             <div v-if="modalType === 'document'" class="chat-markdown text-sm" v-html="renderedContent"></div>
             <!-- 思维导图类型：渲染 Mermaid -->
